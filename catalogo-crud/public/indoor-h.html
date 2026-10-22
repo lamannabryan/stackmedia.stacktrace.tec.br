@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#f3ede8" />
+    <script src="/js/theme.js"></script>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="_stackmedia" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.json?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <link rel="stylesheet" href="/pwa.css" />
+    <script src="/js/pwa.js" defer></script>
+    <meta name="description" content="Crie um vídeo de 15 segundos com cinco produtos para a TV da sua loja." />
+    <title></title>
+    <link rel="stylesheet" href="/brand.css" />
+    <link rel="stylesheet" href="/indoor-h.css" />
+    <link rel="stylesheet" href="/app-shell.css" />
+    <link rel="stylesheet" href="/account.css" />
+    <link rel="stylesheet" href="/theme.css" />
+    <script type="module" src="/js/app-shell.js"></script>
+    <script type="module" src="/js/session.js"></script>
+  </head>
+  <body>
+    <script src="/js/pwa-launch.js"></script>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="site-brand" href="/" aria-label="_stackmedia — Central de criação"><img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="576" height="80" alt="_StackMedia" /></a>
+        <a class="indoor-back" href="/">← Central de criação</a>
+      </div>
+    </header>
+    <main class="indoor-main">
+      <div class="indoor-heading"><div><p class="indoor-kicker">Sua vitrine na TV</p><h1><span class="indoor-title-desktop">5 produtos. Um vídeo de 15 segundos.</span><span class="indoor-title-mobile">Vídeo para TV</span></h1><p>Monte a sequência de ofertas para a televisão da sua loja.</p></div><span class="indoor-format">1920 × 1080 · Horizontal · MP4</span></div>
+      <nav class="indoor-steps" aria-label="Etapas de criação">
+        <button type="button" data-step="products" aria-current="step" aria-controls="indoor-products-panel" aria-label="Etapa 1: escolher 5 produtos"><span>1</span><b class="indoor-step-full">Escolher 5 produtos</b><b class="indoor-step-short">Produtos</b></button>
+        <button type="button" data-step="pricing" aria-controls="indoor-products-panel" disabled><span>2</span><b class="indoor-step-full">Pre?os e ordem</b><b class="indoor-step-short">Ajustes</b></button>
+        <button type="button" data-step="background" aria-controls="indoor-background-panel" aria-label="Etapa 3: escolher fundo" disabled><span>3</span><b class="indoor-step-full">Escolher fundo</b><b class="indoor-step-short">Fundo</b></button>
+        <button type="button" data-step="preview" aria-controls="indoor-preview-panel" aria-label="Etapa 4: conferir e exportar" disabled><span>4</span><b class="indoor-step-full">Conferir e exportar</b><b class="indoor-step-short">Prévia</b></button>
+      </nav>
+      <p id="indoor-status" class="indoor-status" role="status" aria-live="polite">Carregando o catálogo…</p>
+
+      <section id="indoor-products-panel" aria-labelledby="indoor-products-heading">
+        <nav id="indoor-product-views" class="indoor-product-views" aria-label="Produtos do vídeo" hidden>
+          <button id="indoor-show-catalog" type="button" aria-controls="indoor-catalog" aria-pressed="true">Catálogo</button>
+          <button id="indoor-show-selection" type="button" aria-controls="indoor-selection-panel" aria-pressed="false">Selecionados <span id="indoor-mobile-count">0/5</span></button>
+        </nav>
+        <div class="indoor-products-layout">
+          <div id="indoor-catalog" class="indoor-panel">
+            <h2 id="indoor-products-heading" tabindex="-1">Escolha os produtos do vídeo</h2>
+            <p class="indoor-help">Busque por nome, marca, princípio ativo ou código de barras.</p>
+            <label class="indoor-search" for="indoor-search"><span>Buscar no catálogo</span><input id="indoor-search" type="search" placeholder="Qual produto você quer destacar?" autocomplete="off" /></label>
+            <p id="indoor-results-summary" class="indoor-help" aria-live="polite"></p>
+            <div id="indoor-results" class="indoor-results" aria-busy="true"></div>
+            <button id="indoor-load-more" class="indoor-button secondary" type="button" hidden>Carregar mais produtos</button>
+          </div>
+          <aside id="indoor-selection-panel" class="indoor-panel indoor-selection" aria-labelledby="indoor-selected-heading">
+            <div class="indoor-panel-heading"><h2 id="indoor-selected-heading" tabindex="-1">Sequência do vídeo</h2><strong id="indoor-selection-count">0 / 5</strong></div>
+            <p class="indoor-help">Cada produto aparece por 3 segundos. Use as setas para mudar a ordem. Os preços são opcionais.</p>
+            <ol id="indoor-selected" class="indoor-selected"></ol>
+            <button id="indoor-continue" class="indoor-button" type="button" disabled>Continuar para o fundo →</button>
+          </aside>
+        </div>
+      </section>
+
+      <section id="indoor-background-panel" class="indoor-panel" aria-labelledby="indoor-background-heading" hidden>
+        <h2 id="indoor-background-heading" tabindex="-1">Escolha o cenário da campanha</h2>
+        <p class="indoor-help">O fundo permanece fixo enquanto os cinco produtos se alternam.</p>
+        <div id="indoor-backgrounds" class="indoor-backgrounds" aria-busy="true"></div>
+        <button id="indoor-reload-backgrounds" class="indoor-button secondary" type="button" hidden>Atualizar fundos</button>
+        <div class="indoor-footer"><button class="indoor-button secondary" type="button" data-go="products">← Voltar aos produtos</button><button id="indoor-open-preview" class="indoor-button" type="button" disabled>Conferir vídeo →</button></div>
+      </section>
+
+      <section id="indoor-preview-panel" aria-labelledby="indoor-preview-heading" hidden>
+        <div class="indoor-preview-layout">
+          <div class="indoor-panel">
+            <h2 id="indoor-preview-heading" tabindex="-1">Confira sua campanha</h2>
+            <p class="indoor-help">Um produto por vez, com transição em carrossel e retorno ao primeiro para repetir na TV.</p>
+            <div class="indoor-canvas-wrap"><canvas id="indoor-canvas" width="1920" height="1080" aria-label="Prévia do vídeo de cinco produtos para TV">Prévia do vídeo horizontal.</canvas><p id="indoor-preview-loading">Preparando as imagens…</p></div>
+            <div class="indoor-playback"><button id="indoor-play" class="indoor-button secondary" type="button" disabled>Reproduzir</button><label class="indoor-timeline" for="indoor-time">Posição do vídeo<input id="indoor-time" type="range" min="0" max="14.9666667" step="0.0333333" value="0" disabled /></label><output id="indoor-time-label" for="indoor-time">0,0 / 15 s</output></div>
+            <div id="indoor-scenes" class="indoor-scenes" role="group" aria-label="Ir para um produto do vídeo"></div>
+          </div>
+          <aside class="indoor-panel indoor-export" aria-labelledby="indoor-export-heading">
+            <p class="indoor-kicker">Pronto para sua loja</p><h2 id="indoor-export-heading">Baixar vídeo para TV</h2>
+            <dl class="indoor-specs"><div><dt>Formato</dt><dd>1920 × 1080 · 16:9</dd></div><div><dt>Duração</dt><dd>15 segundos</dd></div><div><dt>Sequência</dt><dd>5 produtos · 3 s por produto</dd></div><div><dt>Arquivo</dt><dd>MP4 · sem áudio</dd></div></dl>
+            <button id="indoor-download" class="indoor-button" type="button" disabled>Baixar MP4 · 15 s</button>
+            <p id="indoor-export-status" class="indoor-help" role="status" aria-live="polite">Confira a prévia antes de exportar.</p>
+            <progress id="indoor-export-progress" max="100" value="0" aria-label="Progresso da exportação" hidden></progress>
+            <button id="indoor-cancel-export" class="indoor-button secondary" type="button" hidden>Cancelar exportação</button>
+            <a id="indoor-download-link" class="indoor-button secondary" hidden>Baixar vídeo novamente</a>
+            <button id="indoor-retry-preview" class="indoor-button secondary" type="button" hidden>Tentar carregar imagens novamente</button>
+            <p class="indoor-help">Na televisão ou no player, ative a repetição do vídeo para manter as ofertas em exibição.</p>
+            <div class="indoor-export-edit"><button class="indoor-button secondary" type="button" data-go="products">Editar produtos e preços</button><button class="indoor-button secondary" type="button" data-go="background">Trocar fundo</button></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+    <div id="indoor-mobile-dock" class="indoor-mobile-dock" role="group" aria-label="Ações da etapa" hidden>
+      <p id="indoor-mobile-hint" class="indoor-mobile-hint">Escolha 5 produtos para seu vídeo.</p>
+      <button id="indoor-mobile-back" class="indoor-button secondary" type="button">Selecionados</button>
+      <button id="indoor-mobile-next" class="indoor-button" type="button" disabled>Revisar seleção</button>
+    </div>
+    <script type="module" src="/js/features/indoor/editor.js"></script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Importar produtos · Stackmedia</title>
+  <link rel="icon" href="/branding/stackmedia-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/brand.css">
+  <link rel="stylesheet" href="/import-produtos.css">
+</head>
+<body>
+  <main>
+    <h1>Importar produtos</h1>
+    <p class="intro">Cole o HTML da lista para cadastrar os produtos e baixar suas imagens.</p>
+    <form id="import-form">
+      <label for="product-html">HTML dos produtos</label>
+      <textarea id="product-html" name="html" rows="12" required spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="import-help" placeholder="Cole aqui o trecho &lt;ul id=&quot;tbl-produtos&quot;&gt;…&lt;/ul&gt;"></textarea>
+      <p id="import-help" class="hint">Até 500 produtos por vez. EANs já cadastrados serão ignorados. Itens sem foto serão cadastrados sem imagem.</p>
+      <button id="import-submit" type="submit">Importar produtos</button>
+    </form>
+    <p id="import-error" class="error" role="alert" hidden></p>
+    <section id="import-progress" aria-label="Progresso da importação" hidden>
+      <div class="progress-heading"><strong id="progress-title">Importando produtos</strong><span id="progress-count">0 de 0</span></div>
+      <progress id="progress-bar" max="100" value="0" aria-label="Produtos processados"></progress>
+      <p id="progress-status" class="hint" role="status" aria-live="polite"></p>
+    </section>
+    <section id="import-report" aria-labelledby="report-title" hidden tabindex="-1">
+      <h2 id="report-title">Relatório da importação</h2>
+      <div id="report-summary" class="summary"></div>
+      <p id="report-images" class="hint"></p>
+      <div class="table-wrap" role="region" aria-label="Resultados por produto" tabindex="0">
+        <table>
+          <thead><tr><th scope="col">Produto / EAN</th><th scope="col">Resultado</th><th scope="col">Detalhes</th></tr></thead>
+          <tbody id="report-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/js/import-produtos.js"></script>
+</body>
+</html>

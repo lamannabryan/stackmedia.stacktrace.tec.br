@@ -1,0 +1,5 @@
+/* The editor's controls, gestures and responsive layout are shared with Stories. */
+.feed-page {
+  --artwork-aspect-ratio: 4 / 5;
+  --artwork-width-ratio: .8;
+}

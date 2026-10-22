@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#f3ede8" />
+    <script src="/js/theme.js"></script>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="_stackmedia" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.json?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <link rel="stylesheet" href="/pwa.css" />
+    <script src="/js/pwa.js" defer></script>
+    <meta name="description" content="_stackmedia: central para criar artes comerciais a partir do catálogo de produtos." />
+    <title></title>
+    <link rel="stylesheet" href="/brand.css" />
+    <link rel="stylesheet" href="/home.css" />
+    <link rel="stylesheet" href="/partners.css" />
+    <link rel="stylesheet" href="/magazine-home.css" />
+    <link rel="stylesheet" href="/magazine-catalogue.css" />
+    <link rel="stylesheet" href="/tour.css" />
+    <link rel="stylesheet" href="/app-shell.css" />
+    <link rel="stylesheet" href="/account.css" />
+    <link rel="stylesheet" href="/theme.css" />
+    <script type="module" src="/js/app-shell.js"></script>
+    <script type="module" src="/js/session.js"></script>
+  </head>
+  <body class="home-page" data-tour-page="home">
+    <script src="/js/pwa-launch.js"></script>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="site-brand" href="/" aria-label="_stackmedia — Central de criação">
+          <img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="576" height="80" alt="_StackMedia" />
+        </a>
+        <nav class="site-nav" aria-label="Navegação principal">
+          <a href="/" aria-current="page">Central</a>
+          <a href="/catalogo">Catálogo</a>
+          
+          <a href="/artes/stories">Stories</a>
+          <a href="/artes/feed">Feed</a>
+          <a href="/artes/indoor-h">TV Indoor</a>
+        </nav>
+        <button class="tour-launcher header-tour-launcher" type="button" data-tour-start aria-label="Abrir tour guiado" title="Tour guiado">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" stroke-linejoin="round" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="studio-shell">
+      <main class="studio-main" id="conteudo">
+    
+
+        <section class="partner-carousel" id="partner-carousel" aria-label="Destaques do mês e parceiros" aria-roledescription="carrossel" aria-busy="true">
+          <div class="partner-loading" id="partner-loading" role="status"><span aria-hidden="true"></span><span class="screen-reader-only">Carregando destaques…</span></div>
+          <span class="screen-reader-only" id="partner-time">5 s por destaque</span>
+          <div class="partner-slide" id="partner-slide" role="group" aria-roledescription="slide" aria-label="Apresentação">
+            <div class="partner-slide-copy">
+              <span class="partner-tag" id="partner-tag"></span>
+              <h1 id="partner-name"></h1>
+              <p id="partner-description"></p>
+              <a class="partner-button" id="partner-products" href="/catalogo" hidden></a>
+              <button class="partner-button" id="partner-retry" type="button" hidden>Tentar novamente</button>
+            </div>
+            <div class="partner-logo-stage">
+              <div class="partner-logo-frame">
+                <img class="partner-logo-echo partner-logo-echo-top" alt="" aria-hidden="true" draggable="false" hidden />
+                <img id="partner-logo" alt="" draggable="false" hidden />
+                <img class="partner-logo-echo partner-logo-echo-bottom" alt="" aria-hidden="true" draggable="false" hidden />
+                <span class="partner-logo-placeholder" id="partner-logo-placeholder" aria-hidden="true">_</span>
+              </div>
+              <div id="magazine-cover" class="magazine-cover" hidden aria-hidden="true"><span>STACKMEDIA / REVISTA</span><strong id="magazine-cover-month"></strong><span id="magazine-cover-year"></span><p>Uma seleção.<br />Novas ideias.</p><small id="magazine-cover-count"></small></div>
+              <span class="partner-logo-caption"><span id="partner-edition" aria-hidden="true">01</span><span id="partner-caption" hidden aria-hidden="true"></span></span>
+            </div>
+          </div>
+          <div class="partner-carousel-controls" id="partner-controls" hidden>
+            <div class="partner-progress" id="partner-progress" aria-hidden="true" hidden><span id="partner-progress-fill"></span></div>
+            <div class="partner-dots" id="partner-dots" role="group" aria-label="Escolher destaque"></div>
+            <div class="partner-arrows"><button id="partner-play" type="button" aria-label="Pausar carrossel">Pausar</button><span id="partner-counter" aria-hidden="true"></span><button id="partner-previous" type="button" aria-label="Destaque anterior">←</button><button id="partner-next" type="button" aria-label="Próximo destaque">→</button></div>
+          </div>
+          <span class="screen-reader-only" id="partner-announcement" aria-live="polite" aria-atomic="true"></span>
+        </section>
+
+        <section class="studio-quick-create" aria-labelledby="hero-title">
+          <div class="studio-hero-copy">
+            <h2 id="hero-title">O que vamos criar hoje?</h2>
+            <p>Escolha um formato e transforme seus produtos em ofertas.</p>
+            <div class="studio-hero-actions" data-tour="home-create">
+              <a class="studio-primary-action" href="/artes/stories"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 6h6m-3 4v6m-3-3h6M11 19h2"/></svg> Criar Story</a>
+              <a class="studio-primary-action" href="/artes/feed"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="3"/><path d="M8 12h8m-4-4v8"/></svg> Criar Feed</a>
+              <a class="studio-primary-action" href="/artes/indoor-h"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8m-4-4v4m-2-15 5 4-5 4z"/></svg> Criar vídeo para TV</a>
+              <button class="ean-launch-button" id="ean-overlay-open" type="button" data-tour="home-barcode">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M7 3H3v4m14-4h4v4M3 17v4h4m14-4v4h-4M7 7v10m4-10v10m3-10v10m3-10v10"/></svg>
+                <span class="home-desktop-copy">Código de barras</span><span class="home-mobile-copy">Ler com câmera</span>
+              </button>
+            </div>
+            <div class="studio-hero-help">
+              <a class="studio-secondary-action" href="/catalogo">Explorar catálogo <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+              
+            </div>
+          </div>
+        </section>
+
+        <section class="format-section" id="formatos" aria-labelledby="formatos-title">
+          <div class="section-heading">
+            <div><h2 id="formatos-title"><span class="home-desktop-copy">Tudo pronto para sua próxima campanha</span><span class="home-mobile-copy">Explore os formatos</span></h2></div>
+          </div>
+
+          <div class="format-grid format-grid-available" data-tour="home-formats">
+            <article class="format-card format-card-story is-ready">
+              <div class="format-card-topline"><span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="7" y="3" width="10" height="18" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M10 6h4M10.5 18h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+              <div><h3>Stories</h3><p>Campanhas verticais para Instagram e WhatsApp.</p></div>
+              <div class="format-card-footer"><span>1080 × 1920 · 9:16</span><a href="/artes/stories">Criar Story <b aria-hidden="true">→</b></a></div>
+            </article>
+
+            <article class="format-card format-card-feed is-ready" aria-label="Feed vertical">
+              <div class="format-card-topline"><span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M9 16.3 11.3 13l1.8 2.1 1.7-1.7 1.2 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+              <div><h3>Feed</h3><p>Artes em 4:5 para destacar suas ofertas no Instagram.</p></div>
+              <div class="format-card-footer"><span>1080 × 1350 · 4:5</span><a href="/artes/feed">Criar Feed <b aria-hidden="true">→</b></a></div>
+            </article>
+
+            <article class="format-card format-card-indoor is-ready" aria-label="TV Indoor horizontal">
+              <div class="format-card-topline"><span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 22h8m-4-4v4m-2-14 5 3-5 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+              <div><h3>TV Indoor</h3><p>Ofertas em movimento para a televisão da sua loja.</p></div>
+              <div class="format-card-footer"><span>1920 × 1080 · 16:9</span><a href="/artes/indoor-h">Criar vídeo para TV <b aria-hidden="true">→</b></a></div>
+            </article>
+          </div>
+        </section>
+
+
+    
+        <section id="revista-atual" class="home-magazine" aria-labelledby="home-magazine-title" hidden>
+          <div class="home-magazine-heading">
+            <div><p class="studio-kicker" id="home-magazine-period">Revista do mês</p><h2 id="home-magazine-title"></h2><p>Uma seleção para inspirar suas próximas ofertas, com preços sugeridos para suas campanhas.</p></div>
+            <span id="home-magazine-count" class="home-magazine-count"></span>
+          </div>
+          <label class="home-magazine-search">Encontre um produto nesta edição<input id="home-magazine-search" type="search" placeholder="Nome ou EAN" /></label>
+          <p id="home-magazine-status" role="status"></p>
+          <div id="home-magazine-products" class="home-magazine-grid"></div>
+          <button id="home-magazine-more" class="partner-button" type="button" hidden>Ver mais produtos</button>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="ean-scanner-overlay" id="ean-scanner-overlay" aria-labelledby="ean-scanner-title" hidden>
+      <section class="ean-scanner-dialog">
+        <button class="ean-scanner-close" id="ean-overlay-close" type="button" aria-label="Fechar leitor de código de barras">×</button>
+        <span class="ean-scanner-mark" aria-hidden="true"></span>
+        <h2 id="ean-scanner-title">Busque pelo código</h2>
+        <p id="ean-scanner-description">Leia o código de barras com a câmera ou digite os números do produto.</p>
+        <form id="ean-launcher" novalidate>
+          <label class="ean-format-label" for="ean-format">Formato da arte</label>
+          <select id="ean-format" name="format">
+            <option value="stories">Stories · 1080 × 1920</option>
+            <option value="feed">Feed · 1080 × 1350</option>
+          </select>
+          <button class="ean-camera-button" id="ean-camera-start" type="button" aria-controls="ean-camera-panel" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 4h8l2 3h3v13H3V7h3z" stroke-linejoin="round"/><circle cx="12" cy="13" r="4"/></svg>
+            <span id="ean-camera-label">Usar câmera</span>
+          </button>
+          <div id="ean-camera-panel" class="ean-camera-panel" hidden>
+            <div class="ean-camera-preview">
+              <video id="ean-camera-video" autoplay muted playsinline aria-label="Prévia da câmera para leitura do código de barras"></video>
+              <span class="ean-camera-guide" aria-hidden="true"></span>
+            </div>
+            <p class="ean-camera-privacy">A imagem é processada no aparelho e não é enviada ao servidor.</p>
+            <button class="ean-camera-button" id="ean-camera-stop" type="button">Desligar câmera e digitar código</button>
+          </div>
+          <div id="ean-manual-fields">
+            <label class="ean-input-label" for="ean-input">Código de barras</label>
+            <input id="ean-input" name="ean" type="text" inputmode="numeric" enterkeyhint="search" autocomplete="off" pattern="[0-9]*" maxlength="14" placeholder="Digite ou cole o código" />
+            <button class="studio-primary-action ean-submit-button" id="ean-submit" type="submit">Encontrar produto</button>
+          </div>
+        </form>
+        <p id="ean-status" class="ean-scanner-status" role="status" aria-live="polite">Aguardando leitura…</p>
+      </section>
+    </dialog>
+    <script type="module" src="/home.js"></script>
+    <script type="module" src="/js/features/partners/carousel.js"></script>
+    <script type="module" src="/js/features/tour/index.js"></script>
+  </body>
+</html>

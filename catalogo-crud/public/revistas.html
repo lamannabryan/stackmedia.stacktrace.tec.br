@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3ede8" />
+  <title></title>
+  <script src="/js/theme.js"></script>
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <link rel="icon" href="/pwa-icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="stylesheet" href="/brand.css" />
+  <link rel="stylesheet" href="/users.css" />
+  <link rel="stylesheet" href="/revistas.css" />
+  <link rel="stylesheet" href="/account.css" />
+  <link rel="stylesheet" href="/app-shell.css" />
+  <link rel="stylesheet" href="/theme.css" />
+  <script type="module" src="/js/app-shell.js"></script>
+  <script type="module" src="/js/session.js"></script>
+  <script src="/js/pwa.js" defer></script>
+</head>
+<body>
+  <header class="site-header"><div class="site-header-inner">
+    <a class="site-brand" href="/"><img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="288" height="40" alt="StackMedia" /></a>
+    <nav class="site-nav" aria-label="Navegação principal"><a href="/">Central</a><a href="/catalogo">Catálogo</a><a href="/revistas" aria-current="page">Revistas</a></nav>
+  </div></header>
+  <main class="users-main magazine-main">
+    <div class="users-heading"><div><p class="users-eyebrow">Administração</p><h1>Revistas</h1><p>Uma seleção de produtos por mês, com preços sugeridos para suas campanhas.</p></div><a class="magazine-download" href="/api/revistas/modelo" download="modelo-revista.xlsx">Baixar modelo XLSX <span aria-hidden="true">↓</span></a></div>
+    <section class="magazine-import" aria-labelledby="import-title">
+      <div><p class="users-eyebrow">Nova edição</p><h2 id="import-title">Importar revista</h2><p>Preencha EAN, PREÇO e VIGENCIA no modelo. Use um único mês/ano por arquivo, por exemplo <strong>10/2026</strong>.</p><p class="magazine-help">XLSX de até 4 MB e 2.000 produtos. Os EANs precisam existir e estar ativos no catálogo. Os preços do catálogo não são alterados.</p></div>
+      <form id="magazine-import-form"><fieldset id="magazine-import-fields" disabled>
+        <label>Título da revista<input id="magazine-title" maxlength="120" placeholder="Ex.: Ofertas de outubro" /></label>
+        <label>Planilha XLSX<input id="magazine-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required /></label>
+        <button class="users-primary" type="submit">Analisar planilha</button>
+      </fieldset></form>
+    </section>
+    <p id="magazine-status" class="users-feedback magazine-status" role="status" aria-live="polite">Carregando revistas…</p>
+    <section id="magazine-preview" class="magazine-preview" aria-labelledby="preview-title" hidden>
+      <div class="users-heading"><h2 id="preview-title">Prévia da importação</h2><button id="cancel-import" type="button">Descartar prévia</button></div>
+      <p id="preview-summary"></p><ul id="preview-errors" class="magazine-errors"></ul>
+      <div class="users-table-wrap"><table class="users-table"><caption class="visually-hidden">Produtos encontrados na planilha</caption><thead><tr><th>Linha</th><th>EAN</th><th>Produto</th><th>Preço sugerido</th></tr></thead><tbody id="preview-products"></tbody></table></div>
+      <p id="preview-limit" class="magazine-help"></p>
+      <label id="replace-label" class="users-check" hidden><input id="replace-confirm" type="checkbox" /> Entendo que todos os produtos e preços da revista deste mês serão substituídos.</label>
+      <label id="ignore-errors-label" class="users-check" hidden><input id="ignore-errors" type="checkbox" /> Ignorar as linhas com erro e importar somente os produtos válidos.</label>
+      <button id="confirm-import" class="users-primary" type="button" disabled>Importar revista</button>
+    </section>
+    <section aria-labelledby="magazines-title">
+      <div class="users-heading magazine-list-heading"><div><h2 id="magazines-title">Edições mensais</h2><p id="magazine-count"></p></div><button id="reload-magazines" type="button">Atualizar lista</button></div>
+      <div id="magazine-list" class="magazine-list"></div>
+    </section>
+  </main>
+  <dialog id="magazine-dialog" class="magazine-dialog" aria-labelledby="magazine-dialog-title">
+    <div class="users-heading"><h2 id="magazine-dialog-title">Revista</h2><button id="close-magazine" type="button" aria-label="Fechar revista">×</button></div>
+    <form id="magazine-edit-form"><fieldset id="magazine-edit-fields">
+      <label>Título<input id="edit-title" maxlength="120" required /></label>
+      <label class="users-check"><input id="edit-active" type="checkbox" /> Destacar esta revista durante o mês de vigência</label>
+      <p class="magazine-help">Para atualizar produtos ou preços, importe outra planilha com a mesma vigência. Revistas futuras ficam agendadas; revistas passadas saem do destaque automaticamente.</p>
+      <button class="users-primary" type="submit">Salvar alterações</button>
+    </fieldset></form>
+    <p id="magazine-edit-status" class="magazine-status" role="status" aria-live="polite"></p>
+    <label>Buscar produto<input id="magazine-product-search" type="search" placeholder="Nome ou EAN" /></label>
+    <div class="users-table-wrap"><table class="users-table"><caption class="visually-hidden">Produtos da revista</caption><thead><tr><th>Produto</th><th>EAN</th><th>Preço sugerido</th></tr></thead><tbody id="magazine-products"></tbody></table></div>
+    <p id="magazine-product-count" class="magazine-help"></p>
+    <button id="delete-magazine" class="users-danger" type="button">Excluir revista</button>
+  </dialog>
+  <script type="module" src="/js/revistas.js"></script>
+</body>
+</html>

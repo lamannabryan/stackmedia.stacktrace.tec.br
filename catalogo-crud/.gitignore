@@ -1,0 +1,35 @@
+# Dependências e arquivos de ambiente
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Estado persistente, logs e artefatos locais
+data/
+storage/
+logs/
+coverage/
+dist/
+build/
+tmp/
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+npm-debug.log*
+
+# Arquivos do sistema e editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Arquivos de implantação e provas de conceito fora do runtime atual
+.plesk/
+camas-stories/produtos.json
+camas-stories/teste.js
+camas-stories/imagens originais/
+
+.../imagens-produtos

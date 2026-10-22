@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#f3ede8" />
+    <script src="/js/theme.js"></script>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="_stackmedia" />
+    <link rel="manifest" href="/manifest.json?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <title></title>
+    <link rel="stylesheet" href="/brand.css" />
+    <link rel="stylesheet" href="/partners.css" />
+    <link rel="stylesheet" href="/pwa.css" />
+    <link rel="stylesheet" href="/app-shell.css" />
+    <link rel="stylesheet" href="/account.css" />
+    <link rel="stylesheet" href="/theme.css" />
+    <script type="module" src="/js/app-shell.js"></script>
+    <script src="/js/pwa.js" defer></script>
+    <script type="module" src="/js/session.js"></script>
+  </head>
+  <body class="partners-page">
+    <script src="/js/pwa-launch.js"></script>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="site-brand" href="/" aria-label="_stackmedia — Central de criação"><img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="576" height="80" alt="_StackMedia" /></a>
+        <nav class="site-nav" aria-label="Navegação principal">
+          <a href="/">Central</a><a href="/catalogo">Catálogo</a><a href="/artes/stories">Stories</a><a href="/artes/feed">Feed</a><a href="/artes/indoor-h">TV Indoor</a>
+        </nav>
+      </div>
+    </header>
+    <main class="partners-main" id="conteudo">
+      <a class="partners-back" href="/">← Voltar à central</a>
+      <div class="partners-heading">
+        <div><span class="partner-eyebrow">Sua vitrine de marcas</span><h1>Parceiros em destaque</h1><p>Escolha até três fabricantes do catálogo e envie seus logotipos. Os destaques aparecem no carrossel da central, nesta ordem.</p></div>
+        <span class="partner-count" id="partner-count" role="status">0 de 3 destaques</span>
+      </div>
+      <div class="partners-status" id="partners-status" role="status"><span id="partners-status-text">Carregando fabricantes e destaques…</span><button class="partner-text-button" id="partners-retry" type="button" hidden>Tentar novamente</button></div>
+      <div class="partners-grid" id="partners-grid" aria-label="Posições de destaque" aria-busy="true"></div>
+      <p class="partners-note">Cada posição é salva individualmente. Use um logotipo com fundo transparente para um melhor resultado. Remover um destaque preserva os produtos do fabricante.</p>
+      <noscript><p>Ative o JavaScript para cadastrar os parceiros.</p></noscript>
+    </main>
+    <template id="partner-card-template">
+      <form class="partner-card">
+        <div class="partner-card-header"><h2></h2><span data-state>Posição livre</span></div>
+        <div class="partner-card-preview"><img data-preview alt="Prévia do logotipo" hidden /><span data-placeholder>Seu parceiro começa aqui.<br />Envie um logotipo para destacar a marca.</span></div>
+        <fieldset>
+          <label data-manufacturer-label>Fabricante<select name="fabricante" required><option value="">Selecione um fabricante</option></select></label>
+          <label data-logo-label>Logotipo próprio<input name="logo" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+          <small class="partner-file-hint">PNG, JPG ou WebP · até 4 MB · imagem estática.<br />O logotipo será exibido inteiro, sem cortes.</small>
+          <div class="partner-card-actions"><button class="partner-button" type="submit">Salvar destaque</button><button class="partner-text-button" data-remove type="button" hidden>Remover</button><button class="partner-text-button" data-reset type="button" hidden>Desfazer alterações</button></div>
+        </fieldset>
+        <p class="partner-feedback" role="status" aria-live="polite"></p>
+      </form>
+    </template>
+    <script type="module" src="/js/features/partners/admin.js"></script>
+  </body>
+</html>

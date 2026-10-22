@@ -1,0 +1,30 @@
+.home-magazine[hidden], .home-magazine [hidden] { display: none !important; }
+.magazine-cover { width: min(280px, 100%); padding: 24px; background: #f6e6d5; color: #39241c; border-left: 6px solid #e51d5b; box-shadow: 8px 8px 0 var(--line); transform: rotate(-4deg); }
+.magazine-cover > span:first-child { display: block; font-size: 10px; letter-spacing: .16em; border-bottom: 1px solid #39241c40; padding-bottom: 14px; }
+.magazine-cover strong { display: inline-block; font-size: 64px; letter-spacing: -.08em; line-height: 1.2; }
+.magazine-cover > p { color: #39241c; font-size: 25px; line-height: 1.15; font-weight: 650; margin: 12px 0 20px; }
+.magazine-cover small { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+.home-magazine { margin-top: 48px; padding: 32px; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); scroll-margin-top: 100px; }
+.home-magazine-heading { display: flex; align-items: start; justify-content: space-between; gap: 24px; }
+.home-magazine h2 { margin: 10px 0; font-size: clamp(25px, 3vw, 38px); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.home-magazine-heading p:not(.studio-kicker) { max-width: 600px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.home-magazine-count { flex-shrink: 0; padding: 10px 14px; border-radius: 10px; background: var(--color-red-soft); color: var(--red-text); font-size: 12px; }
+.home-magazine-search { display: grid; gap: 8px; max-width: 420px; margin-top: 24px; font-size: 12px; color: var(--muted); }
+.home-magazine-search input { width: 100%; min-height: 44px; padding: 10px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: inherit; font-size: 14px; }
+#home-magazine-status { font-size: 12px; color: var(--muted); margin-block: 16px; }
+.home-magazine-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.home-magazine-product { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.home-magazine-image { height: 180px; background: #fff; position: relative; display: grid; place-items: center; color: #777; font-size: 12px; }
+.home-magazine-image img { position: absolute; width: 100%; height: 100%; padding: 20px; object-fit: contain; }
+.home-magazine-product-copy { padding: 18px; display: flex; flex: 1; flex-direction: column; }
+.home-magazine-product h3 { margin: 0 0 8px; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.home-magazine-product small { color: var(--muted); font-size: 10px; }
+.home-magazine-price-label { margin-top: auto; padding-top: 20px; color: var(--muted); font-size: 11px; }
+.home-magazine-price { margin: 3px 0 16px; color: var(--red-text); font-size: 25px; letter-spacing: -.04em; }
+.home-magazine-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.home-magazine-actions a { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; color: var(--ink); text-underline-offset: 4px; }
+#home-magazine-more { margin-top: 24px; }
+.home-magazine .magazine-catalogue-price { margin: 0; color: var(--red-text); font-size: 13px; font-weight: 700; }
+.home-magazine .product-dialog { max-height: calc(100dvh - 32px); overflow-y: auto; }
+@media (max-width: 1000px) { .home-magazine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .home-magazine-heading { flex-direction: column; gap: 8px; } }
+@media (max-width: 580px) { .home-magazine { padding: 20px; margin-top: 32px; } .home-magazine-grid { grid-template-columns: 1fr; } .magazine-cover { width: 210px; padding: 18px; } .magazine-cover strong { font-size: 48px; } .magazine-cover > p { font-size: 22px; } }

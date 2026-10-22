@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3ede8" />
+  <title></title>
+  <script src="/js/theme.js"></script>
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <link rel="icon" href="/pwa-icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+  <link rel="stylesheet" href="/brand.css" />
+  <link rel="stylesheet" href="/users.css" />
+<link rel="stylesheet" href="/backgrounds.css" />
+  <link rel="stylesheet" href="/account.css" />
+  <link rel="stylesheet" href="/app-shell.css" />
+  <link rel="stylesheet" href="/theme.css" />
+  <script type="module" src="/js/app-shell.js"></script>
+  <script type="module" src="/js/session.js"></script>
+  <script src="/js/pwa.js" defer></script>
+</head>
+<body>
+  <header class="site-header"><div class="site-header-inner">
+    <a class="site-brand" href="/"><img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="288" height="40" alt="_stackmedia" /></a>
+    <nav class="site-nav" aria-label="Navegação principal"><a href="/">Central</a><a href="/catalogo">Catálogo</a><a href="/usuarios">Usuários</a><a href="/backgrounds" aria-current="page">Backgrounds</a></nav>
+  </div></header>
+  <main class="users-main">
+<div class="users-heading"><div><p class="users-eyebrow">Administra&#231;&#227;o</p><h1>Backgrounds</h1><p>Adicione e remova fundos dispon&#237;veis para as artes de todos os usu&#225;rios.</p></div></div>
+<div class="users-toolbar"><label>Formato<select id="background-format"><option value="story">Stories</option><option value="feed">Feed</option><option value="indoor">Indoor horizontal</option></select></label><button id="reload-backgrounds" type="button">Atualizar lista</button></div>
+<form id="background-form" class="background-upload"><fieldset id="upload-fields" disabled><legend>Adicionar background</legend>
+<label>Nome<input id="background-name" maxlength="80" required placeholder="Ex.: Ofertas da semana" /></label>
+<label>Imagem<input id="background-file" type="file" accept="image/png,image/jpeg,image/webp" required aria-describedby="upload-help" /></label>
+<p id="upload-help">PNG, JPG ou WebP, at&#233; 10 MB e 40 megapixels. O fundo ser&#225; ajustado ao formato da arte.</p>
+<img id="upload-preview" alt="Pr&#233;via do novo background" hidden />
+<button class="users-primary" type="submit">Adicionar background</button></fieldset></form>
+<p id="background-status" role="status" aria-live="polite">Carregando backgrounds...</p>
+<div id="background-list" class="background-list" aria-label="Backgrounds cadastrados"></div>
+</main><script type="module" src="/js/backgrounds.js"></script></body></html>

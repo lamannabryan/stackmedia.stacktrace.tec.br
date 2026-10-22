@@ -1,0 +1,16 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.sqlite binary
+*.sqlite-shm binary
+*.sqlite-wal binary
+
+# Exclui legados da distribuição criada com git archive.
+camas-stories/produtos.json export-ignore
+camas-stories/teste.js export-ignore
+camas-stories/imagens?originais/** export-ignore

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3ede8" />
+  <title></title>
+  <script src="/js/theme.js"></script>
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <link rel="icon" href="/pwa-icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+  <link rel="stylesheet" href="/brand.css" />
+  <link rel="stylesheet" href="/users.css" />
+  <link rel="stylesheet" href="/account.css" />
+  <link rel="stylesheet" href="/app-shell.css" />
+  <link rel="stylesheet" href="/theme.css" />
+  <script type="module" src="/js/app-shell.js"></script>
+  <script type="module" src="/js/session.js"></script>
+  <script src="/js/pwa.js" defer></script>
+</head>
+<body>
+  <header class="site-header"><div class="site-header-inner">
+    <a class="site-brand" href="/"><img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="288" height="40" alt="_stackmedia" /></a>
+    <nav class="site-nav" aria-label="Navegação principal"><a href="/">Central</a><a href="/catalogo">Catálogo</a><a href="/usuarios" aria-current="page">Usuários</a></nav>
+  </div></header>
+  <main class="users-main">
+    <div class="users-heading"><div><p class="users-eyebrow">Administração</p><h1>Usuários e permissões</h1><p>Gerencie quem tem acesso e o que cada pessoa pode fazer.</p></div><button id="new-user" class="users-primary" type="button" disabled>+ Novo usuário</button></div>
+    <section class="users-roles" aria-label="Perfis de acesso">
+      <article><h2>Administrador</h2><p>Cria artes e gerencia usuários, parceiros e produtos.</p></article>
+      <article><h2>Cliente</h2><p>Consulta produtos e cria e exporta artes para as campanhas.</p></article>
+    </section>
+    <div class="users-toolbar"><label>Buscar usuário<input id="user-search" type="search" placeholder="Nome ou e-mail" /></label><span id="user-count" role="status"></span><button id="reload-users" type="button">Atualizar lista</button></div>
+    <p id="users-status" class="users-feedback" role="status" aria-live="polite">Carregando usuários…</p>
+    <div class="users-table-wrap"><table class="users-table"><caption class="visually-hidden">Usuários cadastrados</caption><thead><tr><th>Usuário</th><th>Perfil</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="user-list"></tbody></table></div>
+  </main>
+  <dialog id="user-dialog" class="user-dialog" aria-labelledby="user-dialog-title">
+    <form id="user-form">
+      <div class="users-heading"><h2 id="user-dialog-title">Novo usuário</h2><button id="close-user" type="button" aria-label="Fechar">×</button></div>
+      <label>Nome<input name="name" autocomplete="name" maxlength="120" required /></label>
+      <label>E-mail<input name="email" type="email" autocomplete="off" maxlength="254" required /></label>
+      <label>Perfil<select name="role"><option value="cliente">Cliente</option><option value="administrador">Administrador</option></select></label>
+      <label class="users-check"><input name="active" type="checkbox" checked /> Conta ativa</label>
+      <label><span id="password-label">Senha</span><input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" aria-describedby="password-help" /></label>
+      <small id="password-help">Use de 10 a 128 caracteres. Na edição, deixe vazio para manter a senha atual.</small>
+      <p id="user-form-status" class="users-feedback" role="status" aria-live="polite"></p>
+      <div class="users-actions"><button id="cancel-user" type="button">Cancelar</button><button id="save-user" class="users-primary" type="submit">Salvar usuário</button></div>
+    </form>
+  </dialog>
+  <script type="module" src="/js/users.js"></script>
+</body>
+</html>

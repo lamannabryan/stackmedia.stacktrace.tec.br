@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#f3ede8" />
+    <script src="/js/theme.js"></script>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="_stackmedia" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.json?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <link rel="stylesheet" href="/pwa.css" />
+    <script src="/js/pwa.js" defer></script>
+    <meta
+      name="description"
+      content="Catálogo de produtos com busca, visualização e edição local."
+    />
+    <title></title>
+    <link rel="stylesheet" href="/brand.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/catalogue-stories-link.css" />
+    <link rel="stylesheet" href="/catalogue.css" />
+    <link rel="stylesheet" href="/tour.css" />
+    <link rel="stylesheet" href="/catalogue-mobile.css" />
+    <link rel="stylesheet" href="/app-shell.css" />
+    <link rel="stylesheet" href="/account.css" />
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/product-import.css" />
+    <script type="module" src="/js/app-shell.js"></script>
+    <script type="module" src="/js/session.js"></script>
+  </head>
+  <body class="catalogue-page" data-tour-page="catalogue">
+    <script src="/js/pwa-launch.js"></script>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="site-brand" href="/" aria-label="_stackmedia — Central de criação">
+          <img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="576" height="80" alt="_StackMedia" />
+        </a>
+        <nav class="site-nav" aria-label="Navegação principal">
+          <a href="/">Central</a>
+          <a href="/catalogo" aria-current="page">Catálogo</a>
+          
+          <a href="/artes/stories">Stories</a>
+          <a href="/artes/feed">Feed</a>
+        </nav>
+      </div>
+    </header>
+    <main class="catalogue-app">
+      <div class="workspace catalogue-content">
+        <header class="workspace-header catalogue-header">
+          <div class="catalogue-heading">
+            <div>
+              <p class="eyebrow">Gestão de produtos</p>
+              <h1>Catálogo de produtos</h1>
+            </div>
+          </div>
+          <div class="workspace-actions" data-tour="catalogue-actions">
+            <button class="tour-launcher" type="button" data-tour-start aria-label="Abrir tour guiado">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" stroke-linejoin="round" /></svg>
+              Tour guiado
+            </button>
+            <a class="primary-button story-launch-button" id="story-creator-button" href="/artes/stories">
+              <span aria-hidden="true">✦</span>
+              Criar Story
+            </a>
+            <a class="primary-button story-launch-button" href="/artes/feed">
+              <span aria-hidden="true">✦</span>
+              Criar Feed
+            </a>
+            <button class="ghost-button" id="import-products-button" data-admin-only type="button" aria-label="Importar planilha de produtos" title="Importar planilha" hidden>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <span>Importar planilha</span>
+            </button>
+            <button class="ghost-button" id="new-product-button" type="button" aria-label="Adicionar novo produto">
+              <span aria-hidden="true">+</span>
+              Novo produto
+            </button>
+          </div>
+        </header>
+
+     
+
+        <section class="filter-panel" aria-label="Filtros do catálogo">
+          <div class="filter-panel-heading">
+            <div>
+              <p class="eyebrow">Encontre rapidamente</p>
+              <h3>Filtre o catálogo</h3>
+            </div>
+            <button class="filter-reset-button" id="clear-filters-button" type="button">Limpar filtros</button>
+          </div>
+
+          <div class="manufacturer-filter-banner" id="manufacturer-filter-banner" hidden>
+            <span>Fabricante: <strong id="manufacturer-filter-name"></strong></span>
+            <button id="clear-manufacturer-button" type="button" aria-label="Remover filtro de fabricante">×</button>
+          </div>
+          <label class="search-field" for="search-input" data-tour="catalogue-search">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input
+              id="search-input"
+              type="search"
+              enterkeyhint="search"
+              aria-label="Buscar produtos por nome, EAN, fabricante ou princípio ativo"
+              autocomplete="off"
+              placeholder="Buscar por nome, EAN, fabricante ou princípio ativo"
+            />
+          </label>
+
+          <div class="category-filter-section">
+            <div class="category-filter-heading">
+              <span>Explore por categoria</span>
+              <small>Escolha uma categoria para refinar a listagem.</small>
+            </div>
+            <div class="category-chips" id="category-chips" role="group" aria-label="Filtros por categoria"></div>
+          </div>
+
+          <details class="catalogue-filter-details" id="catalogue-filter-details" data-tour="catalogue-filters" open>
+            <summary class="catalogue-filter-toggle">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6" stroke-linecap="round" /></svg>
+              <span>Filtros <b id="catalogue-filter-count">1</b></span>
+              <small id="catalogue-filter-summary">Com imagem local</small>
+              <svg class="catalogue-filter-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </summary>
+          <div class="filter-row">
+            <label>
+              <span>Categoria</span>
+              <select id="category-filter">
+                <option value="">Todas as categorias</option>
+              </select>
+            </label>
+            <label>
+              <span>Status</span>
+              <select id="status-filter">
+                <option value="">Todos</option>
+                <option value="pendente">Pendentes</option>
+                <option value="ativo">Ativos</option>
+                <option value="inativo">Inativos</option>
+              </select>
+            </label>
+            <label>
+              <span>Imagem</span>
+              <select id="image-filter">
+                <option value="">Todas</option>
+                <option value="com" selected>Com imagem local</option>
+                <option value="sem">Sem imagem local</option>
+              </select>
+            </label>
+          </div>
+          </details>
+        </section>
+
+        <section class="catalogue-section" aria-live="polite">
+          <div class="results-heading" data-tour="catalogue-results">
+            <div>
+              <p class="eyebrow" id="results-kicker">Carregando catálogo</p>
+              <h3 id="results-title">Produtos</h3>
+            </div>
+            <div class="pagination" aria-label="Paginação">
+              <button class="icon-button" id="previous-page-button" type="button" aria-label="Página anterior">←</button>
+              <span id="page-indicator">—</span>
+              <button class="icon-button" id="next-page-button" type="button" aria-label="Próxima página">→</button>
+            </div>
+          </div>
+
+          <div class="product-grid" id="product-grid" aria-label="Lista de produtos"></div>
+          <div class="catalogue-bottom-pagination" id="catalogue-bottom-pagination" aria-label="Paginação ao final dos produtos" hidden>
+            <button class="ghost-button" id="catalogue-previous-bottom" type="button" aria-label="Página anterior" disabled>← Anterior</button>
+            <span id="catalogue-page-bottom" aria-live="polite">—</span>
+            <button class="ghost-button" id="catalogue-next-bottom" type="button" aria-label="Próxima página" disabled>Próxima →</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <dialog class="product-dialog" id="product-dialog" aria-labelledby="dialog-title">
+      <form class="product-form" id="product-form" novalidate>
+        <header class="dialog-header">
+          <div>
+            <p class="eyebrow" id="dialog-kicker">Novo registro</p>
+            <h2 id="dialog-title">Adicionar produto</h2>
+          </div>
+          <button class="close-button" id="close-dialog-button" type="button" aria-label="Fechar produto" autofocus>×</button>
+        </header>
+
+        <div class="form-layout">
+          <section class="image-panel" aria-label="Imagem do produto">
+            <div class="image-preview" id="dialog-image-preview">
+              <span aria-hidden="true">⌁</span>
+              <p>Sem imagem local</p>
+            </div>
+            <p class="image-caption" id="image-caption"></p>
+            <div class="product-image-search" id="product-image-search">
+              <button class="ghost-button" id="search-product-image" type="button">Buscar no Google Imagens</button>
+              <p class="image-caption" id="product-image-search-status" role="status" aria-live="polite"></p>
+              <div class="product-image-results" id="product-image-results" role="group" aria-label="Opções do Google Imagens"></div>
+              <label class="product-image-upload-label" for="product-image-file">Carregar imagem do produto</label>
+              <input id="product-image-file" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Carregar imagem do produto" />
+              <div id="product-image-paste" class="product-image-paste" tabindex="0" role="group" aria-label="Área para colar a imagem copiada">
+                Arraste e solte
+              </div>
+              <button class="ghost-button" id="clear-product-image-selection" type="button" hidden>Desmarcar imagem</button>
+            </div>
+          </section>
+
+          <section class="form-fields">
+            <div class="field-grid two-columns">
+              <label class="full-span">
+                <span>EAN</span>
+                <input name="ean" inputmode="numeric" maxlength="40" placeholder="Código de barras" />
+              </label>
+              <div class="product-ai-tools" id="product-ai-tools">
+                <button class="ghost-button" id="lookup-product-ean" type="button">Preencher dados com IA</button>
+                <p id="product-ai-status" role="status" aria-live="polite"></p>
+                <div id="product-ai-sources" class="product-ai-sources" role="group" aria-label="Fontes dos dados sugeridos pela IA"></div>
+              </div>
+              <label class="full-span">
+                <span>Nome <b>*</b></span>
+                <input name="nome" required maxlength="255" placeholder="Nome do produto" />
+              </label>
+              <label>
+                <span>Subtítulo</span>
+                <input name="subtitulo" maxlength="255" placeholder="Ex.: 30 cápsulas" />
+              </label>
+              <label>
+                <span>Fabricante</span>
+                <input name="fabricante" maxlength="255" placeholder="Fabricante" />
+              </label>
+              <label>
+                <span>Grupo</span>
+                <input name="grupo" maxlength="255" placeholder="Ex.: Medicamento" />
+              </label>
+              <label>
+                <span>Categoria</span>
+                <input name="categoria_produtos" list="category-options" maxlength="255" placeholder="Categoria do produto" />
+              </label>
+              <label>
+                <span>Nome da categoria</span>
+                <input name="categoria_nome" maxlength="255" placeholder="Opcional" />
+              </label>
+              <label>
+                <span>Status</span>
+                <select name="status">
+                  <option value="pendente">Pendente</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                </select>
+              </label>
+              <label>
+                <span>Direção da imagem</span>
+                <select name="direcao_imagem">
+                  <option value="vertical">Vertical</option>
+                  <option value="horizontal">Horizontal</option>
+                </select>
+              </label>
+              <label>
+                <span>Princípio ativo</span>
+                <input name="principio_ativo" maxlength="255" placeholder="Opcional" />
+              </label>
+              <label>
+                <span>Registro MS</span>
+                <input name="ms" maxlength="255" placeholder="Opcional" />
+              </label>
+              <label>
+                <span>Categoria ID</span>
+                <input name="categoria_id" inputmode="numeric" placeholder="Opcional" />
+              </label>
+              <label>
+                <span>Caracteres</span>
+                <input name="caracteres" maxlength="50" placeholder="Ex.: 24/34" />
+              </label>
+              <label>
+                <span>Início da vigência</span>
+                <input name="data_vigencia_inicio" type="date" />
+              </label>
+              <label>
+                <span>Fim da vigência</span>
+                <input name="data_vigencia_fim" type="date" />
+              </label>
+              <label class="full-span">
+                <span>Arquivo de imagem local</span>
+                <input name="imagem_arquivo" maxlength="1000" placeholder="imagens/nome-do-arquivo.png" />
+                <small>Use somente um arquivo existente dentro de <code>imagens/</code>.</small>
+              </label>
+              <label class="full-span">
+                <span>Frases para encarte</span>
+                <textarea name="frases_encarte" rows="3" maxlength="1000" placeholder="Observações ou frases promocionais"></textarea>
+              </label>
+            </div>
+
+            <div class="check-row">
+              <label class="check-field">
+                <input name="generico" type="checkbox" />
+                <span>Produto genérico</span>
+              </label>
+              <label class="check-field">
+                <input name="produto_destaque" type="checkbox" />
+                <span>Produto em destaque</span>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <footer class="dialog-footer">
+          <button class="danger-button" id="delete-product-button" data-admin-only type="button" hidden>Excluir produto</button>
+          <div class="footer-actions">
+            <button class="ghost-button" id="cancel-dialog-button" type="button">Cancelar</button>
+            <button class="primary-button" id="save-product-button" type="submit">Salvar alterações</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog class="product-import-dialog" id="product-import-dialog" aria-labelledby="product-import-title" aria-describedby="product-import-help">
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">Catálogo de produtos</p>
+          <h2 id="product-import-title">Importar planilha</h2>
+        </div>
+        <button class="close-button" id="close-product-import" type="button" aria-label="Fechar importação" autofocus>×</button>
+      </header>
+      <div class="product-import-content">
+        <p id="product-import-help">Selecione um arquivo .xlsx de qualquer um dos dois layouts de exemplo. Será lida a primeira aba, identificando os campos pelos cabeçalhos da linha 1, independentemente da posição das colunas.</p>
+        <dl class="product-import-mapping">
+          <div><dt>code</dt><dd>EAN</dd></div>
+          <div><dt>product_name_pt</dt><dd>Nome</dd></div>
+          <div><dt>brands</dt><dd>Fabricante</dd></div>
+        </dl>
+        <p>Os novos produtos serão cadastrados como ativos, sem imagem. EANs já cadastrados serão mantidos. Linhas sem nome ou com EAN inválido serão ignoradas.</p>
+        <form id="product-import-form">
+          <label for="product-import-file">Planilha de produtos</label>
+          <input id="product-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-describedby="product-import-limits" required />
+          <small id="product-import-limits">Até 10 MB e 10.000 linhas de produtos. As demais colunas serão ignoradas.</small>
+          <button class="ghost-button" id="analyze-product-import" type="submit">Analisar planilha</button>
+        </form>
+        <p id="product-import-status" role="status" aria-live="polite"></p>
+        <section id="product-import-preview" aria-label="Resultado da análise" hidden>
+          <p id="product-import-detected-columns"></p>
+          <p id="product-import-summary"></p>
+          <details id="product-import-issues-section" hidden>
+            <summary id="product-import-issues-title">Linhas ignoradas</summary>
+            <ul id="product-import-issues"></ul>
+            <p id="product-import-issues-limit"></p>
+          </details>
+          <h3 id="product-import-items-title">Novos produtos</h3>
+          <div class="product-import-table-wrap" tabindex="0" role="region" aria-label="Prévia dos produtos">
+            <table>
+              <thead><tr><th scope="col">Linha</th><th scope="col">EAN</th><th scope="col">Nome</th><th scope="col">Fabricante</th></tr></thead>
+              <tbody id="product-import-items"></tbody>
+            </table>
+          </div>
+          <p id="product-import-preview-limit"></p>
+          <button class="primary-button" id="confirm-product-import" type="button" disabled>Importar novos produtos</button>
+        </section>
+      </div>
+    </dialog>
+
+    <datalist id="category-options"></datalist>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="/js/features/catalogue/mobile.js"></script>
+    <script type="module" src="/js/features/catalogue/import.js"></script>
+    <script type="module" src="/js/features/tour/index.js"></script>
+  </body>
+</html>

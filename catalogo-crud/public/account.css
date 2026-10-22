@@ -1,0 +1,40 @@
+html:not([data-user-role="administrador"]) [data-admin-only],
+html:not([data-user-role="administrador"]) a[href="/parceiros"],
+html:not([data-user-role="administrador"]) a[href="/usuarios"] { display: none !important; }
+.site-header, .stories-topbar { position: relative; z-index: 1000; overflow: visible; }
+.site-header-inner, .stories-header-actions, .account-menu { position: relative; z-index: 1001; }
+.account-menu { margin-left: auto; flex: none; color: var(--ink); font: 500 14px "Space Grotesk", sans-serif; }
+.account-menu summary { display: grid; place-items: center; box-sizing: border-box; width: 44px; height: 44px; list-style: none; cursor: pointer; border: 1px solid var(--line); border-radius: 12px; padding: 0; background: var(--surface); }
+.account-menu summary:hover, .account-menu[open] summary { background: var(--color-blue-soft); }
+.account-menu summary::-webkit-details-marker { display: none; }
+.account-menu summary:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.account-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 2147483647; width: min(260px, 85vw); padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 15px 40px #0003; display: grid; gap: 10px; overflow-wrap: anywhere; }
+.account-panel small { color: var(--muted); }
+.account-panel a, .account-panel button { display: block; padding: 10px 0; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; text-decoration: none; cursor: pointer; }
+.account-panel p:empty { display: none; }
+.session-error { padding: 12px; background: var(--surface); color: var(--ink); }
+.shared-app-header .site-header-inner { display: flex; align-items: center; flex-wrap: nowrap; gap: 20px; min-height: 72px; }
+.shared-app-header .shared-header-actions { display: flex; flex: none; align-items: center; gap: 6px; margin-left: auto; }
+.shared-app-header .shared-header-actions .account-menu { margin: 0; }
+.shared-app-header .shared-header-actions :is(.header-tour-launcher, .account-menu summary) { display: grid; place-items: center; flex: none; box-sizing: border-box; width: 44px; height: 44px; min-height: 44px; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: var(--surface); box-shadow: none; font-size: 0; text-decoration: none; cursor: pointer; }
+.shared-app-header .shared-header-actions :is(.header-tour-launcher, .account-menu summary):hover { border-color: var(--line); background: var(--color-blue-soft); }
+.shared-app-header .shared-header-actions :is(.header-tour-launcher, .account-menu summary):focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.shared-app-header .shared-header-actions svg { width: 22px; height: 22px; }
+.shared-app-header .app-screen-name { display: none; }
+body.stories-page .editor-action-bar { position: relative; top: auto; display: flex; justify-content: flex-end; min-height: 0; }
+@media (max-width: 900px) {
+  .shared-app-header .site-header-inner { min-height: 60px; gap: 12px; }
+  .shared-app-header .site-nav { display: none; }
+  .shared-app-header .site-brand { flex: 0 1 76px; }
+  .shared-app-header .site-brand-logo { width: 76px; }
+  .shared-app-header .shared-header-actions :is(.header-tour-launcher, .account-menu summary) { width: 22px; height: 22px; min-height: 22px; padding: 0; border-radius: 6px; }
+  .shared-app-header .shared-header-actions svg { width: 11px; height: 11px; }
+  body.stories-page.is-mobile-editor .editor-action-bar { padding: 4px 16px; }
+}
+@media (max-width: 900px) { .account-menu summary { padding: 10px; } .site-header-inner .account-menu { margin-left: 0; } .is-mobile-editor .account-menu { display: block; } }
+@media (max-width: 900px) {
+  .site-header-inner:has(.account-menu) .app-screen-name { display: none; }
+  .is-mobile-editor .account-menu summary { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; font-size: 11px; border-radius: 14px; }
+  .is-mobile-editor .stories-topbar:has(.account-menu) .story-mobile-context { display: none; }
+  .is-mobile-editor .stories-topbar:has(.account-menu) { grid-template-columns: minmax(0, 1fr) auto; }
+}

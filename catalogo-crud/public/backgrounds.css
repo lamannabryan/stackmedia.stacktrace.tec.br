@@ -1,0 +1,9 @@
+.background-upload { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.background-upload fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 16px; min-width: 0; }
+.background-upload legend { font-weight: 700; margin-bottom: 16px; }
+.background-upload p { margin: 0; color: var(--muted); }
+#upload-preview { max-width: 100%; width: 180px; height: 180px; object-fit: contain; }
+.background-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+.background-card { padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); display: grid; gap: 12px; }
+.background-card img { width: 100%; height: 220px; object-fit: contain; }
+.background-card h2 { font-size: 16px; margin: 0; overflow-wrap: anywhere; }

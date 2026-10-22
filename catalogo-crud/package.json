@@ -1,0 +1,43 @@
+{
+  "name": "catalogo-produtos-crud",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "_stackmedia: catálogo e criação de artes comerciais.",
+  "scripts": {
+    "start": "node server.mjs",
+    "start:production": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "check": "node scripts/check.mjs",
+    "check:production": "node scripts/production-check.mjs",
+    "check:pwa": "node scripts/pwa-deployment-check.mjs",
+    "test:smoke": "node scripts/smoke.mjs",
+    "test:catalogue": "node --test scripts/catalogue-loading.test.mjs scripts/catalogue-mobile.test.mjs scripts/product-images.test.mjs scripts/product-image-upload.test.mjs scripts/google-image-search.test.mjs scripts/product-ai.test.mjs scripts/image-cache.test.mjs scripts/background-variants.test.mjs",
+    "test:product-import": "node --test scripts/product-import.test.mjs scripts/product-import-ui.test.mjs scripts/product-html-import.test.mjs",
+    "test:app-mobile": "node --test scripts/app-shell.test.mjs scripts/home-mobile.test.mjs scripts/barcode-*.test.mjs",
+    "test:tour": "node --test scripts/tour-storage.test.mjs",
+    "test:theme": "node --test scripts/theme.test.mjs",
+    "test:partners": "node --test scripts/partners.test.mjs",
+    "test:stories-layout": "node --test scripts/stories-auto-layout.test.mjs scripts/stories-format-conversion.test.mjs scripts/stories-composition.test.mjs",
+    "test:stories-prices": "node --test scripts/stories-price-input.test.mjs",
+    "test:stories-video": "node --test scripts/stories-video-*.test.mjs",
+    "test:stories-mobile": "node --test scripts/stories-mobile.test.mjs scripts/stories-gestures.test.mjs",
+    "test:indoor": "node --test scripts/indoor-*.test.mjs",
+    "test:pwa": "node --test scripts/pwa.test.mjs scripts/pwa-launch.test.mjs",
+    "verify": "npm run check && npm run test:auth && npm run test:catalogue && npm run test:product-import && npm run test:app-mobile && npm run test:tour && npm run test:theme && npm run test:partners && npm run test:magazines && npm run test:stories-layout && npm run test:stories-prices && npm run test:stories-video && npm run test:stories-mobile && npm run test:indoor && npm run test:pwa && npm run test:smoke",
+    "users:create-admin": "node --env-file-if-exists=.env scripts/create-admin.mjs",
+    "test:auth": "node --test scripts/auth.test.mjs",
+    "test:magazines": "node --test scripts/magazines.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.13.0 <25",
+    "npm": ">=10"
+  },
+  "dependencies": {
+    "cheerio": "1.2.0",
+    "exceljs": "4.4.0",
+    "jszip": "3.10.1",
+    "magic-wand-tool": "1.1.7",
+    "sharp": "0.35.5"
+  }
+}

@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#f3ede8" />
+    <script src="/js/theme.js"></script>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="_stackmedia" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.json?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <link rel="stylesheet" href="/pwa.css" />
+    <script src="/js/pwa.js" defer></script>
+    <meta
+      name="description"
+      content="Crie artes de produtos no formato vertical para Stories."
+    />
+    <title></title>
+    <link rel="stylesheet" href="/brand.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/stories.css" />
+    <link rel="stylesheet" href="/tour.css" />
+    <link rel="stylesheet" href="/stories-mobile.css" />
+    <link rel="stylesheet" href="/feed.css" />
+    <link rel="stylesheet" href="/app-shell.css" />
+    <link rel="stylesheet" href="/account.css" />
+    <link rel="stylesheet" href="/theme.css" />
+    <script type="module" src="/js/app-shell.js"></script>
+    <script type="module" src="/js/session.js"></script>
+  </head>
+  <body class="stories-page" data-tour-page="stories">
+    <script src="/js/pwa-launch.js"></script>
+    <header class="stories-topbar">
+      <a class="stories-back-link" href="/" aria-label="Voltar à central de criação">
+        <span aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m10 5-7 7 7 7M3 12h18" /></svg></span>
+        <img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="576" height="80" alt="_StackMedia" />
+      </a>
+
+      <div class="story-mobile-only story-mobile-context">
+        <h1>Stories</h1><span>9:16 · Vertical</span>
+      </div>
+
+      <div class="stories-header-actions">
+        <span class="stories-format" aria-label="Formato vertical, 1080 por 1920 pixels">1080 × 1920</span>
+        <button id="story-mobile-export-button" class="story-mobile-only story-mobile-header-button" type="button" aria-label="Salvar arte" title="Salvar arte" aria-haspopup="dialog" aria-controls="story-mobile-dialog" data-mobile-panel="export">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></svg>
+        </button>
+        <button class="tour-launcher" type="button" data-tour-start aria-label="Abrir tour guiado" title="Tour guiado">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" stroke-linejoin="round" /></svg>
+          Tour guiado
+        </button>
+        <div class="stories-export-actions" role="group" aria-label="Exportar arte" data-tour="stories-download" data-mobile-group="export">
+          <button class="primary-button story-convert-button" id="convert-artwork-format" type="button" disabled>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4"/></svg>
+            <span id="convert-artwork-format-label">Converter para Feed</span>
+          </button>
+          <p class="story-conversion-notice" id="artwork-conversion-status" role="status" aria-live="polite" hidden></p>
+          <button class="primary-button story-png-button" id="download-story-button" type="button" disabled>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" /><circle cx="8" cy="8" r="1.5" /><path d="m3 16 5-5 4 4 4-6 5 7" /></svg>
+            <span id="story-download-label">Baixar PNG</span>
+          </button>
+          <button class="primary-button" id="download-story-video-button" type="button" disabled>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" /><path d="m10 8 6 4-6 4V8Z" /></svg>
+            <span id="story-video-download-label">Baixar MP4 · 15 s</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+<main class="stories-shell">
+      <aside class="story-control-sidebar story-control-sidebar-left" aria-label="Cenário e produto">
+        <section class="story-control-section story-collapsible-section" id="story-background-section" aria-labelledby="story-background-heading" data-tour="stories-background" data-mobile-group="background">
+          <div class="story-section-heading">
+            <span class="story-section-icon" aria-hidden="true">◒</span>
+            <div>
+              <h2 id="story-background-heading">Fundo da arte</h2>
+              <p>Escolha o visual que melhor valoriza o produto.</p>
+              <p class="story-section-selection" id="story-background-selection" hidden></p>
+            </div>
+            <button class="story-section-collapse-toggle" id="story-background-toggle" type="button" aria-expanded="true" aria-controls="story-background-content" aria-label="Recolher fundo da arte">
+              <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="story-panel-content" id="story-background-content">
+            <div class="story-background-grid" id="story-background-grid" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="story-control-section story-composition-section story-collapsible-section" id="story-composition-section" aria-labelledby="story-composition-heading" data-tour="stories-composition" data-mobile-group="products">
+          <div class="story-section-heading">
+            <span class="story-section-icon" aria-hidden="true"><i class="fa-solid fa-layer-group"></i></span>
+            <div>
+              <h2 id="story-composition-heading">Composição</h2>
+              <p>Defina como os produtos aparecem na arte.</p>
+              <p class="story-section-selection" id="story-composition-selection" hidden></p>
+            </div>
+            <button class="story-section-collapse-toggle" id="story-composition-toggle" type="button" aria-expanded="true" aria-controls="story-composition-content" aria-label="Recolher composição">
+              <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="story-panel-content" id="story-composition-content">
+            <fieldset class="story-composition-options" aria-describedby="story-composition-help">
+              <legend class="story-composition-legend">Tipo de composição da arte</legend>
+              <p class="story-composition-help" id="story-composition-help">Escolha uma opção antes de selecionar os produtos.</p>
+              <label class="story-composition-option" for="story-composition-mode-single">
+                <input class="story-composition-input" id="story-composition-mode-single" name="story-composition-mode" type="radio" value="single" data-composition-mode="single" checked />
+                <span class="story-composition-option-card">
+                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-box"></i></span>
+                  <span class="story-composition-option-copy"><strong>1 produto</strong><small>Um produto e uma descrição</small></span>
+                  <span class="story-composition-indicator" aria-hidden="true"></span>
+                </span>
+              </label>
+              <label class="story-composition-option" for="story-composition-mode-two">
+                <input class="story-composition-input" id="story-composition-mode-two" name="story-composition-mode" type="radio" value="two-products" data-composition-mode="two-products" />
+                <span class="story-composition-option-card">
+                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+                  <span class="story-composition-option-copy"><strong>2 produtos</strong><small>Dois produtos e duas descrições</small></span>
+                  <span class="story-composition-indicator" aria-hidden="true"></span>
+                </span>
+              </label>
+              <label class="story-composition-option" for="story-composition-mode-three">
+                <input class="story-composition-input" id="story-composition-mode-three" name="story-composition-mode" type="radio" value="three-products" data-composition-mode="three-products" />
+                <span class="story-composition-option-card">
+                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+                  <span class="story-composition-option-copy"><strong>3 produtos</strong><small>Uma oferta para cada produto</small></span>
+                  <span class="story-composition-indicator" aria-hidden="true"></span>
+                </span>
+              </label>
+              <label class="story-composition-option" for="story-composition-mode-four">
+                <input class="story-composition-input" id="story-composition-mode-four" name="story-composition-mode" type="radio" value="four-products" data-composition-mode="four-products" />
+                <span class="story-composition-option-card">
+                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+                  <span class="story-composition-option-copy"><strong>4 produtos</strong><small>Uma oferta para cada produto</small></span>
+                  <span class="story-composition-indicator" aria-hidden="true"></span>
+                </span>
+              </label>
+              <label class="story-composition-option" for="story-composition-mode-five">
+                <input class="story-composition-input" id="story-composition-mode-five" name="story-composition-mode" type="radio" value="five-products" data-composition-mode="five-products" />
+                <span class="story-composition-option-card">
+                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+                  <span class="story-composition-option-copy"><strong>5 produtos</strong><small>Uma oferta para cada produto</small></span>
+                  <span class="story-composition-indicator" aria-hidden="true"></span>
+                </span>
+              </label>
+              <label class="story-composition-option" for="story-composition-mode-combo">
+                <input class="story-composition-input" id="story-composition-mode-combo" name="story-composition-mode" type="radio" value="combo" data-composition-mode="combo" />
+                <span class="story-composition-option-card">
+                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-link"></i></span>
+                  <span class="story-composition-option-copy"><strong>Combo</strong><small>Dois produtos em uma única descrição</small></span>
+                  <span class="story-composition-indicator" aria-hidden="true"></span>
+                </span>
+              </label>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="story-control-section story-collapsible-section" id="story-product-section" aria-labelledby="story-product-heading" data-tour="stories-product" data-mobile-group="products">
+          <div class="story-section-heading">
+            <span class="story-section-icon" aria-hidden="true">⌕</span>
+            <div>
+              <h2 id="story-product-heading">Produto</h2>
+              <p>Busque por nome, marca, princípio ativo ou código.</p>
+              <p class="story-section-selection" id="story-product-selection-summary" hidden></p>
+            </div>
+            <button class="story-section-collapse-toggle" id="story-product-toggle" type="button" aria-expanded="true" aria-controls="story-product-content" aria-label="Recolher produto">
+              <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="story-panel-content" id="story-product-content">
+            <div class="story-product-actions" role="group" aria-labelledby="story-product-actions-label">
+              <p class="story-product-actions-label" id="story-product-actions-label">Produtos na arte</p>
+              <div class="story-product-actions-grid">
+                <button class="story-product-remove" id="remove-story-product-button" type="button" disabled>Remover produto 1</button>
+                <button class="story-product-remove" id="remove-story-secondary-product-button" type="button" disabled>Remover produto 2</button>
+                <button class="story-product-remove story-product-remove-all" id="remove-all-story-products-button" type="button" disabled>Remover todos os produtos</button>
+              </div>
+              <p id="story-product-removal-status" class="story-product-removal-status" role="status" aria-live="polite" hidden></p>
+            </div>
+            <div class="story-search-shell">
+              <label class="story-search-field" for="story-product-search">
+                <span aria-hidden="true">⌕</span>
+                <input id="story-product-search" type="search" autocomplete="off" enterkeyhint="search" placeholder="Buscar produto" aria-label="Buscar produto" aria-describedby="story-product-search-summary" />
+              </label>
+              <button class="story-search-clear" id="clear-product-search-button" type="button" hidden aria-label="Limpar busca">×</button>
+            </div>
+            <div class="story-search-context">
+              <p id="story-product-search-summary">Produtos em destaque</p>
+            </div>
+            <div class="story-product-results" id="story-product-results" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <p class="story-status" id="story-status" role="status" aria-live="polite">Carregando backgrounds disponíveis…</p>
+      </aside>
+
+      <aside class="story-control-sidebar story-control-sidebar-right" aria-label="Oferta e ajustes da arte">
+
+        <section class="story-control-section" data-tour="stories-offer" data-mobile-group="offer">
+          <div class="story-section-heading">
+            <span class="story-section-icon story-section-icon-price" aria-hidden="true">R$</span>
+            <div>
+              <h2>Oferta</h2>
+              <p>Digite o valor de destaque da oferta.</p>
+            </div>
+          </div>
+          <div class="story-price-fields">
+            <label class="story-price-field">
+              <span class="story-price-field-label" id="story-primary-price-label">Preço da oferta</span>
+              <span class="story-price-input is-missing">
+                <span>R$</span>
+                <input id="story-price" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" placeholder="0,00" aria-labelledby="story-primary-price-label" aria-describedby="story-price-hint" aria-invalid="true" required />
+              </span>
+            </label>
+            <label class="story-price-field is-disabled" id="story-secondary-price-field" aria-disabled="true">
+              <span class="story-price-field-label" id="story-secondary-price-label">Preço do produto 2</span>
+              <span class="story-price-input">
+                <span>R$</span>
+                <input id="story-secondary-price" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" placeholder="0,00" aria-labelledby="story-secondary-price-label" aria-describedby="story-price-hint" disabled />
+              </span>
+            </label>
+          </div>
+          <p class="story-field-hint" id="story-price-hint">Digite só os números: 2990 vira 29,90. A vírgula é automática.</p>
+        </section>
+
+        <section class="story-control-section story-auto-layout-section" aria-labelledby="story-auto-layout-heading" data-mobile-group="adjust">
+          <div class="story-section-heading">
+            <span class="story-section-icon" aria-hidden="true"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+            <div>
+              <h2 id="story-auto-layout-heading">Organização da arte</h2>
+              <p>Aproveite o espaço da composição escolhida.</p>
+            </div>
+          </div>
+          <button class="primary-button story-auto-layout-button" id="story-auto-layout-button" type="button" aria-describedby="story-auto-layout-status" disabled>
+            <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+            Ajuste automático
+          </button>
+          <p class="story-field-hint story-auto-layout-status" id="story-auto-layout-status" role="status" aria-live="polite">Selecione um produto para ajustar a arte.</p>
+        </section>
+
+        <section class="story-control-section story-free-text-section" data-mobile-group="offer">
+          <div class="story-section-heading">
+            <span class="story-section-icon story-section-icon-copy" aria-hidden="true">Aa</span>
+            <div>
+              <h2>Texto livre</h2>
+              <p>Inclua uma chamada curta</p>
+            </div>
+          </div>
+          <label class="story-free-text-input" for="story-free-text">
+            <i class="fa-solid fa-quote-left" aria-hidden="true"></i>
+            <input id="story-free-text" type="text" maxlength="64" autocomplete="off" enterkeyhint="done" placeholder="Ex.: Aproveite a oferta" aria-label="Texto livre da oferta" />
+          </label>
+        </section>
+
+        <section class="story-control-section story-anchor-section" id="story-anchor-section" data-mobile-group="adjust" hidden>
+          <label class="story-anchor-toggle" for="story-elements-anchor">
+            <span class="story-anchor-icon" aria-hidden="true">
+              <i class="fa-solid fa-anchor"></i>
+            </span>
+            <span class="story-anchor-copy">
+              <strong>Vincular elementos</strong>
+            </span>
+            <input id="story-elements-anchor" type="checkbox" role="switch" aria-label="Vincular produto e oferta" />
+            <span class="story-anchor-switch" aria-hidden="true"></span>
+          </label>
+        </section>
+
+        <section class="story-control-section story-position-section" id="story-position-section" data-mobile-group="adjust" hidden>
+          <div class="story-section-heading">
+            <span class="story-section-icon" aria-hidden="true">↔</span>
+            <div>
+              <h2>Ajuste o primeiro produto</h2>
+              <p>Arraste ou redimensione a imagem do produto.</p>
+            </div>
+          </div>
+          <div class="story-scale-row">
+            <label for="story-product-scale">Tamanho</label>
+            <output id="story-product-scale-output" for="story-product-scale">100%</output>
+          </div>
+          <input class="story-scale-input" id="story-product-scale" type="range" min="10" max="100" value="100" />
+          <div class="story-transform-actions">
+            <button class="ghost-button" id="center-product-button" type="button">Centralizar</button>
+            <button class="ghost-button" id="reset-product-button" type="button">Redefinir imagem</button>
+          </div>
+        </section>
+
+        <section class="story-control-section story-position-section" id="story-secondary-product-position-section" data-mobile-group="adjust" hidden>
+          <div class="story-section-heading">
+            <span class="story-section-icon" aria-hidden="true">②</span>
+            <div>
+              <h2>Ajuste o segundo produto</h2>
+              <p>Arraste ou redimensione a segunda imagem na prévia.</p>
+            </div>
+          </div>
+          <div class="story-scale-row">
+            <label for="story-secondary-product-scale">Tamanho</label>
+            <output id="story-secondary-product-scale-output" for="story-secondary-product-scale">100%</output>
+          </div>
+          <input class="story-scale-input" id="story-secondary-product-scale" type="range" min="10" max="100" value="100" />
+          <div class="story-transform-actions">
+            <button class="ghost-button" id="center-secondary-product-button" type="button">Centralizar</button>
+            <button class="ghost-button" id="reset-secondary-product-button" type="button">Redefinir imagem</button>
+          </div>
+        </section>
+
+        <section class="story-control-section story-position-section" id="story-details-position-section" data-mobile-group="adjust" hidden>
+          <div class="story-section-heading">
+            <span class="story-section-icon" aria-hidden="true">Aa</span>
+            <div>
+              <h2>Ajuste descrição e preço</h2>
+              <p>Mova ou redimensione o cartão na prévia. O preço acompanha a descrição.</p>
+            </div>
+          </div>
+          <div class="story-scale-row">
+            <label for="story-details-scale">Tamanho</label>
+            <output id="story-details-scale-output" for="story-details-scale">100%</output>
+          </div>
+          <input class="story-scale-input" id="story-details-scale" type="range" min="10" max="100" value="100" />
+          <div class="story-transform-actions">
+            <button class="ghost-button" id="center-details-button" type="button">Centralizar</button>
+            <button class="ghost-button" id="reset-details-button" type="button">Redefinir cartão</button>
+          </div>
+        </section>
+
+        <section class="story-control-section story-position-section" id="story-free-text-position-section" data-mobile-group="adjust" hidden>
+          <div class="story-section-heading">
+            <span class="story-section-icon story-section-icon-copy" aria-hidden="true">Aa</span>
+            <div>
+              <h2>Ajuste o texto livre</h2>
+              <p>Arraste ou redimensione a chamada diretamente na prévia.</p>
+            </div>
+          </div>
+          <div class="story-scale-row">
+            <label for="story-free-text-scale">Tamanho</label>
+            <output id="story-free-text-scale-output" for="story-free-text-scale">100%</output>
+          </div>
+          <input class="story-scale-input" id="story-free-text-scale" type="range" min="10" max="100" value="100" />
+          <div class="story-transform-actions">
+            <button class="ghost-button" id="center-free-text-button" type="button">Centralizar</button>
+            <button class="ghost-button" id="reset-free-text-button" type="button">Redefinir texto</button>
+          </div>
+        </section>
+
+      </aside>
+
+      <section class="story-workspace" aria-label="Prévia editável da arte">
+<section class="story-video-export-panel" id="story-video-export-panel" aria-label="Exportação do vídeo" data-mobile-group="export" hidden>
+          <p id="story-video-export-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          <progress id="story-video-progress" max="100" value="0" aria-label="Progresso da exportação MP4" hidden></progress>
+          <button class="ghost-button" id="cancel-story-video-button" type="button" hidden>Cancelar exportação</button>
+          <a id="story-video-download-link" hidden>Baixar MP4 novamente</a>
+        </section>
+        <div class="story-stage">
+          <div class="story-canvas-wrap" id="story-canvas-wrap" data-tour="stories-preview">
+            <canvas id="story-preview-canvas" width="1080" height="1920" aria-label="Prévia editável da arte para Story">
+              Seu navegador não suporta a prévia da arte.
+            </canvas>
+            <div class="story-interaction-layer" id="story-interaction-layer">
+              <div class="story-thirds-grid" id="story-thirds-grid" aria-hidden="true" hidden>
+                <span class="story-thirds-grid-line is-vertical is-first"></span>
+                <span class="story-thirds-grid-line is-vertical is-second"></span>
+                <span class="story-thirds-grid-line is-horizontal is-first"></span>
+                <span class="story-thirds-grid-line is-horizontal is-second"></span>
+              </div>
+              <div
+                class="story-product-selection"
+                id="story-product-selection"
+                data-edit-target="product"
+                hidden
+                tabindex="0"
+                role="group"
+                aria-label="Produto selecionado. Arraste para mover; arraste os cantos para redimensionar; use as setas do teclado para mover."
+              >
+                <button class="story-resize-handle top-left" type="button" data-resize-handle="nw" aria-label="Redimensionar pelo canto superior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle top-right" type="button" data-resize-handle="ne" aria-label="Redimensionar pelo canto superior direito" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-left" type="button" data-resize-handle="sw" aria-label="Redimensionar pelo canto inferior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-right" type="button" data-resize-handle="se" aria-label="Redimensionar pelo canto inferior direito" tabindex="-1"></button>
+              </div>
+              <div
+                class="story-details-selection"
+                id="story-details-selection"
+                data-edit-target="details"
+                hidden
+                tabindex="0"
+                role="group"
+                aria-label="Descrição e preço selecionados. Arraste para mover; arraste os cantos para redimensionar; use as setas do teclado para mover."
+              >
+                <button class="story-resize-handle top-left" type="button" data-resize-handle="nw" aria-label="Redimensionar pelo canto superior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle top-right" type="button" data-resize-handle="ne" aria-label="Redimensionar pelo canto superior direito" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-left" type="button" data-resize-handle="sw" aria-label="Redimensionar pelo canto inferior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-right" type="button" data-resize-handle="se" aria-label="Redimensionar pelo canto inferior direito" tabindex="-1"></button>
+              </div>
+              <div
+                class="story-product-selection"
+                id="story-secondary-product-selection"
+                data-edit-target="product-secondary"
+                hidden
+                tabindex="0"
+                role="group"
+                aria-label="Segundo produto selecionado. Arraste para mover; arraste os cantos para redimensionar; use as setas do teclado para mover."
+              >
+                <button class="story-resize-handle top-left" type="button" data-resize-handle="nw" aria-label="Redimensionar pelo canto superior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle top-right" type="button" data-resize-handle="ne" aria-label="Redimensionar pelo canto superior direito" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-left" type="button" data-resize-handle="sw" aria-label="Redimensionar pelo canto inferior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-right" type="button" data-resize-handle="se" aria-label="Redimensionar pelo canto inferior direito" tabindex="-1"></button>
+              </div>
+              <div
+                class="story-free-text-selection"
+                id="story-free-text-selection"
+                data-edit-target="free-text"
+                hidden
+                tabindex="0"
+                role="group"
+                aria-label="Texto livre selecionado. Arraste para mover; arraste os cantos para redimensionar; use as setas do teclado para mover."
+              >
+                <button class="story-resize-handle top-left" type="button" data-resize-handle="nw" aria-label="Redimensionar pelo canto superior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle top-right" type="button" data-resize-handle="ne" aria-label="Redimensionar pelo canto superior direito" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-left" type="button" data-resize-handle="sw" aria-label="Redimensionar pelo canto inferior esquerdo" tabindex="-1"></button>
+                <button class="story-resize-handle bottom-right" type="button" data-resize-handle="se" aria-label="Redimensionar pelo canto inferior direito" tabindex="-1"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="story-composition-tools" role="group" aria-label="Grade e organização dos elementos">
+          <button id="story-mobile-auto-layout" class="story-workspace-tool-button story-mobile-tool" type="button" aria-label="Ajuste automático" title="Ajuste automático" disabled><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></button>
+          <button id="story-mobile-anchor" class="story-workspace-tool-button story-mobile-tool" type="button" aria-label="Vincular produto e oferta" title="Vincular produto e oferta" aria-pressed="false" disabled><i class="fa-solid fa-link" aria-hidden="true"></i></button>
+          <button class="story-workspace-tool-button story-grid-toggle" id="story-thirds-grid-toggle" type="button" aria-pressed="false" aria-label="Mostrar grade de terços" title="Mostrar grade de terços">
+            <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
+
+          </button>
+        </div>
+        <p id="story-mobile-canvas-status" class="story-mobile-only" role="status" aria-live="polite" aria-atomic="true" hidden></p>
+        <div class="story-workspace-tools" aria-label="Controles de visualização">
+          <div class="story-zoom-control" role="group" aria-label="Zoom da prévia">
+            <button class="story-workspace-tool-button" id="story-zoom-out-button" type="button" aria-label="Diminuir zoom" title="Diminuir zoom">
+              <i class="fa-solid fa-minus" aria-hidden="true"></i>
+            </button>
+            <input id="story-zoom" type="range" min="70" max="130" step="5" value="100" aria-label="Zoom da prévia" />
+            <output id="story-zoom-output" for="story-zoom">100%</output>
+            <button class="story-workspace-tool-button" id="story-zoom-in-button" type="button" aria-label="Aumentar zoom" title="Aumentar zoom">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <button id="story-mobile-background-button" class="story-mobile-only story-workspace-tool-button story-mobile-tool" type="button" aria-label="Escolher fundo" title="Fundo" aria-haspopup="dialog" aria-controls="story-mobile-dialog" data-mobile-panel="background"><i class="fa-regular fa-image" aria-hidden="true"></i></button>
+          <button id="story-mobile-products-button" class="story-mobile-only story-workspace-tool-button story-mobile-tool" type="button" aria-label="Escolher produtos" title="Produtos" aria-haspopup="dialog" aria-controls="story-mobile-dialog" data-mobile-panel="products"><i class="fa-solid fa-box" aria-hidden="true"></i></button>
+          <button id="story-mobile-offer-button" class="story-mobile-only story-workspace-tool-button story-mobile-tool" type="button" aria-label="Preço e texto da oferta" title="Preço e texto" aria-haspopup="dialog" aria-controls="story-mobile-dialog" data-mobile-panel="offer"><span aria-hidden="true">R$</span></button>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="story-mobile-dialog" class="story-mobile-dialog" aria-labelledby="story-mobile-dialog-title">
+      <div class="story-mobile-dialog-surface">
+        <header class="story-mobile-dialog-header">
+          <div><p>Personalize sua arte</p><h2 id="story-mobile-dialog-title">Fundo</h2></div>
+          <button id="story-mobile-close" type="button" aria-label="Fechar e voltar à arte" autofocus><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+        </header>
+        <div class="story-mobile-panels">
+          <section id="story-mobile-panel-background" aria-label="Fundos" hidden></section>
+          <section id="story-mobile-panel-products" aria-label="Composição e produtos" hidden></section>
+          <section id="story-mobile-panel-offer" aria-label="Preço e texto" hidden></section>
+          <section id="story-mobile-panel-export" aria-label="Exportar arte" hidden>
+            <div class="story-mobile-export-intro"><strong>Sua arte, pronta para compartilhar</strong><p>Baixe a imagem em PNG ou o vídeo animado de 15 segundos em MP4. Formato vertical 1080 × 1920.</p></div>
+          </section>
+        </div>
+        <p id="story-mobile-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        <footer id="story-mobile-dialog-footer" hidden><button id="story-mobile-confirm" class="primary-button" type="button">Salvar oferta</button></footer>
+      </div>
+    </dialog>
+
+
+
+    <script type="module" src="/stories.js"></script>
+    <script type="module" src="/js/features/tour/index.js"></script>
+  </body>
+</html>
