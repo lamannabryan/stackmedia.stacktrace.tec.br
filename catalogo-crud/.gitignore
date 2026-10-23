@@ -5,7 +5,8 @@ node_modules/
 !.env.example
 
 # Estado persistente, logs e artefatos locais
-data/
+data/background-cache
+data/bkp dtbs
 storage/
 logs/
 coverage/
@@ -13,10 +14,8 @@ dist/
 build/
 tmp/
 *.log
-*.sqlite
-*.sqlite-shm
-*.sqlite-wal
-*.sqlite-journal
+*.zip
+
 npm-debug.log*
 
 # Arquivos do sistema e editores
@@ -32,4 +31,4 @@ camas-stories/produtos.json
 camas-stories/teste.js
 camas-stories/imagens originais/
 
-.../imagens-produtos
+.../imagens-produtos/imagens old
