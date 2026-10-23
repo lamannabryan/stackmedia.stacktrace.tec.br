@@ -11,6 +11,7 @@ let paused = reducedMotion.matches;
 let hovered = false;
 let timer;
 const SLIDE_DURATION = 5000;
+const LOGO_MOTION_DURATION = 2500;
 let remaining = SLIDE_DURATION;
 let startedAt = null;
 let progressAnimation;
@@ -61,7 +62,11 @@ function resetArtworkMotion() {
   artworkAnimation = artwork.animate([
     { translate: '-12px 0' },
     { translate: '12px 0' },
-  ], { duration: SLIDE_DURATION, easing: 'linear', fill: 'both' });
+  ], {
+    duration: artwork.matches('.partner-logo-frame') ? LOGO_MOTION_DURATION : SLIDE_DURATION,
+    easing: 'linear',
+    fill: 'both',
+  });
   artworkAnimation.pause();
   artworkAnimation.currentTime = SLIDE_DURATION - remaining;
 }

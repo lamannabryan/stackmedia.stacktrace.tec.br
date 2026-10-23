@@ -93,7 +93,11 @@ export function initStoriesMobileEditor({ root = document, getProgress = () => (
       if (canvasStatus.textContent !== message) canvasStatus.textContent = message;
       canvasStatus.hidden = !canvasError;
     }
-    if (autoLayout) autoLayout.disabled = !originalAutoLayout || originalAutoLayout.disabled;
+    if (autoLayout) {
+      autoLayout.disabled = !originalAutoLayout || originalAutoLayout.disabled;
+      autoLayout.title = originalAutoLayout?.title || 'Ajuste automático';
+      autoLayout.setAttribute('aria-label', autoLayout.title);
+    }
     if (anchor) {
       anchor.disabled = !originalAnchor || Boolean(anchorSection?.hidden);
       anchor.setAttribute('aria-pressed', String(Boolean(originalAnchor?.checked)));

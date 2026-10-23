@@ -13,6 +13,7 @@ function selectionFixture(mode) {
   const state = createStoriesEditorState(); state.compositionMode = mode;
   const sandbox = vm.createContext({ state, COMPOSITION_COUNTS, compositionTargets,
     COMPOSITION_MODES: new Set(Object.keys(COMPOSITION_COUNTS)), compositionPanel: {},
+    elements: { productContent: { contains: () => false } }, document: { activeElement: null },
     syncCompositionModeControls() {}, setPanelCollapsed() {}, syncProductPanel() {},
     renderProducts() {}, syncProductEditor() {}, renderPreview() {},
     suggestedMagazinePrice: product => product?.price || '', setProductRemovalStatus() {},
@@ -26,81 +27,80 @@ function selectionFixture(mode) {
   return sandbox;
 }
 
-test('changing quantity preserves retained prices and clears removed images, transforms and offers', () => {
-  const f = selectionFixture('five-products');
-  for (let id = 1; id <= 5; id++) f.selectProductForComposition({ id, price: `${id},00` });
-  f.state.secondaryPrice = '89,90';
-  f.state.extraProducts[0].price = '77,70';
-  for (const slot of f.state.extraProducts) { slot.image = {}; slot.productTransform = { x: 1, y: 2, width: 300 }; }
-  f.setCompositionMode('four-products');
-  assert.equal(f.state.extraProducts[0].price, '77,70');
-  assert.equal(f.state.extraProducts[2].product, null);
-  assert.ok(f.state.extraProducts.every(slot => slot.image === null && slot.productTransform === null));
-  f.setCompositionMode('two-products');
-  assert.equal(f.state.secondaryPrice, '89,90');
-  assert.ok(f.state.extraProducts.every(slot => slot.product === null && slot.price === ''));
-  f.setCompositionMode('single');
-  assert.equal(f.state.selectedProduct.id, 1);
-  assert.equal(f.state.secondaryProduct, null);
-  f.setCompositionMode('combo');
-  assert.equal(f.state.price, '');
-  f.setCompositionMode('five-products');
-  assert.equal(f.state.price, '1,00');
+test('both editors offer only one product, two products and a two-product combo', async () => {
+  assert.deepEqual(COMPOSITION_COUNTS, { single: 1, 'two-products': 2, combo: 2 });
+  for (const name of ['stories', 'feed']) {
+    const html = await readFile(new URL('../public/' + name + '.html', import.meta.url), 'utf8');
+    const modes = [...html.matchAll(/data-composition-mode="([^"]+)"/g)].map(match => match[1]);
+    assert.deepEqual(modes, ['single', 'two-products', 'combo']);
+  }
 });
 
-for (const [mode, count] of Object.entries(COMPOSITION_COUNTS).filter(([, count]) => count > 2)) {
-  test(`${mode} enforces the limit, toggles selections and keeps prices with remaining products`, () => {
+for (const [mode, count] of Object.entries(COMPOSITION_COUNTS)) {
+  test(mode + ' never selects or exports more than the allowed products', () => {
     const f = selectionFixture(mode);
-    const products = Array.from({ length: 6 }, (_, i) => ({ id: i + 1, nome: `Produto ${i + 1}`, price: `${i + 1},99` }));
-    products.forEach(product => f.selectProductForComposition(product));
-    assert.deepEqual(Array.from(f.selectedProducts(), p => p.id), products.slice(0, count).map(p => p.id));
-    f.state.extraProducts[count - 3].price = '99,90';
-    f.selectProductForComposition(products[1]);
-    assert.equal(f.state.secondaryProduct.id, 3);
-    assert.equal(f.state.secondaryPrice, count === 3 ? '99,90' : '3,99');
-    assert.equal(f.getPriceForDetailsTarget(f.detailTargets()[count - 2]), '99,90');
-    f.selectProductForComposition(products[5]);
-    assert.equal(f.selectedProducts().at(-1).id, 6);
-    assert.equal(f.getPriceForDetailsTarget(f.detailTargets().at(-1)), '6,99');
-    f.removeProductFromComposition('primary');
-    assert.equal(f.state.selectedProduct.id, 3);
-    f.removeProductFromComposition('all');
-    assert.ok(f.selectedProducts().every(p => p === null));
-    assert.ok(f.detailTargets().every(target => f.getPriceForDetailsTarget(target) === ''));
-  });
-
-  for (const name of ['stories', 'feed']) test(`${name} ${mode} fits every image and offer without collisions`, () => {
-    const format = getArtworkFormat(name);
-    for (const ratios of [[0.3, 0.5, 1, 2, 4], [1, 1, 1, 1, 1]]) {
-      const products = compositionTargets(mode).map((target, i) => ({ target, aspectRatio: ratios[i] }));
-      const measureDetails = (_target, width) => ({ width: width * 0.95, height: 190 });
-      const options = { format, mode, products, measureDetails };
-      const result = createAutoLayout(options);
-      assert.ok(result);
-      assert.equal(Object.keys(result.products).length, count);
-      assert.equal(Object.keys(result.details).length, count);
-      assert.deepEqual(createAutoLayout(options), result, 'repeated adjustment is stable');
-      const boxes = products.map(p => ({ ...result.products[p.target], height: result.products[p.target].width / p.aspectRatio }));
-      for (const [target, transform] of Object.entries(result.details)) {
-        const measured = measureDetails(target, transform.width);
-        boxes.push({ x: transform.x + (transform.width - measured.width) / 2, y: transform.y, ...measured });
-      }
-      for (const a of boxes) {
-        assert.ok(a.x >= 56 && a.x + a.width <= format.width - 56 + 0.01);
-        assert.ok(a.y >= format.safeTop + 24 && a.y + a.height <= format.height - Math.max(56, format.safeBottom) + 0.01);
-      }
-      for (let i = 0; i < boxes.length; i++) for (const b of boxes.slice(i + 1)) {
-        const a = boxes[i];
-        assert.ok(a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y);
-      }
-      assert.equal(createAutoLayout({ ...options, products: products.slice(1) }), null);
-      assert.equal(createAutoLayout({ ...options, freeTextBox: { x: 0, y: 0, width: format.width, height: format.height } }), null);
+    for (let id = 1; id <= 5; id++) {
+      f.selectProductForComposition({ id, price: id + ',00' });
+      assert.ok(f.selectedProducts().filter(Boolean).length <= count);
     }
+    assert.equal(f.selectedProducts().filter(Boolean).length, count);
+    assert.equal(f.productTargets().length, count);
+    assert.equal(f.detailTargets().length, mode === 'combo' ? 1 : count);
+    assert.equal(f.state.extraProducts.length, 0);
+    assert.equal(f.state.secondaryProduct?.id ?? null, count === 2 ? 5 : null);
+    f.removeProductFromComposition('all');
+    assert.ok(f.selectedProducts().every(product => product === null));
+    assert.equal(f.state.price, '');
+    assert.equal(f.state.secondaryPrice, '');
   });
 }
 
-test('every layer of a five-product video appears during reading and disappears at both endpoints', () => {
-  for (let index = 0; index < 5; index++) for (const kind of ['product', 'details']) {
+test('reducing to one product clears the second product, its image, position and price', () => {
+  const f = selectionFixture('two-products');
+  f.selectProductForComposition({ id: 1, price: '1,00' });
+  f.selectProductForComposition({ id: 2, price: '2,00' });
+  f.state.secondaryPrice = '89,90';
+  f.state.secondaryProductImage = {};
+  f.state.secondaryProductTransform = { x: 1, y: 2, width: 300 };
+  f.setCompositionMode('single');
+  assert.equal(f.state.selectedProduct.id, 1);
+  assert.equal(f.state.price, '1,00');
+  assert.equal(f.state.secondaryProduct, null);
+  assert.equal(f.state.secondaryPrice, '');
+  assert.equal(f.state.secondaryProductImage, null);
+  assert.equal(f.state.secondaryProductTransform, null);
+  f.setCompositionMode('two-products');
+  assert.equal(f.state.secondaryProduct, null, 'removed products do not reappear');
+});
+
+test('switching between separate offers and combo keeps two products and resets the shared price', () => {
+  const f = selectionFixture('two-products');
+  f.selectProductForComposition({ id: 1, price: '1,00' });
+  f.selectProductForComposition({ id: 2, price: '2,00' });
+  f.setCompositionMode('combo');
+  assert.equal(f.state.price, '');
+  assert.equal(f.detailTargets().length, 1);
+  assert.deepEqual(Array.from(f.selectedProducts(), product => product.id), [1, 2]);
+  f.setCompositionMode('two-products');
+  assert.equal(f.state.price, '1,00');
+  assert.equal(f.state.secondaryPrice, '2,00');
+});
+
+for (const mode of ['three-products', 'four-products', 'five-products']) {
+  test(mode + ' is no longer accepted by the editor', () => {
+    const f = selectionFixture('two-products');
+    f.selectProductForComposition({ id: 1, price: '1,00' });
+    f.selectProductForComposition({ id: 2, price: '2,00' });
+    f.setCompositionMode(mode);
+    assert.equal(f.state.compositionMode, 'single');
+    assert.equal(f.state.secondaryProduct, null);
+    assert.equal(f.productTargets().length, 1);
+    assert.equal(compositionTargets(mode).length, 1);
+  });
+}
+
+test('both product layers appear during video reading and disappear at both endpoints', () => {
+  for (let index = 0; index < 2; index++) for (const kind of ['product', 'details']) {
     assert.equal(getStoryVideoLayerState({ kind, index }, 0).opacity, 0);
     assert.equal(getStoryVideoLayerState({ kind, index }, 5).opacity, 1);
     assert.equal(getStoryVideoLayerState({ kind, index }, 15).opacity, 0);

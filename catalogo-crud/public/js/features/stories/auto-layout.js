@@ -49,7 +49,8 @@ export function createAutoLayout(options) {
   if (!options || typeof options !== 'object') return null;
   const { width = STORY_WIDTH, height = STORY_HEIGHT, safeTop = STORY_SAFE_TOP,
     safeBottom = options.format ? 0 : STORY_SAFE_BOTTOM } = options.format || {};
-  const bottomMargin = Math.max(MARGIN, safeBottom);
+  // Keep offers above the decorative footer, including diagonal campaign bands.
+  const bottomMargin = Math.max(MARGIN, safeBottom, height * 0.18);
   if (![width, height, safeTop, safeBottom].every(Number.isFinite)
       || width <= MARGIN * 2 || safeTop < 0 || safeBottom < 0 || height <= safeTop + bottomMargin + 24) return null;
   const SAFE_AREA = {
@@ -57,7 +58,8 @@ export function createAutoLayout(options) {
     width: width - MARGIN * 2, height: height - bottomMargin - safeTop - 24,
   };
   const maximumDetailsWidth = width - 48;
-  const { mode, products, measureDetails, freeTextBox = null } = options;
+  const { mode, products, measureDetails, freeTextBox = null, orientation = 'vertical' } = options;
+  if (!['vertical', 'horizontal'].includes(orientation)) return null;
   const count = COMPOSITION_COUNTS[mode];
   if (!count
     || !Array.isArray(products) || products.length !== count
@@ -110,9 +112,9 @@ export function createAutoLayout(options) {
     // Reward visible product area and readable offers. A square root keeps a
     // very wide package from dominating a narrow bottle in the same campaign.
     const productScore = productAreas.reduce((sum, size) => sum + Math.sqrt(size / (SAFE_AREA.width * SAFE_AREA.height)), 0) / count;
-    const idealCardWidth = mode === 'two-products' ? 440 : 820;
-    const textScore = detailTargets.reduce((sum, target) => sum + Math.min(1.2, candidate.details[target].width / idealCardWidth), 0) / detailTargets.length;
-    const score = productScore + textScore * (mode === 'two-products' ? 0.25 : 0.2);
+    const idealCardWidth = orientation === 'horizontal' ? 560 : mode === 'two-products' ? 440 : 780;
+    const textScore = detailTargets.reduce((sum, target) => sum + Math.min(1, candidate.details[target].width / idealCardWidth), 0) / detailTargets.length;
+    const score = productScore + textScore * (orientation === 'horizontal' ? 0.9 : 0.65);
     if (score > bestScore + EPSILON / 100) {
       best = candidate;
       bestScore = score;
@@ -183,105 +185,49 @@ export function createAutoLayout(options) {
     consider(candidate, area);
   }
 
-  function rows(area, factor) {
-    const height = (area.height - GAP) / 2;
-    const width = area.width * factor;
-    const productWidth = area.width - width - GAP;
-    if (productWidth <= 0 || height <= 0) return;
-    const candidate = { products: {}, details: {}, arrangement: 'rows' };
-    for (const [index, product] of products.entries()) {
+  function horizontal(area, factor) {
+    const rows = mode === 'two-products' ? 2 : 1;
+    const rowHeight = (area.height - GAP * (rows - 1)) / rows;
+    const cardWidth = area.width * factor;
+    const imageWidth = area.width - cardWidth - GAP;
+    if (imageWidth <= 0 || rowHeight <= 0) return;
+    const candidate = { products: {}, details: {}, arrangement: mode === 'combo' ? 'combo-horizontal' : 'rows' };
+    for (let index = 0; index < rows; index++) {
       const target = detailTargets[index];
-      const size = measure(target, width);
-      if (!size || size.height > height) return;
-      const y = area.y + index * (height + GAP);
-      const transform = fitProduct(product, { x: area.x, y, width: productWidth, height });
-      transform.y = y + (height - transform.width / product.aspectRatio) / 2;
-      candidate.products[product.target] = transform;
-      candidate.details[target] = { x: area.x + productWidth + GAP, y: y + (height - size.height) / 2, width };
+      const size = measure(target, cardWidth);
+      if (!size || size.height > rowHeight) return;
+      const y = area.y + index * (rowHeight + GAP);
+      const group = mode === 'combo' ? products : [products[index]];
+      // Two combo products share one offer. Stack them in the image column
+      // using equal widths and preserve each package's aspect ratio.
+      const imageHeight = rowHeight - GAP * (group.length - 1);
+      const width = Math.min(imageWidth, imageHeight / group.reduce((sum, product) => sum + 1 / product.aspectRatio, 0));
+      const groupHeight = group.reduce((sum, product) => sum + width / product.aspectRatio, GAP * (group.length - 1));
+      let top = y + (rowHeight - groupHeight) / 2;
+      for (const product of group) {
+        candidate.products[product.target] = { x: area.x + (imageWidth - width) / 2, y: top, width };
+        top += width / product.aspectRatio + GAP;
+      }
+      candidate.details[target] = { x: area.x + imageWidth + GAP, y: y + (rowHeight - size.height) / 2, width: cardWidth };
     }
     consider(candidate, area);
   }
 
   for (const area of availableAreas(obstacle, SAFE_AREA)) {
-    if (count > 2) {
-      const rows = Math.ceil(count / 2), cellWidth = (area.width - GAP) / 2;
-      const cellHeight = (area.height - GAP * (rows - 1)) / rows;
-      for (const factor of [1, 0.9, 0.8]) {
-        const candidate = { products: {}, details: {}, arrangement: 'grid' };
-        let fits = true;
-        products.forEach((product, index) => {
-          const target = detailTargets[index], width = cellWidth * factor, size = measure(target, width);
-          const imageHeight = cellHeight - (size?.height || cellHeight) - GAP;
-          if (!size || imageHeight < 48) { fits = false; return; }
-          const x = area.x + (count % 2 && index === count - 1 ? (area.width - cellWidth) / 2 : index % 2 * (cellWidth + GAP));
-          const y = area.y + Math.floor(index / 2) * (cellHeight + GAP);
-          candidate.products[product.target] = fitProduct(product, { x, y, width: cellWidth, height: imageHeight });
-          candidate.details[target] = { x: x + (cellWidth - width) / 2, y: y + imageHeight + GAP, width };
-        });
-        if (fits) consider(candidate, area);
+    // Remeasure each candidate: wrapping and price badges affect its height.
+    if (orientation === 'vertical') {
+      for (const factor of [1, 0.9, 0.8, 0.7, 0.6]) {
+        vertical(area, factor);
+        if (mode === 'combo') {
+          vertical(area, factor, 'balanced');
+          vertical(area, factor, 'stack');
+        }
       }
-      // In the shorter Feed canvas, putting the image beside its offer keeps
-      // tall packaging visible even with three rows of products.
-      for (const factor of [0.56, 0.6]) {
-        const candidate = { products: {}, details: {}, arrangement: 'grid-rows' };
-        const width = Math.max(MIN_DETAILS_WIDTH, cellWidth * factor);
-        const imageWidth = cellWidth - width - GAP;
-        if (imageWidth < 48) continue;
-        let fits = true;
-        products.forEach((product, index) => {
-          const target = detailTargets[index], size = measure(target, width);
-          if (!size || size.height > cellHeight) { fits = false; return; }
-          const x = area.x + (count % 2 && index === count - 1 ? (area.width - cellWidth) / 2 : index % 2 * (cellWidth + GAP));
-          const y = area.y + Math.floor(index / 2) * (cellHeight + GAP);
-          const transform = fitProduct(product, { x, y, width: imageWidth, height: cellHeight });
-          transform.y = y + (cellHeight - transform.width / product.aspectRatio) / 2;
-          candidate.products[product.target] = transform;
-          candidate.details[target] = { x: x + imageWidth + GAP, y: y + (cellHeight - size.height) / 2, width };
-        });
-        if (fits) consider(candidate, area);
-      }
-      continue;
-    }
-    // Text wrapping can change abruptly with width, so evaluate several sizes
-    // instead of assuming that a narrower card is always shorter.
-    for (const factor of [1, 0.9, 0.8, 0.7, 0.6]) {
-      vertical(area, factor);
-      if (mode === 'combo') {
-        vertical(area, factor, 'balanced');
-        vertical(area, factor, 'stack');
-      }
-    }
-    if (mode === 'two-products') {
-      // Reserve at least half the row for the offer so the product image
-      // does not overwhelm its description and price.
-      for (const factor of [0.5, 0.55, 0.6]) rows(area, factor);
+    } else {
+      for (const factor of [0.5, 0.55, 0.6]) horizontal(area, factor);
     }
   }
-  // Reduce fitted images and offers once, preserving their visual centers.
-  // Repeated auto-adjusts recompute the layout rather than shrinking it again.
-  if (best) {
-    for (const product of products) {
-      const transform = best.products[product.target];
-      const inset = transform.width * 0.1;
-      transform.x += inset;
-      transform.y += inset / product.aspectRatio;
-      transform.width *= 0.8;
-    }
-    for (const target of detailTargets) {
-      const transform = best.details[target];
-      const original = measure(target, transform.width);
-      // Remeasure wrapped descriptions and respect the editor's readable minimum.
-      // If wrapping adds height, use the nearest smaller size that still fits.
-      for (const factor of [0.8, 0.85, 0.9, 0.95]) {
-        const width = Math.max(MIN_DETAILS_WIDTH, transform.width * factor);
-        const size = measure(target, width);
-        if (!size || size.width > original.width || size.height > original.height) continue;
-        transform.x += (transform.width - width) / 2;
-        transform.y += (original.height - size.height) / 2;
-        transform.width = width;
-        break;
-      }
-    }
-  }
-  return best;
+  // Sizes and positions are solved together, so there is no post-layout
+  // shrinking that separates a product from its offer or makes text tiny.
+  return best ? { ...best, orientation } : null;
 }

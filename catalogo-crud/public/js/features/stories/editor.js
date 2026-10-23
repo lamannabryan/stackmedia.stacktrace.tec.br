@@ -107,7 +107,6 @@ function compositionLabel(value) {
   return {
     single: '1 produto',
     'two-products': '2 produtos',
-    'three-products': '3 produtos', 'four-products': '4 produtos', 'five-products': '5 produtos',
     combo: 'Combo',
   }[normalizeCompositionMode(value)] || 'Selecionado';
 }
@@ -518,7 +517,8 @@ function getDetailsLayout(transform, target = 'details') {
   const lineHeight = nameFontSize * 1.1;
   const subtitleFontSize = clamp(availableWidth * 0.042, 14, 42);
   const subtitleLineHeight = subtitleFontSize * 1.22;
-  const priceHeight = includesPrice ? clamp(availableWidth * 0.18, 64, 176) : 0;
+  const basePriceHeight = clamp(availableWidth * 0.18, 64, 176);
+  const priceHeight = includesPrice ? basePriceHeight * 1.3 : 0;
   const priceGap = includesPrice ? (isMultiProductMode() ? 8 : clamp(availableWidth * 0.045, 16, 42)) : 0;
   const detailGap = clamp(availableWidth * 0.012, 5, 12);
   const textMetrics = getDetailsTextMetrics(
@@ -554,7 +554,8 @@ function getDetailsLayout(transform, target = 'details') {
     Math.max(
       textMetrics.titleWidth + (cardPadding * 2),
       textMetrics.supportingWidth + (cardPadding * 2),
-      includesPrice ? priceMetrics.badgeWidth : 0,
+      // Preserve the description's existing width when enlarging the price.
+      includesPrice ? getDetailsPriceMetrics(availableWidth, basePriceHeight, target).badgeWidth : 0,
     ),
   );
   const descriptionX = transform.x + ((availableWidth - descriptionWidth) / 2);
@@ -851,22 +852,27 @@ function syncAutoLayoutAvailability() {
   if (isMultiProductMode() && (!selectedProducts().every(Boolean) || !allImagesReady())) reason = 'Selecione todos os produtos e aguarde as imagens.';
   const wasDisabled = elements.autoLayout.disabled;
   elements.autoLayout.disabled = Boolean(reason);
+  elements.autoLayout.title = `Ajuste automático: próximo alinhamento ${state.autoLayoutOrientation === 'vertical' ? 'horizontal' : 'vertical'}`;
   if (reason || wasDisabled) {
-    elements.autoLayoutStatus.textContent = reason || 'Organiza os produtos e as ofertas sem sobrepor o texto livre.';
+    elements.autoLayoutStatus.textContent = reason || 'Organiza produto e oferta. Clique novamente para alternar entre vertical e horizontal.';
     elements.autoLayoutStatus.classList.remove('is-error');
   }
   return !reason;
 }
 
-function applyAutoLayout() {
+function applyAutoLayout({ toggle = true } = {}) {
   if (!syncAutoLayoutAvailability()) return;
   finishGesture();
   const targets = productTargets();
   const freeText = getFreeTextLayout();
   // Tracked text can paint beyond its logical box when a word is very long.
   const textWidth = freeText ? Math.max(freeText.width, freeText.textWidth) : 0;
+  const orientation = toggle
+    ? (state.autoLayoutOrientation === 'vertical' ? 'horizontal' : 'vertical')
+    : (state.autoLayoutOrientation || 'vertical');
   const layout = createAutoLayout({
     format,
+    orientation,
     mode: state.compositionMode,
     products: targets.map((target) => ({ target, aspectRatio: getProductAspectRatio(target) })),
     measureDetails: (target, width) => {
@@ -902,11 +908,14 @@ function applyAutoLayout() {
     state.secondaryDetailsTransform = null;
     state.defaultSecondaryDetailsWidth = null;
   }
+  state.autoLayoutOrientation = orientation;
   state.activeEditor = null;
   syncProductEditor();
   schedulePreview();
   updateAvailability();
-  const message = `Ajuste aplicado: ${compositionLabel(state.compositionMode).toLowerCase()}. Você pode continuar ajustando os elementos manualmente.`;
+  const nextOrientation = orientation === 'vertical' ? 'horizontal' : 'vertical';
+  const message = `Ajuste ${orientation} aplicado. Clique novamente para organizar na ${nextOrientation}.`;
+  elements.autoLayout.title = `Ajuste automático: próximo alinhamento ${nextOrientation}`;
   elements.autoLayoutStatus.textContent = message;
   elements.autoLayoutStatus.classList.remove('is-error');
   setStatus(message);
@@ -1019,7 +1028,7 @@ async function convertCurrentArtwork() {
     syncArtworkFormat();
     renderBackgrounds();
     setPanelCollapsed(backgroundPanel, backgroundPanel.section.classList.contains('is-collapsed'));
-    const arranged = applyAutoLayout();
+    const arranged = applyAutoLayout({ toggle: false });
     drawPreviewNow();
     const url = new URL(window.location.href);
     url.pathname = `/artes/${formatName}`;
@@ -1993,6 +2002,7 @@ function setCompositionMode(value) {
 }
 
 function resetProductCompositionState() {
+  state.autoLayoutOrientation = null;
   for (const slot of state.extraProducts) Object.assign(slot, { image: null, imageUrl: null, productTransform: null, detailsTransform: null, defaultProductWidth: null, defaultDetailsWidth: null });
   state.productImage = null;
   state.productImageUrl = null;
@@ -2886,7 +2896,7 @@ async function downloadStoryVideo() {
   }
 }
 
-function downloadStory() {
+function downloadStory(share = false) {
   if (elements.download.disabled) {
     updateAvailability();
     return;
@@ -2905,7 +2915,7 @@ function downloadStory() {
   state.pngExporting = true;
   updateAvailability();
   updateDownloadLabel('Preparando PNG…');
-  exportCanvas.toBlob((blob) => {
+  exportCanvas.toBlob(async (blob) => {
     state.pngExporting = false;
     updateDownloadLabel('Baixar PNG');
     updateAvailability();
@@ -2914,6 +2924,17 @@ function downloadStory() {
       return;
     }
 
+    if (share === true) {
+      const file = new File([blob], storyDownloadName(productName, 'png'), { type: 'image/png' });
+      if (navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file] });
+          setStatus('Escolha o Instagram no compartilhamento, se dispon?vel.');
+          return;
+        } catch (error) { if (error.name === 'AbortError') return; }
+      }
+      setStatus('Compartilhamento indispon?vel. PNG baixado para abrir no Instagram.');
+    }
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -2922,7 +2943,7 @@ function downloadStory() {
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setStatus('PNG pronto. A arte foi baixada para o seu dispositivo.');
+    if (share !== true) setStatus('PNG pronto. A arte foi baixada para o seu dispositivo.');
   }, 'image/png');
 }
 
@@ -3008,7 +3029,7 @@ function cloneControls(source, suffix) {
 }
 
 function ensureExtraControls() {
-  for (let number = 3; number <= 5; number++) {
+  for (let number = 3; number <= Math.max(...Object.values(COMPOSITION_COUNTS)); number++) {
     for (const kind of ['product', 'details']) {
       const target = `${kind}-${number}`;
       const selection = cloneControls(kind === 'product' ? elements.selection : elements.detailsSelection, target);
@@ -3238,7 +3259,14 @@ function bindEvents() {
       }
     });
   });
-  elements.download.addEventListener('click', downloadStory);
+  elements.download.addEventListener('click', () => downloadStory());
+  document.getElementById('share-story-instagram')?.addEventListener('click', () => downloadStory(true));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') document.querySelectorAll('.artwork-share-menu[open]').forEach(menu => { menu.open = false; menu.querySelector('summary').focus(); });
+  });
+  document.addEventListener('click', (event) => {
+    document.querySelectorAll('.artwork-share-menu[open]').forEach(menu => { if (!menu.contains(event.target)) menu.open = false; });
+  });
   elements.convertFormat?.addEventListener('click', convertCurrentArtwork);
   elements.downloadVideo.addEventListener('click', downloadStoryVideo);
   elements.cancelVideo.addEventListener('click', () => {

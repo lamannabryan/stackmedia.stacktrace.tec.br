@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import vm from 'node:vm';
+import { readFile } from 'node:fs/promises';
+import { createStoriesEditorState } from '../public/js/features/stories/state.js';
 import { createAutoLayout } from '../public/js/features/stories/auto-layout.js';
 import { getArtworkFormat } from '../public/js/features/stories/formats.js';
 
-const SAFE_AREA = { left: 56, top: 434, right: 1024, bottom: 1810 };
+const SAFE_AREA = { left: 56, top: 434, right: 1024, bottom: 1920 * 0.82 };
 const GAP = 32;
 const EPSILON = 0.001;
 
@@ -64,7 +67,7 @@ function assertSeparated(first, second) {
 function assertUsableLayout(input) {
   const safeArea = input.format ? {
     left: 56, top: input.format.safeTop + 24,
-    right: input.format.width - 56, bottom: input.format.height - Math.max(56, input.format.safeBottom || 0),
+    right: input.format.width - 56, bottom: input.format.height - Math.max(56, input.format.safeBottom || 0, input.format.height * 0.18),
   } : SAFE_AREA;
   const layout = createAutoLayout(input);
   assert.ok(layout, `expected a usable ${input.mode} composition`);
@@ -143,17 +146,47 @@ test('a single square product uses the available room at a useful display size',
   assert.ok(layout.products.product.width >= 600, 'the product should expand into the available space');
 });
 
-test('Stories and Feed auto-adjust reduce every fitted product by 20% without cumulative shrinking', () => {
-  // Baseline widths for square products with fixed 180px offer cards.
-  const originalWidths = { stories: { single: 968, 'two-products': 452, combo: 566 }, feed: { single: 788, 'two-products': 452, combo: 468 } };
-  for (const [format, modes] of Object.entries(originalWidths)) {
-    for (const [mode, originalWidth] of Object.entries(modes)) {
-      const input = inputFor(mode, [1, 1], { format: getArtworkFormat(format), measureDetails: () => ({ width: 260, height: 180 }) });
-      const layout = assertUsableLayout(input);
-      for (const product of Object.values(layout.products)) assert.equal(product.width, originalWidth * 0.8);
-      for (const details of Object.values(layout.details)) assert.equal(details.width, (mode === 'two-products' ? 484 : 968) * 0.8);
-      assert.deepEqual(createAutoLayout(input), layout);
+for (const formatName of ['stories', 'feed']) for (const orientation of ['vertical', 'horizontal']) {
+  for (const mode of ['single', 'two-products', 'combo']) {
+    test(formatName + ' ' + mode + ' ' + orientation + ' keeps readable offers above the footer', () => {
+      const format = getArtworkFormat(formatName);
+      for (const ratios of [[0.7, 1], [0.25, 3.5], [3.5, 0.25], [1, 1]]) {
+        const input = inputFor(mode, ratios, { format, orientation });
+        const layout = assertUsableLayout(input);
+        assert.equal(layout.orientation, orientation);
+        const boxes = visualBoxes(layout, input);
+        for (const product of boxes.filter(box => box.target.startsWith('product'))) {
+          const offer = boxes.find(box => box.target === (mode === 'two-products' && product.target.endsWith('secondary') ? 'details-secondary' : 'details'));
+          if (orientation === 'vertical') assert.ok(product.y + product.height + GAP <= offer.y + EPSILON);
+          else assert.ok(product.x + product.width + GAP <= offer.x + EPSILON);
+        }
+        assert.deepEqual(createAutoLayout(input), layout, 'reapplying an orientation does not shrink elements');
+      }
+    });
+  }
+  test(formatName + ' ' + orientation + ' respects free text and long descriptions', () => {
+    for (const mode of ['single', 'two-products', 'combo']) {
+      assertUsableLayout(inputFor(mode, [0.7, 1.2], {
+        format: getArtworkFormat(formatName), orientation,
+        freeTextBox: { x: 200, y: 430, width: 640, height: 80 },
+        measureDetails: (target, width) => ({ width: width * 0.9, height: width * 0.55 }),
+      }));
     }
+  });
+}
+
+test('a portrait product and its offer form a compact, centered vertical group', () => {
+  for (const formatName of ['stories', 'feed']) {
+    const format = getArtworkFormat(formatName);
+    const input = inputFor('single', [0.7], { format });
+    const layout = assertUsableLayout(input);
+    const [product, offer] = visualBoxes(layout, input);
+    assert.ok(layout.details.details.width >= 650, 'offer text gets a readable size');
+    assert.ok(Math.abs(offer.y - product.y - product.height - GAP) < EPSILON, 'no gap introduced by shrinking');
+    assert.ok(Math.abs(product.x + product.width / 2 - format.width / 2) < EPSILON);
+    assert.ok(Math.abs(offer.x + offer.width / 2 - format.width / 2) < EPSILON);
+    const safeTop = format.safeTop + 24, safeBottom = format.height * 0.82;
+    assert.ok(Math.abs((product.y + offer.y + offer.height) / 2 - (safeTop + safeBottom) / 2) < EPSILON);
   }
 });
 
@@ -226,4 +259,42 @@ test('invalid measurements and a completely occupied safe area return no layout'
       freeTextBox: { x: 56, y: 408, width: 968, height: 1456 },
     })), null);
   }
+});
+
+const editorSource = await readFile(new URL('../public/js/features/stories/editor.js', import.meta.url), 'utf8');
+test('auto-adjust clicks alternate vertical/horizontal and failed layouts preserve the last arrangement', () => {
+  const state = createStoriesEditorState();
+  const status = { textContent: '', classList: { add() {}, remove() {} } };
+  const context = vm.createContext({
+    state, elements: { autoLayoutStatus: status, autoLayout: {} },
+    format: getArtworkFormat('feed'), createAutoLayout,
+    syncAutoLayoutAvailability: () => true, finishGesture() {},
+    productTargets: () => ['product'], getProductAspectRatio: () => 0.7,
+    getFreeTextLayout: () => null,
+    getDetailsLayout: ({ width }) => ({ descriptionWidth: width * 0.88, cardHeight: width * 0.38 }),
+    setDefaultProductWidth() {}, setDefaultDetailsWidth() {},
+    setProductTransform: (_, transform) => { state.productTransform = transform; },
+    setDetailsTransform: (_, transform) => { state.detailsTransform = transform; },
+    clampProductTransform: t => t, clampDetailsTransform: t => t,
+    isTwoProductsMode: () => false, syncProductEditor() {}, schedulePreview() {}, updateAvailability() {}, setStatus() {},
+  });
+  const start = editorSource.indexOf('function applyAutoLayout(');
+  vm.runInContext(editorSource.slice(start, editorSource.indexOf('\nfunction ', start + 1)), context);
+  assert.equal(context.applyAutoLayout(), true);
+  assert.equal(state.autoLayoutOrientation, 'vertical');
+  const first = structuredClone({ product: state.productTransform, details: state.detailsTransform });
+  assert.equal(context.applyAutoLayout(), true);
+  assert.equal(state.autoLayoutOrientation, 'horizontal');
+  const horizontal = structuredClone({ product: state.productTransform, details: state.detailsTransform });
+  context.applyAutoLayout({ toggle: false });
+  assert.equal(state.autoLayoutOrientation, 'horizontal', 'format conversion preserves the alignment');
+  assert.deepEqual({ product: state.productTransform, details: state.detailsTransform }, horizontal);
+  context.getFreeTextLayout = () => ({ x: 0, y: 0, width: 1080, textWidth: 1080, height: 1350 });
+  assert.equal(context.applyAutoLayout(), undefined);
+  assert.equal(state.autoLayoutOrientation, 'horizontal', 'failure must not advance the cycle');
+  assert.deepEqual({ product: state.productTransform, details: state.detailsTransform }, horizontal);
+  context.getFreeTextLayout = () => null;
+  assert.equal(context.applyAutoLayout(), true);
+  assert.equal(state.autoLayoutOrientation, 'vertical');
+  assert.deepEqual({ product: state.productTransform, details: state.detailsTransform }, first);
 });

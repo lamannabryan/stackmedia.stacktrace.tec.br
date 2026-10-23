@@ -4,8 +4,34 @@ import { loadConfig } from '../src/config.mjs';
 import { initializeCatalogDatabase } from '../src/database/catalog-database.mjs';
 import { createUserService } from '../src/modules/users/user-service.mjs';
 
-if (!process.stdin.isTTY) {
-  console.error('Execute este comando em um terminal interativo. A senha não será exibida.');
+const bootstrapKeys = ['BOOTSTRAP_ADMIN_NAME', 'BOOTSTRAP_ADMIN_EMAIL', 'BOOTSTRAP_ADMIN_PASSWORD'];
+const fromEnvironment = bootstrapKeys.some((key) => process.env[key] !== undefined);
+
+if (fromEnvironment) {
+  let database;
+  try {
+    if (bootstrapKeys.some((key) => !process.env[key])) {
+      throw new Error('Defina BOOTSTRAP_ADMIN_NAME, BOOTSTRAP_ADMIN_EMAIL e BOOTSTRAP_ADMIN_PASSWORD para criar o administrador sem terminal interativo.');
+    }
+    const config = loadConfig();
+    database = await initializeCatalogDatabase(config);
+    console.log(`Banco de dados: ${config.databasePath}`);
+    await createUserService({ database }).create({
+      name: process.env.BOOTSTRAP_ADMIN_NAME,
+      email: process.env.BOOTSTRAP_ADMIN_EMAIL,
+      password: process.env.BOOTSTRAP_ADMIN_PASSWORD,
+      role: 'administrador',
+      active: true,
+    }, { firstAdminOnly: true });
+    console.log('Administrador criado. Acesse /login para entrar. Remova as variáveis BOOTSTRAP_ADMIN_* da hospedagem.');
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
+  } finally {
+    database?.close();
+  }
+} else if (!process.stdin.isTTY) {
+  console.error('Sem terminal interativo: defina BOOTSTRAP_ADMIN_NAME, BOOTSTRAP_ADMIN_EMAIL e BOOTSTRAP_ADMIN_PASSWORD e execute novamente.');
   process.exitCode = 1;
 } else {
   const database = await initializeCatalogDatabase(loadConfig());

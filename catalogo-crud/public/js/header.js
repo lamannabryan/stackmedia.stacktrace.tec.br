@@ -32,5 +32,11 @@ export function mountHeader() {
   launcher.className = 'tour-launcher header-tour-launcher'; launcher.title = 'Tour guiado';
   launcher.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z" stroke-linejoin="round"/></svg>';
   actions.append(launcher); host.replaceChildren(brand, nav, actions);
+  if (editor) {
+    const controls = editor.querySelector('.stories-header-actions');
+    if (controls) actions.prepend(controls);
+    editor.style.display = 'none';
+    host.closest('header').classList.add('editor-unified-header');
+  }
   return actions;
 }

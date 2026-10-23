@@ -1,5 +1,4 @@
-export const COMPOSITION_COUNTS = Object.freeze({ single: 1, 'two-products': 2, combo: 2,
-  'three-products': 3, 'four-products': 4, 'five-products': 5 });
+export const COMPOSITION_COUNTS = Object.freeze({ single: 1, 'two-products': 2, combo: 2 });
 
 export function compositionTargets(mode, kind = 'product') {
   const count = kind === 'details' && mode === 'combo' ? 1 : COMPOSITION_COUNTS[mode] || 1;

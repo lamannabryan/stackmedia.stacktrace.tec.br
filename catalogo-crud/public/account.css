@@ -38,3 +38,14 @@ body.stories-page .editor-action-bar { position: relative; top: auto; display: f
   .is-mobile-editor .stories-topbar:has(.account-menu) .story-mobile-context { display: none; }
   .is-mobile-editor .stories-topbar:has(.account-menu) { grid-template-columns: minmax(0, 1fr) auto; }
 }
+
+.editor-unified-header .stories-header-actions, .editor-unified-header .stories-export-actions { display: flex; align-items: center; gap: 8px; }
+.editor-unified-header .site-nav { display: none; }
+.artwork-share-menu { position: relative; }
+.artwork-share-menu > summary { cursor: pointer; list-style: none; white-space: nowrap; }
+.artwork-share-menu > summary::-webkit-details-marker { display: none; }
+.artwork-share-menu > summary::after { content: ' ?'; }
+.artwork-share-options { position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; display: grid; gap: 8px; min-width: 220px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px #0002; }
+.artwork-share-options button { width: 100%; }
+#story-mobile-panel-export .artwork-share-options { position: static; margin-top: 8px; }
+@media (max-width: 900px) { .is-mobile-editor .editor-unified-header .stories-export-actions { display: none; } }

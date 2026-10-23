@@ -45,7 +45,6 @@
       </div>
 
       <div class="stories-header-actions">
-        <span class="stories-format" aria-label="Feed vertical, 1080 por 1350 pixels">Feed · 1080 × 1350</span>
         <button id="story-mobile-export-button" class="story-mobile-only story-mobile-header-button" type="button" aria-label="Salvar arte" title="Salvar arte" aria-haspopup="dialog" aria-controls="story-mobile-dialog" data-mobile-panel="export">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></svg>
         </button>
@@ -59,6 +58,7 @@
             <span id="convert-artwork-format-label">Converter para Stories</span>
           </button>
           <p class="story-conversion-notice" id="artwork-conversion-status" role="status" aria-live="polite" hidden></p>
+          <details class="artwork-share-menu"><summary class="primary-button">Compartilhar</summary><div class="artwork-share-options">
           <button class="primary-button story-png-button" id="download-story-button" type="button" disabled>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" /><circle cx="8" cy="8" r="1.5" /><path d="m3 16 5-5 4 4 4-6 5 7" /></svg>
             <span id="story-download-label">Baixar PNG</span>
@@ -67,6 +67,7 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" /><path d="m10 8 6 4-6 4V8Z" /></svg>
             <span id="story-video-download-label">Baixar MP4 · 15 s</span>
           </button>
+<button class="primary-button" id="share-story-instagram" type="button">PNG para Instagram</button></div></details>
         </div>
       </div>
     </header>
@@ -119,30 +120,6 @@
                 <span class="story-composition-option-card">
                   <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
                   <span class="story-composition-option-copy"><strong>2 produtos</strong><small>Dois produtos e duas descrições</small></span>
-                  <span class="story-composition-indicator" aria-hidden="true"></span>
-                </span>
-              </label>
-              <label class="story-composition-option" for="story-composition-mode-three">
-                <input class="story-composition-input" id="story-composition-mode-three" name="story-composition-mode" type="radio" value="three-products" data-composition-mode="three-products" />
-                <span class="story-composition-option-card">
-                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
-                  <span class="story-composition-option-copy"><strong>3 produtos</strong><small>Uma oferta para cada produto</small></span>
-                  <span class="story-composition-indicator" aria-hidden="true"></span>
-                </span>
-              </label>
-              <label class="story-composition-option" for="story-composition-mode-four">
-                <input class="story-composition-input" id="story-composition-mode-four" name="story-composition-mode" type="radio" value="four-products" data-composition-mode="four-products" />
-                <span class="story-composition-option-card">
-                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
-                  <span class="story-composition-option-copy"><strong>4 produtos</strong><small>Uma oferta para cada produto</small></span>
-                  <span class="story-composition-indicator" aria-hidden="true"></span>
-                </span>
-              </label>
-              <label class="story-composition-option" for="story-composition-mode-five">
-                <input class="story-composition-input" id="story-composition-mode-five" name="story-composition-mode" type="radio" value="five-products" data-composition-mode="five-products" />
-                <span class="story-composition-option-card">
-                  <span class="story-composition-option-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
-                  <span class="story-composition-option-copy"><strong>5 produtos</strong><small>Uma oferta para cada produto</small></span>
                   <span class="story-composition-indicator" aria-hidden="true"></span>
                 </span>
               </label>
@@ -231,7 +208,7 @@
             <span class="story-section-icon" aria-hidden="true"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
             <div>
               <h2 id="story-auto-layout-heading">Organização da arte</h2>
-              <p>Aproveite o espaço da composição escolhida.</p>
+              <p>Clique para organizar. Clique novamente para alternar entre vertical e horizontal.</p>
             </div>
           </div>
           <button class="primary-button story-auto-layout-button" id="story-auto-layout-button" type="button" aria-describedby="story-auto-layout-status" disabled>
