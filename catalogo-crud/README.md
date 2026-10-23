@@ -648,3 +648,9 @@ Administradores podem acessar **Conta → Gerenciar backgrounds** (`/backgrounds
 
 Os arquivos são validados e convertidos para WebP nas pastas de backgrounds configuradas, junto dos fundos existentes. Essas pastas precisam ter permissão de escrita e devem ser incluídas no backup persistente. As rotas POST e DELETE de `/api/story-backgrounds`, `/api/feed-backgrounds` e `/api/indoor-backgrounds` exigem administrador e token CSRF; a exclusão usa `/:filename`.
 
+
+## Encarte quadrado
+
+O formato **Encarte** está em `/artes/encarte`, com 1080 × 1080 pixels e composições de 1 a 5 produtos com preços individuais. Reutiliza o editor do Feed: preços individuais, texto livre, arraste, redimensionamento, grade, vínculo dos elementos, ajuste automático e exportação PNG/MP4. A conversão para Feed aceita composições de até dois produtos, conforme o limite do formato de destino.
+
+Seus fundos são independentes: `camas-encarte/` (ou `ENCARTE_BACKGROUNDS_ROOT`), listados por `/api/encarte-backgrounds` e servidos em `/encarte-backgrounds/`. Inclui um fundo neutro inicial. Administradores podem adicionar e remover os fundos em **Gerenciar backgrounds → Encarte**. Inclua essa pasta no backup persistente e permita escrita para uploads.

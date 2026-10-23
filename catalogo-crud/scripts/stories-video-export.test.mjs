@@ -229,6 +229,24 @@ test('exports Feed MP4 at 1080 × 1350 with 450 frames and 15 seconds', async (t
   assertReleased(recordings);
 });
 
+test('exports Encarte MP4 at 1080 × 1080 with 450 frames and 15 seconds', async (t) => {
+  const recordings = installEncoder(t);
+  const canvas = { width: 1080, height: 1080 };
+  const blob = await exportStoryVideo(options({ canvas }));
+  assert.equal(blob.type, 'video/mp4');
+  assert.equal(recordings.frames.length, 450);
+  assert.equal(recordings.supportChecks[0].height, 1080);
+  assert.ok(recordings.frames.every((frame) => frame.canvas === canvas));
+  const buffer = Buffer.from(await blob.arrayBuffer());
+  const boxes = readBoxes(buffer);
+  assert.equal(boxDuration(buffer, findBox(boxes, 'mvhd')), 15);
+  assert.equal(boxDuration(buffer, findBox(boxes, 'mdhd')), 15);
+  const header = findBox(boxes, 'tkhd');
+  assert.equal(buffer.readUInt32BE(header.end - 8) / 65536, 1080);
+  assert.equal(buffer.readUInt32BE(header.end - 4) / 65536, 1080);
+  assertReleased(recordings);
+});
+
 test('exports Indoor TV MP4 at 1920 × 1080 with 450 timed frames and 15 seconds', async (t) => {
   const recordings = installEncoder(t);
   const canvas = { width: 1920, height: 1080 };
@@ -294,7 +312,7 @@ test('rejects incorrect canvas dimensions before starting the encoder', async (t
     { width: 720, height: 1280 },
     { width: 1920, height: 1350 },
     { width: 1920, height: 1920 },
-    { width: 1080, height: 1080 },
+    { width: 1080, height: 1079 },
   ]) {
     await assert.rejects(exportStoryVideo(options({ canvas })), /1080/);
     await assert.rejects(getStoryVideoConfig(canvas), /1080/);
@@ -356,7 +374,7 @@ test('does not return an incomplete MP4 when a frame is missing', async (t) => {
   assertReleased(recordings);
 });
 
-for (const height of [1920, 1350]) {
+for (const height of [1920, 1350, 1080]) {
   test(`normalizes WebKit microsecond rounding for 1080 × ${height} without altering MP4 timing`, async (t) => {
     const recordings = installEncoder(t, {
       outputTimestamp: (input) => input.timestamp + (input.index % 3 - 1),

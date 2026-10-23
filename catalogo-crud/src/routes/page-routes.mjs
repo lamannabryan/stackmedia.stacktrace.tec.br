@@ -13,6 +13,7 @@ const pages = new Map([
   ['/login', 'login.html'],
   ['/artes/stories', 'stories.html'],
   ['/artes/feed', 'feed.html'],
+  ['/artes/encarte', 'encarte.html'],
   ['/artes/indoor-h', 'indoor-h.html'],
 ]);
 

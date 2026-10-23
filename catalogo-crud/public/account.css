@@ -25,10 +25,8 @@ body.stories-page .editor-action-bar { position: relative; top: auto; display: f
 @media (max-width: 900px) {
   .shared-app-header .site-header-inner { min-height: 60px; gap: 12px; }
   .shared-app-header .site-nav { display: none; }
-  .shared-app-header .site-brand { flex: 0 1 76px; }
-  .shared-app-header .site-brand-logo { width: 76px; }
-  .shared-app-header .shared-header-actions :is(.header-tour-launcher, .account-menu summary) { width: 22px; height: 22px; min-height: 22px; padding: 0; border-radius: 6px; }
-  .shared-app-header .shared-header-actions svg { width: 11px; height: 11px; }
+  .shared-app-header .site-brand { flex: 0 1 144px; }
+  .shared-app-header .site-brand-logo { width: 144px; }
   body.stories-page.is-mobile-editor .editor-action-bar { padding: 4px 16px; }
 }
 @media (max-width: 900px) { .account-menu summary { padding: 10px; } .site-header-inner .account-menu { margin-left: 0; } .is-mobile-editor .account-menu { display: block; } }

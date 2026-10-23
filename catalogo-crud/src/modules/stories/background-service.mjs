@@ -16,7 +16,7 @@ function makeStoryBackgroundUrl(backgroundFile, urlPrefix) {
 function storyBackgroundLabel(backgroundFile, format) {
   const formatSuffix = format === 'indoor-h'
     ? /(?:[_\s-]+indoor(?:[_\s-]+h(?:orizontal)?)?|[_\s-]+df\s*-\s*prec\s+tv)$/i
-    : format === 'feed' ? /(?:[_\s-]+feed)$/i : /(?:[_\s-]+stories?)$/i;
+    : format === 'encarte' ? /(?:[_\s-]+encarte)$/i : format === 'feed' ? /(?:[_\s-]+feed)$/i : /(?:[_\s-]+stories?)$/i;
   const name = path.basename(backgroundFile, path.extname(backgroundFile))
     .replace(/--[a-f0-9-]{36}$/, '')
     .replace(/^gabarito\s+/i, '')
@@ -27,6 +27,7 @@ function storyBackgroundLabel(backgroundFile, format) {
     .toLocaleLowerCase('pt-BR');
 
   if (!name) {
+    if (format === 'encarte') return 'Background para Encarte';
     if (format === 'indoor-h') return 'Background para Indoor';
     return format === 'feed' ? 'Background para Feed' : 'Background para Story';
   }

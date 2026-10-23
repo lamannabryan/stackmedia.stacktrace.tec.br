@@ -19,7 +19,7 @@ test('background thumbnails and artwork are bounded, cached on disk, versioned a
   await sharp({ create: { width: 2400, height: 4000, channels: 3, background: '#00a080' } }).png().toFile(source);
   const original = await readFile(source);
   const config = { ...loadConfig({ APP_AUTH_ENABLED: 'false' }), storageDirectory: directory,
-    storyBackgroundsDirectory: images, feedBackgroundsDirectory: images, indoorBackgroundsDirectory: images };
+    storyBackgroundsDirectory: images, feedBackgroundsDirectory: images, encarteBackgroundsDirectory: images, indoorBackgroundsDirectory: images };
   const database = new DatabaseSync(':memory:');
   const server = createServer(createApplication({ config, database }));
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -27,7 +27,7 @@ test('background thumbnails and artwork are bounded, cached on disk, versioned a
   const { fetch } = await testSession(database, origin);
   const cache = path.join(directory, 'background-cache');
   try {
-    for (const [format, width, height] of [['story', 1080, 1920], ['feed', 1080, 1350], ['indoor', 1920, 1080]]) {
+    for (const [format, width, height] of [['story', 1080, 1920], ['feed', 1080, 1350], ['encarte', 1080, 1080], ['indoor', 1920, 1080]]) {
       const { items: [item] } = await (await fetch(`${origin}/api/${format}-backgrounds`)).json();
       const responses = await Promise.all(Array.from({ length: 4 }, () => fetch(origin + item.thumbnail_url)));
       const data = await Promise.all(responses.map((response) => response.arrayBuffer().then(Buffer.from)));
@@ -52,13 +52,13 @@ test('background thumbnails and artwork are bounded, cached on disk, versioned a
       } })).status, 304);
       assert.deepEqual(await readFile(source), original);
     }
-    assert.equal((await readdir(cache)).length, 6, 'one file per format/variant, despite concurrent requests');
+    assert.equal((await readdir(cache)).length, 8, 'one file per format/variant, despite concurrent requests');
     const previous = (await (await fetch(origin + '/api/story-backgrounds')).json()).items[0];
     await sharp({ create: { width: 1200, height: 2000, channels: 3, background: '#ff0080' } }).png().toFile(source);
     const changed = (await (await fetch(origin + '/api/story-backgrounds')).json()).items[0];
     assert.notEqual(changed.thumbnail_url, previous.thumbnail_url);
     assert.equal((await fetch(origin + changed.thumbnail_url)).status, 200);
-    assert.equal((await readdir(cache)).length, 6, 'replacement discards obsolete generated thumbnail');
+    assert.equal((await readdir(cache)).length, 8, 'replacement discards obsolete generated thumbnail');
     assert.equal((await fetch(origin + changed.thumbnail_url.replace('thumb-v1', 'unlimited'))).status, 400);
     assert.equal((await fetch(origin + '/story-backgrounds/%2e%2e%2ffile.png?variant=thumb-v1')).status, 403);
     await writeFile(path.join(images, 'broken.png'), 'invalid');

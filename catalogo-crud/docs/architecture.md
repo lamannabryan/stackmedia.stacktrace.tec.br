@@ -38,6 +38,7 @@ public/
 
 camas-stories/               Fundos de Stories
 camas-feed/                  Fundos de Feed (4:5)
+camas-encarte/               Fundos de Encarte (1:1, até 5 produtos)
 data/                        Banco SQLite local (não versionado)
 docs/                        Decisões e contratos de arquitetura
 ```

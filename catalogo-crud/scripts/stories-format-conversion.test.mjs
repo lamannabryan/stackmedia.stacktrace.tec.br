@@ -6,7 +6,7 @@ import { getArtworkFormat } from '../public/js/features/stories/formats.js';
 test('converts both directions without mutating the source or stretching product proportions', () => {
   const input = { product: { x: 100, y: 500, width: 500 }, text: { x: 200, y: 1100, width: 620 }, secondary: null };
   const before = structuredClone(input);
-  for (const source of ['stories', 'feed']) {
+  for (const source of ['stories', 'feed', 'encarte']) {
     const target = otherArtworkFormat(source);
     const result = convertArtworkTransforms(input, source, target);
     const from = getArtworkFormat(source), to = getArtworkFormat(target);

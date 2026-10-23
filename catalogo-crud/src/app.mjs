@@ -81,18 +81,24 @@ export function createApplication({ config, database, logger = console, integrat
     format: 'feed',
     urlPrefix: '/feed-backgrounds',
   });
+  const encarteBackgroundService = createStoryBackgroundService({
+    storyBackgroundsDirectory: config.encarteBackgroundsDirectory,
+    format: 'encarte',
+    urlPrefix: '/encarte-backgrounds',
+  });
   const indoorBackgroundService = createStoryBackgroundService({
     storyBackgroundsDirectory: config.indoorBackgroundsDirectory,
     format: 'indoor-h',
     urlPrefix: '/indoor-backgrounds',
   });
   const apiRouter = createApiRouter({
-    productService, productImportService, partnerService, magazineService, config, storyBackgroundService, feedBackgroundService, indoorBackgroundService,
+    productService, productImportService, partnerService, magazineService, config, storyBackgroundService, feedBackgroundService, encarteBackgroundService, indoorBackgroundService,
     database, userService, sessionService, integrationFetch, productImageDownload,
   });
   const backgroundRoutes = [
     ['/story-backgrounds/', config.storyBackgroundsDirectory, 'stories'],
     ['/feed-backgrounds/', config.feedBackgroundsDirectory, 'feed'],
+    ['/encarte-backgrounds/', config.encarteBackgroundsDirectory, 'encarte'],
     ['/indoor-backgrounds/', config.indoorBackgroundsDirectory, 'indoor-h'],
   ];
 

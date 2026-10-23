@@ -12,7 +12,7 @@ const ENCODER_TIMEOUT_MS = 30000;
 // converting through seconds. Normalize only that rounding, never missing or
 // reordered frames: https://bugs.webkit.org/show_bug.cgi?id=321880
 const TIMESTAMP_ROUNDING_TOLERANCE_US = 1;
-const DIMENSIONS_MESSAGE = 'Use um canvas de 1080 × 1920 (Stories), 1080 × 1350 (Feed) ou 1920 × 1080 (Indoor TV) pixels.';
+const DIMENSIONS_MESSAGE = 'Use um canvas de 1080 × 1920 (Stories), 1080 × 1350 (Feed), 1080 × 1080 (Encarte) ou 1920 × 1080 (Indoor TV) pixels.';
 const UNSUPPORTED_MESSAGE = 'Este navegador não oferece exportação MP4 em H.264. Abra o editor em uma versão atual do Chrome ou Edge com suporte a H.264.';
 
 function abortError() {
@@ -28,7 +28,7 @@ function timestampForFrame(frameIndex) {
 }
 
 function supportsDimensions(width, height) {
-  return (width === VIDEO_WIDTH && [VIDEO_HEIGHT, 1350].includes(height))
+  return (width === VIDEO_WIDTH && [VIDEO_HEIGHT, 1350, 1080].includes(height))
     || (width === 1920 && height === 1080);
 }
 

@@ -21,7 +21,7 @@ export function mountHeader() {
   const nav = document.createElement('nav'); nav.className = 'site-nav';
   nav.setAttribute('aria-label', 'Navegação principal');
   const path = location.pathname.replace(/\.html$/, '').replace('/index', '') || '/';
-  for (const [href, label, alias] of [['/', 'Central', '/'], ['/catalogo', 'Catálogo', '/catalogo'], ['/artes/stories', 'Stories', '/stories'], ['/artes/feed', 'Feed', '/feed'], ['/artes/indoor-h', 'TV Indoor', '/indoor-h']]) {
+  for (const [href, label, alias] of [['/', 'Central', '/'], ['/catalogo', 'Catálogo', '/catalogo'], ['/artes/stories', 'Stories', '/stories'], ['/artes/feed', 'Feed', '/feed'], ['/artes/encarte', 'Encarte', '/encarte'], ['/artes/indoor-h', 'TV Indoor', '/indoor-h']]) {
     const link = document.createElement('a'); link.href = href; link.textContent = label;
     if (path === href || path === alias) link.setAttribute('aria-current', 'page');
     nav.append(link);

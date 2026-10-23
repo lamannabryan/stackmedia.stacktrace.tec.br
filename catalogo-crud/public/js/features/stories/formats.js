@@ -3,8 +3,25 @@ import {
   DEFAULT_PRODUCT_AREA, DEFAULT_TWO_PRODUCT_AREAS, DEFAULT_DETAILS_WIDTH,
 } from './constants.js';
 
-// Stories keeps its original geometry. Both pages use the same editor and exports.
+// All formats share the editor and exports, with their own geometry and backgrounds.
 const formats = {
+  encarte: {
+    width: 1080,
+    height: 1080,
+    safeTop: 108,
+    safeBottom: 0,
+    footerRatio: 0.05,
+    maxProducts: 5,
+    productArea: { x: 124, y: 160, width: 832, height: 430 },
+    twoProductAreas: {
+      product: { x: 82, y: 160, width: 430, height: 430 },
+      'product-secondary': { x: 568, y: 160, width: 430, height: 430 },
+    },
+    detailsWidth: 740,
+    detailsTop: 640,
+    backgroundsUrl: '/api/encarte-backgrounds',
+    downloadPrefix: 'encarte',
+  },
   stories: {
     width: STORY_WIDTH,
     height: STORY_HEIGHT,

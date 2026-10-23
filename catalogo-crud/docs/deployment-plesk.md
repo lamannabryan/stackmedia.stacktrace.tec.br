@@ -40,6 +40,7 @@ vidamix/
 │   └── manifesto-imagens.json
 └── catalogo-crud/
     ├── camas-stories/
+    ├── camas-encarte/
     ├── camas-feed/
     ├── camas-indoor-h/
     ├── data/
@@ -99,7 +100,7 @@ npm ci
 npm run verify
 ```
 
-Envie todos os arquivos, inclusive `package-lock.json`, `camas-stories`, `camas-feed`, `camas-indoor-h`,
+Envie todos os arquivos, inclusive `package-lock.json`, `camas-stories`, `camas-feed`, `camas-encarte`, `camas-indoor-h`,
 `produtos.json` e `imagens-produtos`. Não envie `node_modules`, `.env` ou a
 pasta `data` de desenvolvimento.
 

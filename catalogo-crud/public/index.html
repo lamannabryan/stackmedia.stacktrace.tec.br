@@ -92,6 +92,7 @@
             <div class="studio-hero-actions" data-tour="home-create">
               <a class="studio-primary-action" href="/artes/stories"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 6h6m-3 4v6m-3-3h6M11 19h2"/></svg> Criar Story</a>
               <a class="studio-primary-action" href="/artes/feed"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="3"/><path d="M8 12h8m-4-4v8"/></svg> Criar Feed</a>
+              <a class="studio-primary-action" href="/artes/encarte"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg> Criar Encarte</a>
               <a class="studio-primary-action" href="/artes/indoor-h"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8m-4-4v4m-2-15 5 4-5 4z"/></svg> Criar vídeo para TV</a>
               <button class="ean-launch-button" id="ean-overlay-open" type="button" data-tour="home-barcode">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M7 3H3v4m14-4h4v4M3 17v4h4m14-4v4h-4M7 7v10m4-10v10m3-10v10m3-10v10"/></svg>
@@ -117,6 +118,11 @@
               <div class="format-card-footer"><span>1080 × 1920 · 9:16</span><a href="/artes/stories">Criar Story <b aria-hidden="true">→</b></a></div>
             </article>
 
+            <article class="format-card format-card-encarte is-ready" aria-label="Encarte quadrada">
+              <div class="format-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div>
+              <div><h3>Encarte</h3><p>Até 5 produtos em uma arte quadrada, com fundos próprios.</p></div>
+              <div class="format-card-footer"><span>1080 × 1080 · 1:1</span><a href="/artes/encarte">Criar Encarte <b aria-hidden="true">→</b></a></div>
+            </article>
             <article class="format-card format-card-feed is-ready" aria-label="Feed vertical">
               <div class="format-card-topline"><span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M9 16.3 11.3 13l1.8 2.1 1.7-1.7 1.2 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
               <div><h3>Feed</h3><p>Artes em 4:5 para destacar suas ofertas no Instagram.</p></div>
@@ -157,6 +163,7 @@
           <select id="ean-format" name="format">
             <option value="stories">Stories · 1080 × 1920</option>
             <option value="feed">Feed · 1080 × 1350</option>
+            <option value="encarte">Encarte · até 5 produtos</option>
           </select>
           <button class="ean-camera-button" id="ean-camera-start" type="button" aria-controls="ean-camera-panel" aria-expanded="false">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 4h8l2 3h3v13H3V7h3z" stroke-linejoin="round"/><circle cx="12" cy="13" r="4"/></svg>

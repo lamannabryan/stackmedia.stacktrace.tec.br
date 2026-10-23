@@ -89,8 +89,8 @@ const OFFLINE_ASSETS = [
   '/fonts/space-grotesk-latin-700-normal.woff2',
 ];
 const PAGE_PATHS = new Set([
-  '/', '/catalogo', '/parceiros', '/artes/stories', '/artes/feed', '/artes/indoor-h',
-  '/index.html', '/catalogo.html', '/parceiros.html', '/stories.html', '/feed.html', '/indoor-h.html',
+  '/', '/catalogo', '/parceiros', '/artes/stories', '/artes/feed', '/artes/encarte', '/artes/indoor-h',
+  '/index.html', '/catalogo.html', '/parceiros.html', '/stories.html', '/feed.html', '/encarte.html', '/indoor-h.html',
   OFFLINE_URL,
 ]);
 
@@ -122,7 +122,7 @@ self.addEventListener('fetch', (event) => {
 
   const pathname = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : '/';
   if (request.mode !== 'navigate' && url.searchParams.has('v')
-    && /^(?:\/assets\/imagens\/|\/(?:story|feed|indoor)-backgrounds\/).+\.(?:png|jpe?g|webp)$/i.test(pathname)) {
+    && /^(?:\/assets\/imagens\/|\/(?:story|feed|encarte|indoor)-backgrounds\/).+\.(?:png|jpe?g|webp)$/i.test(pathname)) {
     event.respondWith(cachedImage(request));
     return;
   }

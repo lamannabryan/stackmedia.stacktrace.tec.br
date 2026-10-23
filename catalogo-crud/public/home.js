@@ -119,7 +119,7 @@ async function openArtworkForEan(ean) {
   lookupController = controller;
   if (eanSubmit) eanSubmit.disabled = true;
   cameraStart.disabled = true;
-  const format = eanFormat?.value === 'feed' ? 'feed' : 'stories';
+  const format = ['feed', 'encarte'].includes(eanFormat?.value) ? eanFormat.value : 'stories';
   setEanStatus('Localizando produto…');
 
   try {

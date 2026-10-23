@@ -135,6 +135,15 @@ tours.feed = {
   })),
 };
 
+tours.encarte = {
+  ...tours.stories,
+  description: 'Crie um Encarte quadrado com até 5 produtos e fundos próprios.',
+  steps: tours.stories.steps.map(step => ({ ...step,
+    description: step.description.replace('1080 × 1920', '1080 × 1080')
+      .replace('1 produto, 2 produtos com descrições separadas ou um combo com descrição única', 'de 1 a 5 produtos com preços individuais'),
+  })),
+};
+
 const mobileHome = {
   ...tours.home,
   steps: tours.home.steps.map((step) => ({
@@ -166,6 +175,10 @@ function mobileArtworkTour(format) {
 export function getTour(page, { mobile = false } = {}) {
   if (!mobile) return tours[page];
   if (page === 'home') return mobileHome;
-  if (page === 'stories' || page === 'feed') return mobileArtworkTour(page);
+  if (['stories', 'feed', 'encarte'].includes(page)) {
+    const tour = mobileArtworkTour(page);
+    if (page === 'encarte') tour.steps = tour.steps.map(step => ({ ...step, description: step.description.replace('1 produto, 2 produtos ou um combo', '1 a 5 produtos') }));
+    return tour;
+  }
   return tours[page];
 }

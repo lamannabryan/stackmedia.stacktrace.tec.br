@@ -34,7 +34,7 @@ export async function backgroundVariant({ rootDirectory, urlPath, variant, cache
       await fs.mkdir(cacheDirectory, { recursive: true });
       const temporary = `${output}.${randomUUID()}.tmp`;
       const bounds = variant === 'thumb-v1' ? [240, 240]
-        : format === 'indoor-h' ? [1920, 1080] : format === 'feed' ? [1080, 1350] : [1080, 1920];
+        : format === 'indoor-h' ? [1920, 1080] : format === 'encarte' ? [1080, 1080] : format === 'feed' ? [1080, 1350] : [1080, 1920];
       try {
         await sharp(source, { limitInputPixels: 64_000_000, sequentialRead: true })
           .rotate().resize(bounds[0], bounds[1], { fit: 'inside', withoutEnlargement: true })

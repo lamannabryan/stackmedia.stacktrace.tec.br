@@ -69,7 +69,11 @@ export function renderProductCard(product, openProduct) {
   feedLink.href = `/artes/feed?productId=${encodeURIComponent(String(product.id))}`;
   feedLink.setAttribute('aria-label', `Criar Feed para ${product.nome}`);
   feedLink.append(createElement('span', 'product-story-action-icon', '→'));
-  actions.append(openButton, storyLink, feedLink);
+  const encarteLink = createElement('a', 'product-story-action', 'Encarte');
+  encarteLink.href = '/artes/encarte?productId=' + encodeURIComponent(String(product.id));
+  encarteLink.setAttribute('aria-label', 'Criar Encarte para ' + product.nome);
+  encarteLink.append(createElement('span', 'product-story-action-icon', '→'));
+  actions.append(openButton, storyLink, feedLink, encarteLink);
 
   content.append(meta, title, subtitle, footer, actions);
   card.append(image, content);

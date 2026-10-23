@@ -1,8 +1,8 @@
 import { getArtworkFormat } from './formats.js';
 
 export function otherArtworkFormat(name) {
-  if (!['stories', 'feed'].includes(name)) throw new Error('Formato de arte inválido.');
-  return name === 'stories' ? 'feed' : 'stories';
+  if (!['stories', 'feed', 'encarte'].includes(name)) throw new Error('Formato de arte inválido.');
+  return name === 'feed' ? 'stories' : 'feed';
 }
 
 /** Scale positions and sizes uniformly inside the usable area, without stretching images. */
@@ -33,7 +33,7 @@ export function convertArtworkTransforms(transforms, sourceName, targetName) {
 function backgroundKey(value) {
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\.(png|jpe?g|webp)$/i, '').replace(/^gabarito[\s_-]+/i, '')
-    .replace(/[\s_-]+(?:feed|stories|story)$/i, '').replace(/[\s_-]+/g, ' ').trim().toLowerCase();
+    .replace(/[\s_-]+(?:feed|stories|story|encarte)$/i, '').replace(/[\s_-]+/g, ' ').trim().toLowerCase();
 }
 
 /** Prefer the matching template; never silently replace a campaign with an unrelated one. */

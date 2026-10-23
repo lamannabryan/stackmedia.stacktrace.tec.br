@@ -18,7 +18,7 @@ function getRequestedProductId(productService, value) {
   return productService.productId(value);
 }
 
-export function createApiRouter({ database, productService, productImportService, partnerService, magazineService, config, storyBackgroundService, feedBackgroundService, indoorBackgroundService, userService, sessionService, integrationFetch = fetch, productImageDownload }) {
+export function createApiRouter({ database, productService, productImportService, partnerService, magazineService, config, storyBackgroundService, feedBackgroundService, encarteBackgroundService, indoorBackgroundService, userService, sessionService, integrationFetch = fetch, productImageDownload }) {
   const router = createRouter();
   const productAi = createProductAiService({ client: createDeepSeekClient({ ...config.deepseek, fetchImpl: integrationFetch }) });
   router.post('/api/products/lookup-ean', async ({ request, response, session }) => {
@@ -63,7 +63,7 @@ export function createApiRouter({ database, productService, productImportService
   router.delete('/api/revistas/:id', ({ response, params, url, session }) => {
     requireAdmin(session); magazineService.remove(params.id, url.searchParams.get('revision')); sendNoContent(response);
   });
-  for (const [route, service] of [['story-backgrounds', storyBackgroundService], ['feed-backgrounds', feedBackgroundService], ['indoor-backgrounds', indoorBackgroundService]]) {
+  for (const [route, service] of [['story-backgrounds', storyBackgroundService], ['feed-backgrounds', feedBackgroundService], ['encarte-backgrounds', encarteBackgroundService], ['indoor-backgrounds', indoorBackgroundService]]) {
     router.post(`/api/${route}`, async ({ request, response, session }) => {
       requireAdmin(session);
       sendJson(response, 201, await service.addBackground(await readJsonBody(request, { maxBytes: BACKGROUND_BODY_BYTES })));
@@ -134,6 +134,10 @@ export function createApiRouter({ database, productService, productImportService
 
   router.get('/api/feed-backgrounds', async ({ request, response }) => {
     sendRevalidatedJson(request, response, { items: await feedBackgroundService.listStoryBackgrounds() });
+  });
+
+  router.get('/api/encarte-backgrounds', async ({ request, response }) => {
+    sendRevalidatedJson(request, response, { items: await encarteBackgroundService.listStoryBackgrounds() });
   });
 
   router.get('/api/indoor-backgrounds', async ({ request, response }) => {

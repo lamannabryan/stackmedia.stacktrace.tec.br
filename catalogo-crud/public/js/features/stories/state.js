@@ -1,4 +1,4 @@
-export function createStoriesEditorState() {
+export function createStoriesEditorState(maxProducts = 2) {
   return {
     backgrounds: [],
     selectedBackground: null,
@@ -8,7 +8,10 @@ export function createStoriesEditorState() {
     autoLayoutOrientation: null,
     selectedProduct: null,
     secondaryProduct: null,
-    extraProducts: [],
+    extraProducts: Array.from({ length: Math.max(0, maxProducts - 2) }, () => ({
+      product: null, price: '', image: null, imageUrl: null,
+      productTransform: null, detailsTransform: null, defaultProductWidth: null, defaultDetailsWidth: null,
+    })),
     productResults: [],
     productTotal: 0,
     productPage: 0,

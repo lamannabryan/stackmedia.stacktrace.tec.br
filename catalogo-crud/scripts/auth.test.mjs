@@ -18,6 +18,7 @@ async function fixture(t, environment = 'test', { integrationFetch, deepseek } =
     CATALOG_SOURCE: path.join(directory, 'products.json'), MANIFEST_SOURCE: path.join(directory, 'manifest.json') }) };
   config.storyBackgroundsDirectory = path.join(directory, 'stories');
   config.feedBackgroundsDirectory = path.join(directory, 'feed');
+  config.encarteBackgroundsDirectory = path.join(directory, 'encarte');
   config.indoorBackgroundsDirectory = path.join(directory, 'indoor');
   config.imagesDirectory = path.join(directory, 'images');
   if (deepseek) config.deepseek = deepseek;
@@ -90,7 +91,7 @@ test('administrators upload and remove backgrounds in each format; clients and i
     assert.equal((await f.call(page, { session: client })).status, 403);
   }
   assert.equal((await f.call('/backgrounds', { session })).status, 200);
-  for (const format of ['story', 'feed', 'indoor']) {
+  for (const format of ['story', 'feed', 'encarte', 'indoor']) {
     const route = `/api/${format}-backgrounds`;
     assert.equal((await f.call(route, { method: 'POST', body })).status, 401);
     assert.equal((await f.call(route, { method: 'POST', session: client, body })).status, 403);

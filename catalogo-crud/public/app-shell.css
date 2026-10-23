@@ -26,8 +26,8 @@
     gap: 12px;
     flex-wrap: nowrap;
   }
-  .site-header .site-brand { flex: 0 1 76px; min-width: 0; }
-  .site-header .site-brand-logo { width: 76px; }
+  .site-header .site-brand { flex: 0 1 144px; min-width: 0; }
+  .site-header .site-brand-logo { width: 144px; }
   .has-app-tabbar .site-header .site-nav { display: none; }
   a[href="/artes/indoor-h"], a[href="/indoor-h.html"] { display: none !important; }
   .app-screen-name {

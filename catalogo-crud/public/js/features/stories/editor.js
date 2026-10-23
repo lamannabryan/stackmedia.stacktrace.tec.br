@@ -1,4 +1,4 @@
-import { COMPOSITION_COUNTS, compositionTargets, compositionCell } from './composition.js';
+import { COMPOSITION_COUNTS, compositionModes, compositionTargets, compositionCell } from './composition.js';
 import {
   DEFAULT_FREE_TEXT_WIDTH,
   DESCRIPTION_CARD_PADDING,
@@ -24,7 +24,7 @@ let {
   productArea: DEFAULT_PRODUCT_AREA, twoProductAreas: DEFAULT_TWO_PRODUCT_AREAS,
   detailsWidth: DEFAULT_DETAILS_WIDTH,
 } = format;
-const state = createStoriesEditorState();
+const state = createStoriesEditorState(format.maxProducts || 2);
 const elements = getStoriesEditorElements();
 
 let searchTimer;
@@ -35,7 +35,7 @@ let artworkReady = false;
 let previewTask = null;
 let formatConverting = false;
 
-const COMPOSITION_MODES = new Set(Object.keys(COMPOSITION_COUNTS));
+let COMPOSITION_MODES = new Set(compositionModes(formatName));
 const extraControls = new Map();
 function productTargets() { return compositionTargets(state.compositionMode); }
 function detailTargets() { return compositionTargets(state.compositionMode, 'details'); }
@@ -108,7 +108,7 @@ function compositionLabel(value) {
     single: '1 produto',
     'two-products': '2 produtos',
     combo: 'Combo',
-  }[normalizeCompositionMode(value)] || 'Selecionado';
+  }[normalizeCompositionMode(value)] || `${COMPOSITION_COUNTS[normalizeCompositionMode(value)]} produtos`;
 }
 
 const compositionPanel = Object.freeze({
@@ -248,9 +248,11 @@ function updateAvailability() {
   elements.download.disabled = !ready || exporting || formatConverting;
   elements.downloadVideo.disabled = !ready || exporting || formatConverting;
   if (elements.convertFormat) {
-    elements.convertFormat.disabled = exporting || formatConverting || !state.selectedProduct
+    elements.convertFormat.disabled = exporting || formatConverting || isMultiProductMode() || !state.selectedProduct
       || !state.productTransform || state.productImageUrl !== state.selectedProduct.imagem_local_url
       || !state.backgroundImage || state.backgroundImageUrl !== state.selectedBackground?.url;
+    elements.convertFormat.title = isMultiProductMode()
+      ? 'O Feed aceita até 2 produtos. Escolha uma composição de 1 ou 2 produtos para converter.' : '';
   }
 
   if (!state.selectedBackground) {
@@ -517,8 +519,8 @@ function getDetailsLayout(transform, target = 'details') {
   const lineHeight = nameFontSize * 1.1;
   const subtitleFontSize = clamp(availableWidth * 0.042, 14, 42);
   const subtitleLineHeight = subtitleFontSize * 1.22;
-  const basePriceHeight = clamp(availableWidth * 0.18, 64, 176);
-  const priceHeight = includesPrice ? basePriceHeight * 1.3 : 0;
+  const basePriceHeight = clamp(availableWidth * 0.18, isMultiProductMode() ? 38 : 64, 176);
+  const priceHeight = includesPrice ? basePriceHeight * (isMultiProductMode() ? 1 : 1.3) : 0;
   const priceGap = includesPrice ? (isMultiProductMode() ? 8 : clamp(availableWidth * 0.045, 16, 42)) : 0;
   const detailGap = clamp(availableWidth * 0.012, 5, 12);
   const textMetrics = getDetailsTextMetrics(
@@ -934,11 +936,20 @@ function setConversionNotice(message, isError = false) {
 
 function syncArtworkFormat() {
   const feed = formatName === 'feed';
-  const label = feed ? 'Feed' : 'Stories';
+  const encarte = formatName === 'encarte';
+  const label = encarte ? 'Encarte' : feed ? 'Feed' : 'Stories';
   const dimensions = `${STORY_WIDTH} × ${STORY_HEIGHT}`;
   document.body.dataset.artworkFormat = formatName;
   document.body.dataset.tourPage = formatName;
   document.body.classList.toggle('feed-page', feed);
+  document.body.classList.toggle('encarte-page', encarte);
+  document.body.style.setProperty('--artwork-aspect-ratio', STORY_WIDTH + ' / ' + STORY_HEIGHT);
+  document.body.style.setProperty('--artwork-width-ratio', STORY_WIDTH / STORY_HEIGHT);
+  COMPOSITION_MODES = new Set(compositionModes(formatName));
+  for (const input of elements.compositionModes) {
+    input.disabled = !COMPOSITION_MODES.has(input.value);
+    input.closest('label').hidden = input.disabled;
+  }
   document.title = 'StackMedia';
   elements.canvas.width = STORY_WIDTH;
   elements.canvas.height = STORY_HEIGHT;
@@ -951,10 +962,10 @@ function syncArtworkFormat() {
   const heading = document.querySelector('.story-mobile-context h1');
   const ratio = document.querySelector('.story-mobile-context > span');
   if (heading) heading.textContent = label;
-  if (ratio) ratio.textContent = `${feed ? '4:5' : '9:16'} · Vertical`;
+  if (ratio) ratio.textContent = encarte ? '1:1 · Quadrado' : `${feed ? '4:5' : '9:16'} · Vertical`;
   const intro = document.querySelector('.story-mobile-export-intro p');
-  if (intro) intro.textContent = `Baixe a imagem em PNG ou o vídeo animado de 15 segundos em MP4. ${label} vertical ${dimensions}.`;
-  if (elements.convertFormatLabel) elements.convertFormatLabel.textContent = `Converter para ${feed ? 'Stories' : 'Feed'}`;
+  if (intro) intro.textContent = `Baixe a imagem em PNG ou o vídeo animado de 15 segundos em MP4. ${label} ${encarte ? 'quadrado' : 'vertical'} ${dimensions}.`;
+  if (elements.convertFormatLabel) elements.convertFormatLabel.textContent = `Converter para ${otherArtworkFormat(formatName) === 'stories' ? 'Stories' : 'Feed'}`;
 }
 
 async function convertCurrentArtwork() {
@@ -1826,7 +1837,7 @@ async function renderPreviewOnce(requestId) {
     if (isMultiProductMode() && (productChanged || secondaryProductChanged || extraChanged)) {
       for (const target of productTargets()) if (getProductImage(target)) resetProductTransform(target);
       for (const target of detailTargets()) if (getDetailsProduct(target)) resetDetailsTransform(target);
-      if (allImagesReady()) applyAutoLayout();
+      if (allImagesReady()) applyAutoLayout({ toggle: false });
     }
     drawPreviewNow();
     updateAvailability();
@@ -2039,7 +2050,7 @@ function removeProductFromComposition(position) {
     state.secondaryProduct = entries[1]?.product || null; state.secondaryPrice = entries[1]?.price || '';
     state.extraProducts.forEach((slot, index) => { slot.product = entries[index + 2]?.product || null; slot.price = entries[index + 2]?.price || ''; });
     refreshProductSelection();
-    setProductRemovalStatus('Sele??o atualizada. Os pre?os acompanham os produtos.');
+    setProductRemovalStatus('Seleção atualizada. Os preços acompanham os produtos.');
     return;
   }
   if (position === 'primary' && !state.selectedProduct) return;
@@ -3029,7 +3040,7 @@ function cloneControls(source, suffix) {
 }
 
 function ensureExtraControls() {
-  for (let number = 3; number <= Math.max(...Object.values(COMPOSITION_COUNTS)); number++) {
+  for (let number = 3; number <= (format.maxProducts || 2); number++) {
     for (const kind of ['product', 'details']) {
       const target = `${kind}-${number}`;
       const selection = cloneControls(kind === 'product' ? elements.selection : elements.detailsSelection, target);
@@ -3311,6 +3322,6 @@ function truncateLines(lines, count, context, width) {
   if (lines.length <= count) return;
   lines.splice(count);
   let last = lines[count - 1];
-  while (last.length && context.measureText(last + '?').width > width) last = last.slice(0, -1);
-  lines[count - 1] = last.trimEnd() + '?';
+  while (last.length && context.measureText(last + '…').width > width) last = last.slice(0, -1);
+  lines[count - 1] = last.trimEnd() + '…';
 }

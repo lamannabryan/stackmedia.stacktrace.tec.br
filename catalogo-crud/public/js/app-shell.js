@@ -17,6 +17,7 @@ export function getAppScreen(pathname) {
     '/usuarios': 'users', '/usuarios.html': 'users',
     '/artes/stories': 'stories', '/stories.html': 'stories',
     '/artes/feed': 'feed', '/feed.html': 'feed',
+    '/artes/encarte': 'encarte', '/encarte.html': 'encarte',
     '/artes/indoor-h': 'indoor', '/indoor-h.html': 'indoor',
   })[path] || null;
 }
