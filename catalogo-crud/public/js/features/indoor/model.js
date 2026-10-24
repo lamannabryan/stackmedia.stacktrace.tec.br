@@ -1,6 +1,7 @@
 import { suggestedMagazinePrice } from '../stories/price-input.js';
 
 export const PRODUCT_LIMIT = 5;
+export const PRODUCT_MINIMUM = 2;
 
 export function addProduct(selection, product) {
   if (!product?.id || !product.imagem_local_url || selection.length >= PRODUCT_LIMIT
@@ -22,7 +23,7 @@ export function moveProduct(selection, id, direction) {
 }
 
 export function canContinue(selection) {
-  return selection.length === PRODUCT_LIMIT
-    && new Set(selection.map((item) => item.product.id)).size === PRODUCT_LIMIT
+  return selection.length >= PRODUCT_MINIMUM && selection.length <= PRODUCT_LIMIT
+    && new Set(selection.map((item) => item.product.id)).size === selection.length
     && selection.every((item) => Boolean(item.product.imagem_local_url));
 }

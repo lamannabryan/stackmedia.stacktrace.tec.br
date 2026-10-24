@@ -15,6 +15,9 @@ import { createStoriesEditorState } from './state.js';
 import { createAutoLayout } from './auto-layout.js';
 import { bindPriceInput, suggestedMagazinePrice } from './price-input.js';
 import { drawStoryVideoFrame } from './video-animation.js';
+import { resolveMagazineBackground } from '../magazines/background.js';
+import { selectedProductIds, loadSelectedProducts } from '../magazines/selection.js';
+import { getEncarteItemBounds, drawEncarteItemSurface } from './encarte-items.js';
 import { initStoriesMobileEditor } from './mobile-editor.js';
 
 let formatName = document.body.dataset.artworkFormat || 'stories';
@@ -57,16 +60,6 @@ async function requestJson(url, { signal } = {}) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.error || 'Não foi possível carregar os dados.');
   return payload;
-}
-
-function getPreselectedProductId() {
-  if (typeof window === 'undefined') return null;
-
-  const value = new URLSearchParams(window.location.search).get('productId');
-  if (!value || !/^[1-9]\d*$/.test(value)) return null;
-
-  const productId = Number(value);
-  return Number.isSafeInteger(productId) ? productId : null;
 }
 
 function setStatus(message, isError = false) {
@@ -513,15 +506,18 @@ function getDetailsLayout(transform, target = 'details') {
   if (!transform) return null;
 
   const includesPrice = detailTargets().includes(target);
+  const compact = isMultiProductMode();
   const availableWidth = clamp(transform.width, MIN_DETAILS_WIDTH, STORY_WIDTH - 48);
   const cardPadding = isMultiProductMode() ? 12 : DESCRIPTION_CARD_PADDING;
-  const nameFontSize = clamp(availableWidth * 0.062, 20, 68);
+  const nameFontSize = compact
+    ? clamp(availableWidth * 0.078, 25, 68)
+    : clamp(availableWidth * 0.062, 20, 68);
   const lineHeight = nameFontSize * 1.1;
   const subtitleFontSize = clamp(availableWidth * 0.042, 14, 42);
   const subtitleLineHeight = subtitleFontSize * 1.22;
   const basePriceHeight = clamp(availableWidth * 0.18, isMultiProductMode() ? 38 : 64, 176);
-  const priceHeight = includesPrice ? basePriceHeight * (isMultiProductMode() ? 1 : 1.3) : 0;
-  const priceGap = includesPrice ? (isMultiProductMode() ? 8 : clamp(availableWidth * 0.045, 16, 42)) : 0;
+  const priceHeight = includesPrice ? basePriceHeight * (compact ? 1.4 : 1.3) : 0;
+  const priceGap = includesPrice ? (compact ? 0 : clamp(availableWidth * 0.045, 16, 42)) : 0;
   const detailGap = clamp(availableWidth * 0.012, 5, 12);
   const textMetrics = getDetailsTextMetrics(
     availableWidth,
@@ -542,16 +538,14 @@ function getDetailsLayout(transform, target = 'details') {
       priceWidth: 0,
       badgeWidth: 0,
     };
-  const titleLineCount = Math.max(1, textMetrics.titleLines.length);
+  const titleLineCount = compact ? 2 : Math.max(1, textMetrics.titleLines.length);
   const supportingLineCount = Math.max(1, textMetrics.supportingLines.length);
   const descriptionHeight = cardPadding
     + nameFontSize
     + ((titleLineCount - 1) * lineHeight)
-    + detailGap
-    + subtitleFontSize
-    + ((supportingLineCount - 1) * subtitleLineHeight)
+    + (compact ? 0 : detailGap + subtitleFontSize + ((supportingLineCount - 1) * subtitleLineHeight))
     + cardPadding;
-  const descriptionWidth = Math.min(
+  const descriptionWidth = compact ? availableWidth : Math.min(
     availableWidth,
     Math.max(
       textMetrics.titleWidth + (cardPadding * 2),
@@ -565,6 +559,7 @@ function getDetailsLayout(transform, target = 'details') {
   const priceY = includesPrice ? transform.y + descriptionHeight + priceGap : null;
 
   return {
+    compact,
     x: transform.x,
     y: transform.y,
     target,
@@ -583,7 +578,7 @@ function getDetailsLayout(transform, target = 'details') {
     detailGap,
     titleLineCount,
     titleLines: textMetrics.titleLines,
-    supportingLines: textMetrics.supportingLines,
+    supportingLines: compact ? [] : textMetrics.supportingLines,
     priceHeight,
     priceY,
     badgeX: includesPrice
@@ -862,8 +857,8 @@ function syncAutoLayoutAvailability() {
   return !reason;
 }
 
-function applyAutoLayout({ toggle = true } = {}) {
-  if (!syncAutoLayoutAvailability()) return;
+function applyAutoLayout({ toggle = true, allowPartial = false } = {}) {
+  if (!allowPartial && !syncAutoLayoutAvailability()) return;
   finishGesture();
   const targets = productTargets();
   const freeText = getFreeTextLayout();
@@ -876,7 +871,7 @@ function applyAutoLayout({ toggle = true } = {}) {
     format,
     orientation,
     mode: state.compositionMode,
-    products: targets.map((target) => ({ target, aspectRatio: getProductAspectRatio(target) })),
+    products: targets.map((target) => ({ target, aspectRatio: getProductImage(target) ? getProductAspectRatio(target) : 2 / 3 })),
     measureDetails: (target, width) => {
       const card = getDetailsLayout({ x: 0, y: 0, width }, target);
       return { width: card.descriptionWidth, height: card.cardHeight };
@@ -899,10 +894,12 @@ function applyAutoLayout({ toggle = true } = {}) {
   // Commit only the complete, measured layout. Linked elements and the export
   // use these same transforms, while each size control starts at the new 100%.
   for (const [target, transform] of Object.entries(layout.products)) {
+    if (!getProductImage(target)) continue;
     setDefaultProductWidth(target, transform.width);
     setProductTransform(target, clampProductTransform(transform, target));
   }
   for (const [target, transform] of Object.entries(layout.details)) {
+    if (!getDetailsProduct(target)) continue;
     setDefaultDetailsWidth(target, transform.width);
     setDetailsTransform(target, clampDetailsTransform(transform, target));
   }
@@ -911,6 +908,7 @@ function applyAutoLayout({ toggle = true } = {}) {
     state.defaultSecondaryDetailsWidth = null;
   }
   state.autoLayoutOrientation = orientation;
+  state.itemAreas = layout.itemAreas || {};
   state.activeEditor = null;
   syncProductEditor();
   schedulePreview();
@@ -962,9 +960,9 @@ function syncArtworkFormat() {
   const heading = document.querySelector('.story-mobile-context h1');
   const ratio = document.querySelector('.story-mobile-context > span');
   if (heading) heading.textContent = label;
-  if (ratio) ratio.textContent = encarte ? '1:1 · Quadrado' : `${feed ? '4:5' : '9:16'} · Vertical`;
+  if (ratio) ratio.textContent = encarte ? '3:4 · Vertical' : `${feed ? '4:5' : '9:16'} · Vertical`;
   const intro = document.querySelector('.story-mobile-export-intro p');
-  if (intro) intro.textContent = `Baixe a imagem em PNG ou o vídeo animado de 15 segundos em MP4. ${label} ${encarte ? 'quadrado' : 'vertical'} ${dimensions}.`;
+  if (intro) intro.textContent = `Baixe a imagem em PNG ou o vídeo animado de 15 segundos em MP4. ${label} vertical ${dimensions}.`;
   if (elements.convertFormatLabel) elements.convertFormatLabel.textContent = `Converter para ${otherArtworkFormat(formatName) === 'stories' ? 'Stories' : 'Feed'}`;
 }
 
@@ -1222,21 +1220,23 @@ function drawDetailsCard(context, product, price, target = 'details') {
     supportingLines,
   } = layout;
 
-  context.save();
-  context.shadowColor = 'rgba(7, 49, 48, 0.19)';
-  context.shadowBlur = descriptionWidth * 0.045;
-  context.shadowOffsetY = descriptionWidth * 0.026;
-  context.fillStyle = '#ffffff';
-  drawRoundedRect(
-    context,
-    descriptionX,
-    layout.y,
-    descriptionWidth,
-    layout.descriptionHeight,
-    Math.min(descriptionWidth * 0.055, descriptionWidth * 0.14),
-  );
-  context.fill();
-  context.restore();
+  if (formatName !== 'encarte') {
+    context.save();
+    context.shadowColor = 'rgba(7, 49, 48, 0.19)';
+    context.shadowBlur = descriptionWidth * 0.045;
+    context.shadowOffsetY = descriptionWidth * 0.026;
+    context.fillStyle = '#ffffff';
+    drawRoundedRect(
+      context,
+      descriptionX,
+      layout.y,
+      descriptionWidth,
+      layout.compact ? layout.cardHeight : layout.descriptionHeight,
+      Math.min(descriptionWidth * 0.055, descriptionWidth * 0.14),
+    );
+    context.fill();
+    context.restore();
+  }
 
   context.save();
   context.fillStyle = '#0b2b33';
@@ -1251,7 +1251,7 @@ function drawDetailsCard(context, product, price, target = 'details') {
   context.fillStyle = '#5f7379';
   context.font = `700 ${layout.subtitleFontSize}px Arial, sans-serif`;
   const supportingY = firstLineY
-    + ((lines.length - 1) * layout.lineHeight)
+    + ((layout.titleLineCount - 1) * layout.lineHeight)
     + (layout.nameFontSize / 2)
     + layout.detailGap
     + (layout.subtitleFontSize / 2);
@@ -1285,7 +1285,7 @@ function drawDetailsCard(context, product, price, target = 'details') {
     priceWidth = context.measureText(displayedPrice).width;
   }
 
-  const badgeWidth = Math.min(
+  const badgeWidth = layout.compact ? descriptionWidth : Math.min(
     maxBadgeWidth,
     (horizontalPadding * 2) + currencyWidth + contentGap + priceWidth,
   );
@@ -1299,7 +1299,9 @@ function drawDetailsCard(context, product, price, target = 'details') {
   context.textBaseline = 'middle';
   context.textAlign = 'left';
   context.font = `800 ${currencyFontSize}px Arial, sans-serif`;
-  const currencyX = badgeX + horizontalPadding;
+  const currencyX = layout.compact
+    ? badgeX + (badgeWidth - currencyWidth - contentGap - priceWidth) / 2
+    : badgeX + horizontalPadding;
   context.fillText('R$', currencyX, layout.priceY + (layout.priceHeight / 2));
   context.font = `900 ${priceFontSize}px Arial, sans-serif`;
   context.fillText(
@@ -1352,6 +1354,10 @@ function drawPlaceholder(context) {
 }
 
 function drawProductImage(context, image, bounds) {
+  if (formatName === 'encarte') {
+    context.drawImage(image, bounds.x, bounds.y, bounds.width, bounds.height);
+    return;
+  }
   // Use artwork pixels so the shadow scales with the product in preview and exports.
   const size = Math.min(bounds.width, bounds.height);
   const blur = size * 0.025;
@@ -1392,6 +1398,22 @@ function getCompositionLayers() {
       draw: (context) => drawDetailsCard(context, product, hasPrice(target) ? getPriceForDetailsTarget(target) : '', target),
     });
   });
+  if (formatName === 'encarte') {
+    const frames = layers.filter(layer => layer.kind === 'product').map(product => {
+      const details = layers.find(layer => layer.kind === 'details' && layer.index === product.index);
+      const bounds = state.itemAreas?.[productTargets()[product.index]]
+        || getEncarteItemBounds(product.bounds, details?.bounds, STORY_WIDTH, STORY_HEIGHT);
+      // Image and price share a pivot; the surface stays fixed throughout the video.
+      product.animationBounds = bounds;
+      if (details) details.animationBounds = bounds;
+      const accent = state.backgroundBadgeTheme?.fill || '#0e746c';
+      return {
+        kind: 'item-surface', index: product.index, bounds, accent, compositeOperation: 'source-over',
+        draw: context => drawEncarteItemSurface(context, bounds, accent),
+      };
+    });
+    layers.unshift(...frames);
+  }
   const textBounds = getFreeTextBox();
   if (textBounds) {
     layers.push({
@@ -1611,8 +1633,8 @@ function syncProductEditor() {
     ['free-text', freeTextVisible],
   ].filter(([, visible]) => visible).map(([target]) => target);
   visibleTargets.push(...syncExtraControls());
-  if (document.body.classList.contains('is-mobile-editor') && !visibleTargets.includes(state.activeEditor)) {
-    state.activeEditor = visibleTargets[0] || null;
+  if (!visibleTargets.includes(state.activeEditor)) {
+    state.activeEditor = null;
   }
   syncPriceInputs();
   elements.positionSection.hidden = !productVisible;
@@ -1837,7 +1859,7 @@ async function renderPreviewOnce(requestId) {
     if (isMultiProductMode() && (productChanged || secondaryProductChanged || extraChanged)) {
       for (const target of productTargets()) if (getProductImage(target)) resetProductTransform(target);
       for (const target of detailTargets()) if (getDetailsProduct(target)) resetDetailsTransform(target);
-      if (allImagesReady()) applyAutoLayout({ toggle: false });
+      applyAutoLayout({ toggle: false, allowPartial: true });
     }
     drawPreviewNow();
     updateAvailability();
@@ -2014,6 +2036,7 @@ function setCompositionMode(value) {
 
 function resetProductCompositionState() {
   state.autoLayoutOrientation = null;
+  state.itemAreas = {};
   for (const slot of state.extraProducts) Object.assign(slot, { image: null, imageUrl: null, productTransform: null, detailsTransform: null, defaultProductWidth: null, defaultDetailsWidth: null });
   state.productImage = null;
   state.productImageUrl = null;
@@ -2133,24 +2156,48 @@ function addProductToResults(product) {
 }
 
 async function preselectProductFromLocation() {
-  const productId = getPreselectedProductId();
-  if (!productId) return false;
+  const ids = selectedProductIds(window.location.search, format.maxProducts || 2);
+  if (!ids.length) return false;
 
   try {
-    const product = await requestJson(`/api/products/${productId}`);
-    const isExpectedProduct = Number.isSafeInteger(product?.id) && product.id === productId;
-    if (!isExpectedProduct) return false;
+    const products = await loadSelectedProducts(ids, requestJson);
+    const product = products[0];
+    state.compositionMode = compositionModes(formatName).find(mode => COMPOSITION_COUNTS[mode] === products.length);
+    state.compositionChosen = true;
+    syncCompositionModeControls();
+    setPanelCollapsed(compositionPanel, true);
 
     state.selectedProduct = product;
     state.price = suggestedMagazinePrice(product);
-    state.secondaryProduct = null;
+    state.secondaryProduct = products[1] || null;
+    state.secondaryPrice = suggestedMagazinePrice(state.secondaryProduct);
+    state.extraProducts.forEach((slot, index) => {
+      slot.product = products[index + 2] || null;
+      slot.price = suggestedMagazinePrice(slot.product);
+    });
     syncProductPanel({ collapseWhenComplete: true });
     resetProductCompositionState();
-    addProductToResults(product);
+    products.forEach(addProductToResults);
     renderProducts();
+    if (product.revista_background) {
+      try {
+        const background = await resolveMagazineBackground(product.revista_background, formatName, state.backgrounds, requestJson);
+        if (!background) throw new Error('Fundo indisponível');
+        if (!state.backgrounds.some(item => item.url === background.url)) state.backgrounds.unshift(background);
+        state.selectedBackground = background;
+        state.backgroundChosen = true;
+        renderBackgrounds();
+        setPanelCollapsed(backgroundPanel, true);
+      } catch {
+        state.selectedBackground = null;
+        state.backgroundChosen = false;
+        renderBackgrounds();
+        setStatus('Não foi possível carregar o fundo da revista. Escolha um fundo para continuar.', true);
+      }
+    }
     return true;
   } catch {
-    // An invalid, missing, or inaccessible product keeps the editor in its regular empty state.
+    setStatus('Não foi possível carregar os produtos selecionados. Selecione os produtos novamente para continuar.', true);
     return false;
   }
 }
@@ -2821,6 +2868,8 @@ function captureVideoSnapshot(canvases) {
   canvases.push(background.canvas);
   drawImageCover(background.context, state.backgroundImage, 0, 0, STORY_WIDTH, STORY_HEIGHT);
   const layers = getCompositionLayers().map(({ draw, ...layer }) => {
+    // Surfaces stay vector-based, avoiding an extra full-size canvas per item.
+    if (layer.kind === 'item-surface') return layer;
     const { canvas, context } = createExportCanvas();
     canvases.push(canvas);
     // Rasterize synchronously, before awaiting the encoder or allowing edits.
@@ -2828,7 +2877,10 @@ function captureVideoSnapshot(canvases) {
     draw(context);
     return { ...layer, canvas };
   });
-  return { width: STORY_WIDTH, height: STORY_HEIGHT, background: background.canvas, layers };
+  return {
+    width: STORY_WIDTH, height: STORY_HEIGHT, background: background.canvas, layers,
+    format: formatName, itemCount: layers.filter(layer => layer.kind === 'product').length,
+  };
 }
 
 async function downloadStoryVideo() {
@@ -2884,7 +2936,9 @@ async function downloadStoryVideo() {
     elements.videoDownloadLink.download = filename;
     elements.videoDownloadLink.hidden = false;
     elements.videoDownloadLink.click();
-    resultMessage = 'MP4 pronto: 15 segundos, com animações de entrada e saída. Se o download não iniciar, use o link abaixo.';
+    resultMessage = formatName === 'encarte'
+      ? 'MP4 pronto: 15 segundos, destacando cada produto em sequência. Se o download não iniciar, use o link abaixo.'
+      : 'MP4 pronto: 15 segundos, com animações de entrada e saída. Se o download não iniciar, use o link abaixo.';
   } catch (error) {
     if (controller.signal.aborted || error.name === 'AbortError') {
       resultMessage = 'Exportação cancelada. Sua arte continua disponível no editor.';
@@ -3145,7 +3199,10 @@ function bindEvents() {
 
   document.addEventListener('pointerdown', (event) => {
     if (event.target.closest?.('[data-edit-target]')) return;
-    if (document.body.classList.contains('is-mobile-editor')) return;
+    if (document.body.classList.contains('is-mobile-editor')
+      && !event.target.closest?.('.story-stage')) return;
+    mobileCanvasSelection = null;
+    lastCanvasTap = null;
     setActiveEditor();
   });
 
@@ -3237,6 +3294,12 @@ function bindEvents() {
   elements.zoom.addEventListener('input', () => setPreviewZoom(elements.zoom.value));
   elements.zoomOut.addEventListener('click', () => setPreviewZoom(state.previewZoom - Number(elements.zoom.step)));
   elements.zoomIn.addEventListener('click', () => setPreviewZoom(state.previewZoom + Number(elements.zoom.step)));
+  elements.stage.addEventListener('wheel', (event) => {
+    if (!event.deltaY) return;
+    event.preventDefault();
+    const step = Number(elements.zoom.step) || 5;
+    setPreviewZoom(state.previewZoom - Math.sign(event.deltaY) * step);
+  }, { passive: false });
   elements.thirdsGridToggle.addEventListener('click', () => {
     setThirdsGridVisible(!state.thirdsGridVisible);
   });

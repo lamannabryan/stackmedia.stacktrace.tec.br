@@ -1,6 +1,8 @@
-import { PRODUCT_LIMIT, addProduct, removeProduct, moveProduct, canContinue } from './model.js';
+import { PRODUCT_LIMIT, PRODUCT_MINIMUM, addProduct, removeProduct, moveProduct, canContinue } from './model.js';
 import { INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_DURATION, drawIndoorFrame } from './renderer.js';
+import { sampleThemeColor } from './palette.js';
 import { bindPriceInput } from '../stories/price-input.js';
+import { selectedProductIds, loadSelectedProducts } from '../magazines/selection.js';
 
 const byId = (id) => document.getElementById(`indoor-${id}`);
 const ui = Object.fromEntries([
@@ -74,15 +76,15 @@ function syncMobileControls() {
   if (state.step === 'products') {
     const reviewing = state.productView === 'selection';
     ui['mobile-back'].textContent = reviewing ? '← Catálogo' : 'Buscar';
-    ui['mobile-next'].textContent = reviewing ? 'Escolher fundo →' : 'Revisar seleção →';
+    ui['mobile-next'].textContent = reviewing ? 'Preços e ordem →' : 'Revisar seleção →';
     ui['mobile-next'].disabled = reviewing ? !complete : !count;
-    ui['mobile-hint'].textContent = complete ? '5 de 5 · Confira a ordem e os preços opcionais.'
-      : `${count} de 5 selecionados · Faltam ${PRODUCT_LIMIT - count}.`;
+    ui['mobile-hint'].textContent = complete ? `${count} de 5 · Confira a ordem e os preços.`
+      : `Selecione de ${PRODUCT_MINIMUM} a ${PRODUCT_LIMIT} produtos · ${count} selecionado${count === 1 ? '' : 's'}.`;
   } else if (state.step === 'pricing') {
-    ui['mobile-back'].textContent = '? Produtos';
-    ui['mobile-next'].textContent = 'Escolher fundo ?';
+    ui['mobile-back'].textContent = '← Produtos';
+    ui['mobile-next'].textContent = 'Escolher fundo →';
     ui['mobile-next'].disabled = !complete;
-    ui['mobile-hint'].textContent = 'Ajuste os pre?os opcionais e a ordem.';
+    ui['mobile-hint'].textContent = 'Ajuste os preços opcionais e a ordem.';
   } else if (state.step === 'background') {
     ui['mobile-back'].textContent = '← Produtos';
     ui['mobile-next'].textContent = 'Conferir vídeo →';
@@ -109,10 +111,10 @@ function showProductView(view, { focus = true } = {}) {
 }
 
 function selectionStatus() {
-  if (state.step === 'pricing') { status('Use as setas para ordenar os produtos e informe os pre?os opcionais.'); return; }
-  const remaining = PRODUCT_LIMIT - state.selection.length;
+  if (state.step === 'pricing') { status('Use as setas para ordenar os produtos e informe os preços opcionais.'); return; }
+  const remaining = Math.max(0, PRODUCT_MINIMUM - state.selection.length);
   status(remaining ? `Escolha mais ${remaining} ${remaining === 1 ? 'produto' : 'produtos'} para completar o vídeo.`
-    : 'Os cinco produtos estão selecionados. Continue para configurar pre?os e ordem.');
+    : `${state.selection.length} produtos selecionados. Continue para configurar preços e ordem ou adicione até 5 produtos.`);
 }
 
 function syncControls() {
@@ -164,7 +166,7 @@ function updateSelection(next) {
 function renderSelected() {
   ui['selection-count'].textContent = `${state.selection.length} / ${PRODUCT_LIMIT}`;
   ui.selected.replaceChildren();
-  for (let index = 0; index < PRODUCT_LIMIT; index += 1) {
+  for (let index = 0; index < (state.step === 'pricing' ? state.selection.length : PRODUCT_LIMIT); index += 1) {
     const entry = state.selection[index];
     const row = element('li', entry ? '' : 'indoor-slot-empty');
     row.append(element('span', 'indoor-slot', String(index + 1)));
@@ -306,7 +308,7 @@ function renderBackgrounds() {
     ui.backgrounds.append(card);
   }
   if (!state.backgrounds.length) ui.backgrounds.append(element('p', 'indoor-empty', state.backgroundsLoading
-    ? 'Carregando fundos…' : 'Ainda não há fundos para TV Indoor. Assim que forem disponibilizados, clique em Atualizar fundos.'));
+    ? 'Carregando fundos…' : 'Ainda não há fundos para TV. Assim que forem disponibilizados, clique em Atualizar fundos.'));
   ui.backgrounds.setAttribute('aria-busy', String(state.backgroundsLoading));
   ui['reload-backgrounds'].hidden = state.backgroundsLoading;
   syncControls();
@@ -327,7 +329,7 @@ async function loadBackgrounds() {
       invalidatePreview();
     }
     if (state.step === 'background') status(state.backgrounds.length
-      ? 'Escolha o fundo para sua campanha.' : 'Aguardando a disponibilização dos fundos para TV Indoor.');
+      ? 'Escolha o fundo para sua campanha.' : 'Aguardando a disponibilização dos fundos para TV.');
   } catch (error) {
     if (state.step === 'background') status(error.name === 'AbortError'
       ? 'O carregamento dos fundos demorou demais. Tente atualizar a lista.' : error.message, true);
@@ -402,18 +404,21 @@ async function preparePreview() {
     if (!context) throw new Error('Este navegador não conseguiu abrir a prévia. Tente novamente no Chrome ou Edge.');
     const [background, ...loaded] = await Promise.all([loadImage(backgroundUrl), ...selected.map((entry) => loadImage(entry.product.imagem_local_url))]);
     if (state.previewVersion !== version || state.step !== 'preview') return;
-    state.snapshot = { background, products: selected.map((entry, index) => ({ ...entry, image: loaded[index] })) };
+    state.snapshot = { background, themeColor: sampleThemeColor(background), products: selected.map((entry, index) => ({ ...entry, image: loaded[index] })) };
     state.seconds = 0;
     selected.forEach((entry, index) => {
       const node = button('', () => {
         pause();
-        state.seconds = index * INDOOR_DURATION / PRODUCT_LIMIT;
+        state.seconds = index * INDOOR_DURATION / selected.length;
         paint();
       });
       node.setAttribute('aria-label', `Ver produto ${index + 1}: ${entry.product.nome}`);
-      node.append(thumbnail(entry.product.imagem_local_url), element('span', '', `${index + 1} · ${index * 3}–${(index + 1) * 3} s`));
+      const slot = INDOOR_DURATION / selected.length;
+      const time = value => value.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+      node.append(thumbnail(entry.product.imagem_local_url), element('span', '', `${index + 1} · ${time(index * slot)}–${time((index + 1) * slot)} s`));
       ui.scenes.append(node);
     });
+    byId('sequence-summary').textContent = `${selected.length} produtos · ${(INDOOR_DURATION / selected.length).toLocaleString('pt-BR')} s por produto`;
     paint();
     ui['preview-loading'].hidden = true;
     status('Prévia pronta. Reproduza o vídeo e baixe o MP4 quando estiver tudo certo.');
@@ -437,8 +442,8 @@ function goTo(step) {
   state.step = step;
   for (const name of ['products', 'background', 'preview']) byId(`${name}-panel`).hidden = name !== (step === 'pricing' ? 'products' : step);
   byId('products-panel').classList.toggle('is-pricing', step === 'pricing');
-  byId('selected-heading').textContent = step === 'pricing' ? 'Pre?os e ordem' : 'Produtos selecionados';
-  ui.continue.textContent = step === 'pricing' ? 'Escolher fundo ?' : 'Pre?os e ordem ?';
+  byId('selected-heading').textContent = step === 'pricing' ? 'Preços e ordem' : 'Produtos selecionados';
+  ui.continue.textContent = step === 'pricing' ? 'Escolher fundo →' : 'Preços e ordem →';
   renderSelected();
   syncControls();
   const heading = byId(step === 'pricing' || (step === 'products' && mobileViewport.matches && state.productView === 'selection')
@@ -448,7 +453,7 @@ function goTo(step) {
   if (step === 'products' || step === 'pricing') selectionStatus();
   else if (step === 'background') {
     status(state.backgroundsLoaded && !state.backgrounds.length
-      ? 'Aguardando a disponibilização dos fundos para TV Indoor.' : 'Escolha o fundo para sua campanha.');
+      ? 'Aguardando a disponibilização dos fundos para TV.' : 'Escolha o fundo para sua campanha.');
     if (!state.backgroundsLoaded) void loadBackgrounds();
   } else void preparePreview();
 }
@@ -485,7 +490,7 @@ async function download() {
     if (controller.signal.aborted) return;
     state.downloadUrl = URL.createObjectURL(blob);
     ui['download-link'].href = state.downloadUrl;
-    ui['download-link'].download = `stackmedia-indoor-h-${new Date().toISOString().replace(/[:.]/g, '-')}.mp4`;
+    ui['download-link'].download = `stackmedia-tv-${new Date().toISOString().replace(/[:.]/g, '-')}.mp4`;
     ui['download-link'].hidden = false;
     ui['download-link'].click();
     status('Vídeo pronto! Se o download não começar, use Baixar vídeo novamente.', false, ui['export-status']);
@@ -570,5 +575,19 @@ window.addEventListener('pagehide', () => {
   state.exportController?.abort();
   clearDownload();
 });
-renderSelected();
-void loadProducts();
+async function initialize() {
+  renderSelected();
+  await loadProducts();
+  const ids = selectedProductIds(window.location.search);
+  if (!ids.length) return;
+  try {
+    const products = await loadSelectedProducts(ids, fetchJson);
+    const selection = products.reduce((items, product) => addProduct(items, product), []);
+    if (selection.length !== products.length) throw new Error('Um dos produtos selecionados está sem imagem. Revise a seleção.');
+    updateSelection(selection);
+    if (canContinue(selection)) goTo('pricing');
+  } catch (error) {
+    status(error.message, true);
+  }
+}
+void initialize();

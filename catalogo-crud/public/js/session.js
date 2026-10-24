@@ -1,18 +1,24 @@
 import { mountHeader } from './header.js';
 const headerActions = mountHeader();
 let session;
-export const sessionReady = fetch('/api/auth/me', { cache: 'no-store' }).then(async (response) => {
+async function readSession() {
+  const response = await fetch('/api/auth/me', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
   if (!response.ok) {
     if (response.status === 401) location.replace(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
     throw new Error('Não foi possível verificar sua sessão. Atualize a página.');
   }
-  session = await response.json();
+  return response.json();
+}
+export const sessionReady = readSession().then((current) => {
+  session = current;
   document.documentElement.dataset.userRole = session.user.role;
   return session;
 });
 
 export async function apiFetch(url, options = {}) {
-  const current = await sessionReady;
+  await sessionReady;
+  if (restoringSession) await restoringSession;
+  const current = session;
   const headers = new Headers(options.headers);
   if (!['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase())) headers.set('X-CSRF-Token', current.csrfToken);
   const response = await fetch(url, { ...options, headers });
@@ -67,4 +73,18 @@ sessionReady.then(showAccount).catch((error) => {
   const message = document.createElement('p'); message.className = 'session-error';
   message.setAttribute('role', 'alert'); message.textContent = error.message; document.body.prepend(message);
 });
-window.addEventListener('pageshow', (event) => { if (event.persisted) location.reload(); });
+// Retomar uma página preservada não exige uma nova navegação do PWA.
+// Revalide a autenticação e o CSRF; recarregue somente se a identidade mudou.
+let restoringSession;
+window.addEventListener('pageshow', (event) => {
+  if (!event.persisted || restoringSession) return;
+  restoringSession = sessionReady.then(readSession).then((current) => {
+    if (current.user.id !== session.user.id || current.user.role !== session.user.role) {
+      location.reload();
+      return;
+    }
+    session = current;
+  }).catch((error) => {
+    console.warn('Não foi possível revalidar a sessão na retomada.', error);
+  }).finally(() => { restoringSession = null; });
+});

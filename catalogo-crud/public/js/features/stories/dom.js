@@ -35,6 +35,7 @@ export function getStoriesEditorElements(root = document) {
     autoLayoutStatus: root.querySelector('#story-auto-layout-status'),
     canvas: root.querySelector('#story-preview-canvas'),
     canvasWrap: root.querySelector('#story-canvas-wrap'),
+    stage: root.querySelector('.story-stage'),
     interactionLayer: root.querySelector('#story-interaction-layer'),
     rightSidebar: root.querySelector('.story-control-sidebar-right'),
     thirdsGrid: root.querySelector('#story-thirds-grid'),

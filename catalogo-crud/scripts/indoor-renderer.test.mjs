@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_DURATION, INDOOR_PRODUCT_COUNT,
-  getCarouselState, drawIndoorFrame,
+  getCarouselState, getProductMotion, drawIndoorFrame,
 } from '../public/js/features/indoor/renderer.js';
 
 function mockContext() {
@@ -32,14 +32,20 @@ function mockContext() {
       calls.push({ type: 'text', text, x, y, width: this.measureText(text).width, font: this.font, offsetX: this.offsetX });
     },
     drawImage(...args) { calls.push({ type: 'image', args, offsetX: this.offsetX }); },
+    rotate(angle) { calls.push({ type: 'rotate', angle }); },
+    scale(x, y) { calls.push({ type: 'scale', x, y }); },
+    ellipse() {},
+    stroke() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    createRadialGradient() { return { addColorStop() {} }; },
     fillRect(...args) { calls.push({ type: 'fillRect', args }); },
     rect(...args) { calls.push({ type: 'clipRect', args }); },
     beginPath() {},
-    moveTo() {},
+    moveTo(x, y) { this.pathStart = [x, y]; },
     lineTo() {},
     quadraticCurveTo() {},
     closePath() {},
-    fill() {},
+    fill() { calls.push({ type: 'fill', color: this.fillStyle, start: this.pathStart }); },
     clip() {},
     assertBalanced() { assert.equal(stack.length, 0); },
   };
@@ -115,8 +121,10 @@ test('background cover crops without distortion and product contain fits the saf
   assert.ok(Math.abs(sw / sh - dw / dh) < 1e-10);
   const [, x, y, width, height] = images[1].args;
   assert.equal(width / height, 40);
-  assert.ok(x >= 600 && y >= 120 && x + width <= 1140 && y + height <= 960);
-  assert.deepEqual(context.calls.find((call) => call.type === 'clipRect').args, [576, 84, 1280, 912]);
+  assert.equal(x, -width / 2, 'product rotates around its center');
+  assert.equal(y, -height / 2);
+  assert.ok(width <= 480 && height <= 740, 'leave room for rotation and floating');
+  assert.deepEqual(context.calls.find((call) => call.type === 'clipRect').args, [316, 84, 1280, 912]);
   context.assertBalanced();
 });
 
@@ -134,7 +142,7 @@ test('long names, descriptions, manufacturer and prices remain inside the detail
   for (const call of textCalls) {
     assert.ok(call.text.length < 100);
     assert.ok(call.width <= 572);
-    assert.ok(call.x >= 1224 && call.x + call.width <= 1796);
+    assert.ok(call.x >= 964 && call.x + call.width <= 1536);
     assert.ok(call.y >= 276 && call.y + Number(call.font.match(/([\d.]+)px/)[1]) <= 860);
   }
   context.assertBalanced();
@@ -149,14 +157,13 @@ test('price is optional and no preview controls or timing labels are painted', (
   assert.deepEqual(texts, ['VidaMix', 'Produto 1', 'Conteúdo da embalagem']);
 });
 
-test('stationary and sliding offers are clipped clear of the actual templates campaign marks', () => {
+test('stationary and sliding offers stay within the centered content viewport', () => {
   for (const seconds of [0, 2.825, 5.825, 11.9, 14.9999]) {
     const context = mockContext();
     drawIndoorFrame(context, snapshot(), seconds);
     const clipIndex = context.calls.findIndex((call) => call.type === 'clipRect');
     const clip = context.calls[clipIndex].args;
-    assert.deepEqual(clip, [576, 84, 1280, 912]);
-    assert.ok(clip[0] > 545, 'reserve the widest left-side campaign logo');
+    assert.deepEqual(clip, [316, 84, 1280, 912]);
     assert.ok(clipIndex > 0, 'paint the fixed background before restricting moving content');
     for (const [index, call] of context.calls.entries()) {
       if (call.type === 'text' || (call.type === 'image' && call.args[0].id !== 'background')) {
@@ -167,10 +174,10 @@ test('stationary and sliding offers are clipped clear of the actual templates ca
   }
 });
 
-test('renderer requires exactly five entries and does not mutate the snapshot', () => {
-  for (const products of [[], Array(4).fill({}), Array(6).fill({}), [null, {}, {}, {}, {}]]) {
+test('renderer requires two to five entries and does not mutate the snapshot', () => {
+  for (const products of [[], [{}], Array(6).fill({}), [null, {}, {}, {}, {}]]) {
     const context = mockContext();
-    assert.throws(() => drawIndoorFrame(context, snapshot({ products }), 0), /exatamente 5 produtos/);
+    assert.throws(() => drawIndoorFrame(context, snapshot({ products }), 0), /2 a 5 produtos/);
     assert.equal(context.calls.length, 0);
     context.assertBalanced();
   }
@@ -180,6 +187,27 @@ test('renderer requires exactly five entries and does not mutate the snapshot', 
   assert.deepEqual(input, original);
 });
 
+test('TV distributes its 450 frames among every selected product and loops without an empty slide', () => {
+  for (const count of [2, 3, 4, 5]) {
+    const input = snapshot();
+    input.products = input.products.slice(0, count);
+    const visits = Array(count).fill(0);
+    for (let frame = 0; frame < 450; frame++) {
+      const state = getCarouselState(frame / 30, count);
+      visits[state.index]++;
+      assert.ok(state.slides.every(slide => slide.index >= 0 && slide.index < count));
+    }
+    assert.ok(visits.every(frames => Math.abs(frames - 450 / count) <= 1));
+    assert.deepEqual(getCarouselState(15, count), getCarouselState(0, count));
+    for (let index = 0; index < count; index++) {
+      const state = drawIndoorFrame(mockContext(), input, index * 15 / count + .1);
+      assert.equal(state.index, index);
+    }
+    const lastTransition = getCarouselState(14.9, count);
+    assert.equal(lastTransition.slides.at(-1).index, 0);
+  }
+});
+
 test('renderer restores all canvas state when drawing fails', () => {
   const context = mockContext();
   context.fillText = () => { throw new Error('draw failure'); };
@@ -187,4 +215,33 @@ test('renderer restores all canvas state when drawing fails', () => {
   assert.equal(context.globalAlpha, 0.4);
   assert.equal(context.shadowBlur, 8);
   context.assertBalanced();
+});
+
+test('product layers animate deterministically, settle separately and alternate movement', () => {
+  const early = getProductMotion(0.35, 0);
+  const settled = getProductMotion(1, 0);
+  assert.ok(early.title > early.subtitle && early.subtitle > early.price);
+  assert.ok(early.imageScale < settled.imageScale);
+  assert.equal(settled.price, 1);
+  assert.equal(settled.cardX, 0);
+  assert.notEqual(getProductMotion(2, 0).imageY, settled.imageY);
+  assert.equal(getProductMotion(0.35, 1).imageRotation, -early.imageRotation);
+  assert.deepEqual(getProductMotion(2, 3), getProductMotion(2, 3));
+  for (const key of Object.keys(early)) {
+    assert.ok(Math.abs(getProductMotion(0.35 - 1e-7)[key] - early[key]) < 1e-5, `${key} stays continuous at the slot boundary`);
+  }
+});
+
+test('progress uses the selected theme, fills each product segment and resets on loop', () => {
+  const input = snapshot({ themeColor: '#d82b6a' });
+  const progress = seconds => {
+    const context = mockContext();
+    drawIndoorFrame(context, input, seconds);
+    return context.calls.filter(call => call.type === 'fill' && call.color === input.themeColor && call.start[1] === 972);
+  };
+  assert.equal(progress(0).length, 0);
+  assert.equal(progress(1.5).length, 1);
+  assert.equal(progress(4.5).length, 2);
+  assert.equal(progress(14.9).length, 5);
+  assert.deepEqual(progress(15), progress(0));
 });

@@ -27,7 +27,7 @@ test('background thumbnails and artwork are bounded, cached on disk, versioned a
   const { fetch } = await testSession(database, origin);
   const cache = path.join(directory, 'background-cache');
   try {
-    for (const [format, width, height] of [['story', 1080, 1920], ['feed', 1080, 1350], ['encarte', 1080, 1080], ['indoor', 1920, 1080]]) {
+    for (const [format, width, height] of [['story', 1080, 1920], ['feed', 1080, 1350], ['encarte', 1080, 1440], ['indoor', 1920, 1080]]) {
       const { items: [item] } = await (await fetch(`${origin}/api/${format}-backgrounds`)).json();
       const responses = await Promise.all(Array.from({ length: 4 }, () => fetch(origin + item.thumbnail_url)));
       const data = await Promise.all(responses.map((response) => response.arrayBuffer().then(Buffer.from)));

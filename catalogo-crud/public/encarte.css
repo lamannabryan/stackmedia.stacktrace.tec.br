@@ -1,6 +1,6 @@
-/* Square artwork uses the same controls and responsive editor as Feed. */
+/* Portrait artwork uses the same controls and responsive editor as Feed. */
 .encarte-page {
-  --artwork-aspect-ratio: 1 / 1;
-  --artwork-width-ratio: 1;
+  --artwork-aspect-ratio: 3 / 4;
+  --artwork-width-ratio: 0.75;
 }
-.encarte-page .story-background-option img { aspect-ratio: 1 / 1; }
+.encarte-page .story-background-option img { aspect-ratio: 3 / 4; }

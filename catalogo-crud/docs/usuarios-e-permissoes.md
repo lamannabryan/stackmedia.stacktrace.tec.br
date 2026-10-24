@@ -5,7 +5,7 @@ O _stackmedia exige login por e-mail e senha para acessar o catálogo, os editor
 | Recurso | Administrador | Cliente |
 | --- | --- | --- |
 | Consultar catálogo e detalhes dos produtos | Sim | Sim |
-| Usar código de barras, Stories, Feed e TV Indoor | Sim | Sim |
+| Usar código de barras, Stories, Feed e TV | Sim | Sim |
 | Criar e exportar artes | Sim | Sim |
 | Ver os destaques de parceiros na central | Sim | Sim |
 | Cadastrar, editar e excluir produtos | Sim | Não |

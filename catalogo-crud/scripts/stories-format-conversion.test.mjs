@@ -11,8 +11,8 @@ test('converts both directions without mutating the source or stretching product
     const result = convertArtworkTransforms(input, source, target);
     const from = getArtworkFormat(source), to = getArtworkFormat(target);
     const scale = Math.min(to.width / from.width, (to.height - to.safeTop - to.safeBottom) / (from.height - from.safeTop - from.safeBottom));
-    assert.equal(result.product.width / input.product.width, scale);
-    assert.equal(result.text.width / input.text.width, scale);
+    assert.ok(Math.abs(result.product.width / input.product.width - scale) < 1e-9);
+    assert.ok(Math.abs(result.text.width / input.text.width - scale) < 1e-9);
     assert.ok(Math.abs((result.text.y - result.product.y) - (input.text.y - input.product.y) * scale) < 1e-9);
     assert.equal(result.secondary, null);
     assert.notEqual(result.product, input.product);

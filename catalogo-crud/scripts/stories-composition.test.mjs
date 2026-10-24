@@ -117,7 +117,7 @@ test('Encarte offers all counts through five using the same editor controls as F
   for (const id of ids(feed).filter(id => id !== 'story-composition-mode-combo')) assert.ok(ids(html).includes(id), 'missing shared control ' + id);
   assert.deepEqual([...html.matchAll(/data-composition-mode="([^"]+)"/g)].map(match => match[1]), compositionModes('encarte'));
   const format = getArtworkFormat('encarte');
-  assert.equal(format.width, 1080); assert.equal(format.height, 1080);
+  assert.equal(format.width, 1080); assert.equal(format.height, 1440);
   assert.equal(format.backgroundsUrl, '/api/encarte-backgrounds');
 });
 
@@ -134,10 +134,10 @@ for (const [mode, count] of Object.entries(COMPOSITION_COUNTS).filter(([, count]
     boxes.push(...Object.values(layout.details).map(transform => ({ ...transform, height: 142 })));
     for (const [index, box] of boxes.entries()) {
       assert.ok(box.x >= 0 && box.y >= format.safeTop && box.width > 0 && box.height > 0);
-      assert.ok(box.x + box.width <= 1080.01 && box.y + box.height <= 1080.01);
+      assert.ok(box.x + box.width <= 1080.01 && box.y + box.height <= format.height + .01);
       for (const other of boxes.slice(index + 1)) assert.ok(box.x + box.width <= other.x + .01 || other.x + other.width <= box.x + .01 || box.y + box.height <= other.y + .01 || other.y + other.height <= box.y + .01);
     }
-    assert.equal(createAutoLayout({ mode, orientation, format, products, measureDetails, freeTextBox: { x: 0, y: 0, width: 1080, height: 1080 } }), null);
+    assert.equal(createAutoLayout({ mode, orientation, format, products, measureDetails, freeTextBox: { x: 0, y: 0, width: format.width, height: format.height } }), null);
   });
 }
 
@@ -188,6 +188,10 @@ test('five-product Encarte gives images two tall rows with centered offers below
   assert.equal(new Set(boxes.map(box => box.y)).size, 2);
   assert.equal(boxes[0].y, boxes[2].y);
   assert.equal(boxes[3].y, boxes[4].y);
-  for (const box of boxes) assert.ok(box.width / (2 / 3) >= 270, 'product height must use the space freed by the compact offers');
+  for (const box of boxes) {
+    assert.ok(box.width / (2 / 3) >= 240, 'products remain readable inside the campaign safe area');
+    assert.ok(box.y >= 326, 'products stay below the campaign header');
+  }
+  for (const card of Object.values(layout.details)) assert.ok(card.y + 142 <= 1440 * 0.84 + .01, 'offers stay above the diagonal footer');
   assert.ok(boxes[3].x > boxes[0].x, 'last row is centered');
 });

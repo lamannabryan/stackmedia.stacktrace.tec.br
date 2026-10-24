@@ -62,12 +62,12 @@ Backgrounds Feed:    ./camas-feed
 Backgrounds Indoor:  ./camas-indoor-h
 ```
 
-Os fundos de TV Indoor horizontal usam `camas-indoor-h`. Se estiverem em outra
+Os fundos de TV horizontal usam `camas-indoor-h`. Se estiverem em outra
 pasta, configure `INDOOR_BACKGROUNDS_ROOT` nas variáveis do Plesk. O caminho pode
 ser absoluto ou relativo à pasta da aplicação. A pasta pode ficar vazia durante
 a preparação dos fundos; a API continuará respondendo com uma lista vazia.
 Para exportar um vídeo Indoor, copie os fundos para essa pasta e selecione um
-fundo no editor, além dos cinco produtos.
+fundo no editor, além de selecionar de dois a cinco produtos.
 
 ## Troca das imagens de produtos para WebP
 

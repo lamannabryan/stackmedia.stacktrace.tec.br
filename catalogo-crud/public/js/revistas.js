@@ -3,6 +3,48 @@ const $ = id => document.getElementById(id);
 const money = value => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 const monthLabel = month => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${month}-01T12:00:00Z`));
 let preview = null, uploaded = null, current = null, working = false;
+const backgroundChoices = new Map();
+const backgroundKey = value => value ? JSON.stringify({ format: value.format, arquivo: value.arquivo }) : '';
+function selectedBackground(id) { return $(id).value ? JSON.parse($(id).value) : null; }
+function showBackgroundPreview(id) {
+  const image = $(`${id}-preview`), background = backgroundChoices.get($(id).value);
+  image.hidden = !background;
+  if (background) image.src = background.thumbnail_url || background.url;
+  else image.removeAttribute('src');
+}
+function setBackgroundSelection(id, background) {
+  const key = backgroundKey(background);
+  if (key && ![...$(id).options].some(option => option.value === key)) {
+    $(id).add(new Option(`${background.arquivo} (indisponível)`, key));
+  }
+  $(id).value = key;
+  showBackgroundPreview(id);
+}
+async function loadBackgroundChoices() {
+  const formats = [['stories', 'Stories', '/api/story-backgrounds'], ['feed', 'Feed', '/api/feed-backgrounds'], ['encarte', 'Encarte', '/api/encarte-backgrounds']];
+  const results = await Promise.allSettled(formats.map(async ([format, label, url]) => {
+    const { items } = await request(url);
+    return { format, label, items };
+  }));
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue;
+    const { format, label, items } = result.value;
+    for (const id of ['magazine-background', 'edit-background']) {
+      const group = document.createElement('optgroup'); group.label = label;
+      for (const item of items) {
+        const key = backgroundKey({ format, arquivo: item.arquivo });
+        backgroundChoices.set(key, item);
+        group.append(new Option(item.nome, key));
+      }
+      $(id).append(group);
+    }
+  }
+  $('magazine-background-status').textContent = results.some(result => result.status === 'rejected')
+    ? 'Alguns fundos não puderam ser carregados. Recarregue a página para tentar novamente.' : '';
+}
+for (const id of ['magazine-background', 'edit-background']) {
+  $(id).addEventListener('change', () => { $(id).dataset.changed = 'true'; showBackgroundPreview(id); });
+}
 const el = (tag, text, className) => {
   const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node;
 };
@@ -64,6 +106,7 @@ function renderPreview() {
   $('replace-confirm').checked = false;
   $('confirm-import').textContent = preview.existing ? 'Substituir revista deste mês' : 'Importar revista';
   if (!$('magazine-title').value.trim() && preview.month) $('magazine-title').value = preview.existing?.title || `Revista de ${monthLabel(preview.month)}`;
+  if (!$('magazine-background').dataset.changed) setBackgroundSelection('magazine-background', preview.existing?.background);
   updateConfirmation();
 }
 $('magazine-file').addEventListener('change', clearPreview);
@@ -92,8 +135,9 @@ $('confirm-import').addEventListener('click', async () => {
   if (!title) { $('magazine-status').textContent = 'Informe um título para a revista.'; $('magazine-title').focus(); return; }
   busy(true); $('magazine-status').textContent = 'Importando revista…';
   try {
-    const saved = await request('/api/revistas/import', json('POST', { file: uploaded, title, ignoreErrors: $('ignore-errors').checked, expectedRevision: preview.existing?.revision ?? null }));
+    const saved = await request('/api/revistas/import', json('POST', { file: uploaded, title, background: selectedBackground('magazine-background'), ignoreErrors: $('ignore-errors').checked, expectedRevision: preview.existing?.revision ?? null }));
     clearPreview(); $('magazine-import-form').reset(); await load();
+    delete $('magazine-background').dataset.changed; showBackgroundPreview('magazine-background');
     $('magazine-status').textContent = `Revista de ${monthLabel(saved.month)} importada com ${saved.total} produto(s).${saved.skippedRows ? ` ${saved.skippedRows} linha(s) com erro ignorada(s).` : ''}`;
   } catch (error) { $('magazine-status').textContent = error.message; }
   finally { busy(false); }
@@ -114,6 +158,7 @@ async function openMagazine(id) {
     current = await request(`/api/revistas/${id}`);
     $('magazine-dialog-title').textContent = monthLabel(current.month);
     $('edit-title').value = current.title; $('edit-active').checked = current.active;
+    setBackgroundSelection('edit-background', current.background);
     $('magazine-edit-status').textContent = ''; $('magazine-product-search').value = ''; renderProducts(); $('magazine-dialog').showModal();
   } catch (error) { $('magazine-status').textContent = error.message; }
   finally { busy(false); }
@@ -123,7 +168,7 @@ $('magazine-product-search').addEventListener('input', renderProducts);
 $('magazine-edit-form').addEventListener('submit', async event => {
   event.preventDefault(); if (working || !current) return; busy(true);
   try {
-    current = await request(`/api/revistas/${current.id}`, json('PUT', { title: $('edit-title').value, active: $('edit-active').checked, revision: current.revision }));
+    current = await request(`/api/revistas/${current.id}`, json('PUT', { title: $('edit-title').value, active: $('edit-active').checked, background: selectedBackground('edit-background'), revision: current.revision }));
     await load(); $('magazine-edit-status').textContent = 'Alterações salvas.';
   } catch (error) { $('magazine-edit-status').textContent = error.message; }
   finally { busy(false); }
@@ -143,6 +188,6 @@ $('reload-magazines').addEventListener('click', async () => {
 });
 sessionReady.then(async ({ user }) => {
   if (user.role !== 'administrador') { location.replace('/'); return; }
-  busy(true); try { await load(); $('magazine-status').textContent = ''; }
+  busy(true); try { await Promise.all([load(), loadBackgroundChoices()]); $('magazine-status').textContent = ''; }
   finally { busy(false); }
 }).catch(error => { $('magazine-status').textContent = error.message; });

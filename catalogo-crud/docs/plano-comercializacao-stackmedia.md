@@ -72,7 +72,7 @@ Não foram executados testes da aplicação, testes de carga, auditoria de depen
 | Stories e Feed | Canvas, produto individual, dois produtos/combos, preço, texto, fundos e ajustes | Há uma jornada de criação especializada em ofertas. |
 | Conversão de formato | Conversão entre Stories e Feed com preservação da composição editável | Reduz trabalho repetido; deve entrar na demonstração. |
 | Exportação | PNG e MP4; vídeo de 15 segundos codificado no navegador | Reduz processamento no servidor, mas depende do aparelho e do suporte a H.264. |
-| TV Indoor | Vídeo horizontal com cinco produtos | É produção de arquivo; não foi identificado gerenciamento remoto de televisores. |
+| TV | Vídeo horizontal com dois a cinco produtos | É produção de arquivo; não foi identificado gerenciamento remoto de televisores. |
 | Revistas mensais | Importação XLSX, prévia, preços sugeridos, ativação e revisão | Pode evoluir para campanhas comerciais por período e loja. |
 | Parceiros | Três posições de fabricante, logotipos e acesso ao catálogo filtrado | Útil para acordos comerciais; exposição atual é dentro da área autenticada. |
 | PWA e mobile | Instalação, interface adaptada, câmera de código de barras e tema escuro | Facilita acesso; não equivale a aplicativo nativo nem operação completa offline. |

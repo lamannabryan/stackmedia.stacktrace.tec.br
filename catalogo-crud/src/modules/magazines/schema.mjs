@@ -19,4 +19,7 @@ export function initializeMagazineSchema(database) {
     );
     CREATE INDEX IF NOT EXISTS idx_magazine_items_product ON magazine_items(product_id);
   `);
+  if (!database.prepare('PRAGMA table_info(magazines)').all().some(column => column.name === 'background')) {
+    database.exec('ALTER TABLE magazines ADD COLUMN background TEXT');
+  }
 }

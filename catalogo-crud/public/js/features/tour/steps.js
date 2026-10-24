@@ -10,7 +10,7 @@ export const tours = {
         target: '[data-tour="home-create"]',
         eyebrow: 'Seu ponto de partida',
         title: 'Uma oferta começa aqui',
-        description: 'Crie Stories e Feed em PNG ou MP4. Para a televisão da loja, escolha Criar vídeo para TV: selecione 5 produtos e monte um carrossel animado de 15 segundos.',
+        description: 'Crie Stories e Feed em PNG ou MP4. Para a televisão da loja, escolha Criar vídeo para TV: selecione de 2 a 5 produtos e monte um carrossel animado de 15 segundos.',
         placement: 'bottom',
       },
       {
@@ -26,7 +26,7 @@ export const tours = {
         target: '[data-tour="home-formats"]',
         eyebrow: 'Explore as possibilidades',
         title: 'Escolha o formato da campanha',
-        description: 'Stories, Feed e TV Indoor aparecem em Disponível agora, com seus recursos e botões de criação. TV Indoor exporta um vídeo horizontal em 1920 × 1080.',
+        description: 'Stories, Feed e TV aparecem em Disponível agora, com seus recursos e botões de criação. TV exporta um vídeo horizontal em 1920 × 1080.',
         placement: 'bottom',
       },
     ],
@@ -137,7 +137,7 @@ tours.feed = {
 
 tours.encarte = {
   ...tours.stories,
-  description: 'Crie um Encarte quadrado com até 5 produtos e fundos próprios.',
+  description: 'Crie um Encarte vertical 3:4 com até 5 produtos e fundos próprios.',
   steps: tours.stories.steps.map(step => ({ ...step,
     description: step.description.replace('1080 × 1920', '1080 × 1080')
       .replace('1 produto, 2 produtos com descrições separadas ou um combo com descrição única', 'de 1 a 5 produtos com preços individuais'),

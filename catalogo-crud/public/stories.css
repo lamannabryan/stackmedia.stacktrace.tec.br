@@ -575,6 +575,11 @@ body.stories-page {
   cursor: grabbing;
 }
 
+.story-interaction-layer [data-edit-target]:not(.is-active) .story-resize-handle {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .story-resize-handle {
   position: absolute;
   z-index: 2;

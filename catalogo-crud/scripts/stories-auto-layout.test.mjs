@@ -262,6 +262,61 @@ test('invalid measurements and a completely occupied safe area return no layout'
 });
 
 const editorSource = await readFile(new URL('../public/js/features/stories/editor.js', import.meta.url), 'utf8');
+test('multi-product offer cards reserve equal space for short and long descriptions', () => {
+  const context = vm.createContext({
+    isMultiProductMode: () => true, detailTargets: () => ['details'],
+    MIN_DETAILS_WIDTH: 260, STORY_WIDTH: 1080, DESCRIPTION_CARD_PADDING: 24,
+    clamp: (value, min, max) => Math.max(min, Math.min(max, value)),
+    getDetailsTextMetrics: () => ({ titleLines: ['Short'], supportingLines: ['300g'], titleWidth: 50, supportingWidth: 30 }),
+    getDetailsPriceMetrics: () => ({ badgeWidth: 120 }),
+  });
+  const start = editorSource.indexOf('function getDetailsLayout(');
+  vm.runInContext(editorSource.slice(start, editorSource.indexOf('\nfunction ', start + 1)), context);
+  const short = context.getDetailsLayout({ x: 0, y: 0, width: 300 });
+  context.getDetailsTextMetrics = () => ({ titleLines: ['Long product', 'second line'], supportingLines: ['Manufacturer'], titleWidth: 240, supportingWidth: 120 });
+  const long = context.getDetailsLayout({ x: 0, y: 0, width: 300 });
+  assert.equal(short.descriptionWidth, 300);
+  assert.equal(short.cardHeight, long.cardHeight);
+  assert.equal(short.priceY, long.priceY);
+  assert.equal(short.priceY, short.descriptionHeight, 'price is joined to the description');
+});
+
+test('selecting each product applies the same reserved slots as automatic adjustment', () => {
+  const state = { compositionMode: 'five-products', autoLayoutOrientation: 'horizontal' };
+  const targets = ['product', 'product-secondary', 'product-3', 'product-4', 'product-5'];
+  const ready = new Set([targets[0]]);
+  const products = {}, details = {};
+  const context = vm.createContext({
+    state, elements: { autoLayoutStatus: { classList: { add() {}, remove() {} } }, autoLayout: {} },
+    format: getArtworkFormat('encarte'), createAutoLayout,
+    syncAutoLayoutAvailability: () => ready.size === 5, finishGesture() {},
+    productTargets: () => targets, getProductAspectRatio: () => 2 / 3,
+    getProductImage: target => ready.has(target),
+    getDetailsProduct: target => ready.has(target.replace('details', 'product')),
+    getFreeTextLayout: () => null,
+    getDetailsLayout: ({ width }) => ({ descriptionWidth: width, cardHeight: 142 }),
+    setDefaultProductWidth() {}, setDefaultDetailsWidth() {},
+    setProductTransform: (target, transform) => { products[target] = transform; },
+    setDetailsTransform: (target, transform) => { details[target] = transform; },
+    clampProductTransform: t => t, clampDetailsTransform: t => t,
+    isTwoProductsMode: () => true, syncProductEditor() {}, schedulePreview() {}, updateAvailability() {}, setStatus() {},
+  });
+  const start = editorSource.indexOf('function applyAutoLayout(');
+  vm.runInContext(editorSource.slice(start, editorSource.indexOf('\nfunction ', start + 1)), context);
+  assert.equal(context.applyAutoLayout({ toggle: false, allowPartial: true }), true);
+  assert.equal(Object.keys(products).length, 1);
+  assert.equal(Object.keys(details).length, 1);
+  const first = structuredClone(products.product);
+  for (const target of targets.slice(1)) {
+    ready.add(target);
+    assert.equal(context.applyAutoLayout({ toggle: false, allowPartial: true }), true);
+    assert.deepEqual(products.product, first, 'existing product stays in its reserved slot');
+  }
+  const initial = structuredClone({ products, details });
+  context.applyAutoLayout({ toggle: false });
+  assert.deepEqual({ products, details }, initial);
+});
+
 test('auto-adjust clicks alternate vertical/horizontal and failed layouts preserve the last arrangement', () => {
   const state = createStoriesEditorState();
   const status = { textContent: '', classList: { add() {}, remove() {} } };
@@ -270,6 +325,7 @@ test('auto-adjust clicks alternate vertical/horizontal and failed layouts preser
     format: getArtworkFormat('feed'), createAutoLayout,
     syncAutoLayoutAvailability: () => true, finishGesture() {},
     productTargets: () => ['product'], getProductAspectRatio: () => 0.7,
+    getProductImage: () => ({}), getDetailsProduct: () => ({}),
     getFreeTextLayout: () => null,
     getDetailsLayout: ({ width }) => ({ descriptionWidth: width * 0.88, cardHeight: width * 0.38 }),
     setDefaultProductWidth() {}, setDefaultDetailsWidth() {},

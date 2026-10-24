@@ -30,6 +30,10 @@
       <div><p class="users-eyebrow">Nova edição</p><h2 id="import-title">Importar revista</h2><p>Preencha EAN, PREÇO e VIGENCIA no modelo. Use um único mês/ano por arquivo, por exemplo <strong>10/2026</strong>.</p><p class="magazine-help">XLSX de até 4 MB e 2.000 produtos. Os EANs precisam existir e estar ativos no catálogo. Os preços do catálogo não são alterados.</p></div>
       <form id="magazine-import-form"><fieldset id="magazine-import-fields" disabled>
         <label>Título da revista<input id="magazine-title" maxlength="120" placeholder="Ex.: Ofertas de outubro" /></label>
+        <label>Fundo da revista<select id="magazine-background"><option value="">Sem fundo definido</option></select></label>
+        <img id="magazine-background-preview" class="magazine-background-preview" alt="Prévia do fundo da revista" hidden />
+        <p class="magazine-help">Ao abrir um produto em Stories, Feed ou Encarte, este fundo será aplicado. Se existir uma versão com o mesmo nome no formato escolhido, ela será usada.</p>
+        <p id="magazine-background-status" class="magazine-help" role="status"></p>
         <label>Planilha XLSX<input id="magazine-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required /></label>
         <button class="users-primary" type="submit">Analisar planilha</button>
       </fieldset></form>
@@ -53,6 +57,8 @@
     <div class="users-heading"><h2 id="magazine-dialog-title">Revista</h2><button id="close-magazine" type="button" aria-label="Fechar revista">×</button></div>
     <form id="magazine-edit-form"><fieldset id="magazine-edit-fields">
       <label>Título<input id="edit-title" maxlength="120" required /></label>
+      <label>Fundo da revista<select id="edit-background"><option value="">Sem fundo definido</option></select></label>
+      <img id="edit-background-preview" class="magazine-background-preview" alt="Prévia do fundo da revista" hidden />
       <label class="users-check"><input id="edit-active" type="checkbox" /> Destacar esta revista durante o mês de vigência</label>
       <p class="magazine-help">Para atualizar produtos ou preços, importe outra planilha com a mesma vigência. Revistas futuras ficam agendadas; revistas passadas saem do destaque automaticamente.</p>
       <button class="users-primary" type="submit">Salvar alterações</button>

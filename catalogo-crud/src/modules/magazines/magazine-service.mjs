@@ -1,5 +1,16 @@
 import { badRequest, HttpError } from '../../http/errors.mjs';
 import { readMagazineUpload } from './import-xlsx.mjs';
+import { isSupportedStoryBackground } from '../stories/background-service.mjs';
+
+function backgroundValue(value) {
+  if (value === null) return null;
+  if (!value || !['stories', 'feed', 'encarte'].includes(value.format)
+      || typeof value.arquivo !== 'string' || value.arquivo.length > 255
+      || /[\\/%:\x00-\x1f]/.test(value.arquivo) || !isSupportedStoryBackground(value.arquivo)) {
+    throw badRequest('Selecione um fundo válido para a revista.');
+  }
+  return JSON.stringify({ format: value.format, arquivo: value.arquivo });
+}
 
 const monthPattern = /^(20\d{2}|2100)-(0[1-9]|1[0-2])$/;
 export function currentMagazineMonth(date = new Date()) {
@@ -42,7 +53,7 @@ export function createMagazineService({ database, productService }) {
   }
   function serialize(row) {
     const current = currentMagazineMonth();
-    return { ...row, active: Boolean(row.active), status: !row.active ? 'Pausada' : row.month < current ? 'Encerrada' : row.month > current ? 'Agendada' : 'Em destaque',
+    return { ...row, background: row.background ? JSON.parse(row.background) : null, active: Boolean(row.active), status: !row.active ? 'Pausada' : row.month < current ? 'Encerrada' : row.month > current ? 'Agendada' : 'Em destaque',
       total: database.prepare('SELECT COUNT(*) AS total FROM magazine_items WHERE magazine_id = ?').get(row.id).total };
   }
   function list() { return database.prepare('SELECT * FROM magazines ORDER BY month DESC').all().map(serialize); }
@@ -94,13 +105,14 @@ export function createMagazineService({ database, productService }) {
       const existing = result.existing;
       if ((existing?.revision ?? null) !== (payload.expectedRevision ?? null)) throw new HttpError(409, 'A revista mudou desde a prévia. Analise a planilha novamente antes de substituir.');
       const title = titleValue(payload.title), timestamp = new Date().toISOString();
+      const background = backgroundValue(payload.background === undefined ? existing?.background ?? null : payload.background);
       let id;
       if (existing) {
         id = existing.id;
-        database.prepare('UPDATE magazines SET title = ?, revision = revision + 1, updated_at = ? WHERE id = ?').run(title, timestamp, id);
+        database.prepare('UPDATE magazines SET title = ?, background = ?, revision = revision + 1, updated_at = ? WHERE id = ?').run(title, background, timestamp, id);
         database.prepare('DELETE FROM magazine_items WHERE magazine_id = ?').run(id);
       } else {
-        id = Number(database.prepare('INSERT INTO magazines (month, title, created_at, updated_at) VALUES (?, ?, ?, ?)').run(result.month, title, timestamp, timestamp).lastInsertRowid);
+        id = Number(database.prepare('INSERT INTO magazines (month, title, background, created_at, updated_at) VALUES (?, ?, ?, ?, ?)').run(result.month, title, background, timestamp, timestamp).lastInsertRowid);
       }
       const insert = database.prepare('INSERT INTO magazine_items (magazine_id, product_id, ean, price_cents, position) VALUES (?, ?, ?, ?, ?)');
       result.items.forEach((item, index) => insert.run(id, item.product_id, item.ean, item.price_cents, index));
@@ -113,8 +125,9 @@ export function createMagazineService({ database, productService }) {
     if (current.revision !== payload?.revision) throw new HttpError(409, 'A revista foi alterada. Atualize a lista.');
     const title = titleValue(payload.title);
     if (typeof payload.active !== 'boolean') throw badRequest('Informe a situação da revista.');
-    database.prepare('UPDATE magazines SET title = ?, active = ?, revision = revision + 1, updated_at = ? WHERE id = ?')
-      .run(title, Number(payload.active), new Date().toISOString(), current.id);
+    const background = payload.background === undefined ? current.background : backgroundValue(payload.background);
+    database.prepare('UPDATE magazines SET title = ?, active = ?, background = ?, revision = revision + 1, updated_at = ? WHERE id = ?')
+      .run(title, Number(payload.active), background, new Date().toISOString(), current.id);
     return details(id);
   }
   function remove(id, revision) {

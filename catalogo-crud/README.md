@@ -1,7 +1,7 @@
 # _stackmedia
 
 Plataforma local para organizar produtos e criar artes comerciais em Stories,
-Feed e vídeos para TV Indoor. Sua estrutura permite incluir novos formatos, documentos
+Feed e vídeos para TV. Sua estrutura permite incluir novos formatos, documentos
 de frente e verso, exportações e integrações de publicação sem concentrar toda
 a lógica em uma única página ou arquivo.
 
@@ -84,7 +84,9 @@ inválidos e gravação no banco temporário.
 
 Administradores acessam **Engrenagem → Gerenciar revistas** (`/revistas`). Cada mês/ano tem uma revista com título, situação e uma lista de produtos do catálogo com preços sugeridos. É possível consultar e buscar os produtos, renomear, pausar/ativar, substituir a lista por nova importação e excluir a edição sem excluir os produtos do catálogo.
 
-A página inicial exibe a revista ativa do mês atual no carrossel e em uma seção ao final da página, para todos os usuários autenticados. A seção inclui busca por nome/EAN, preços sugeridos e atalhos de Story/Feed com o produto selecionado. Ao selecionar um produto da revista atual, Stories, Feed e TV Indoor preenchem seu preço sugerido automaticamente, permitindo edição manual. Isso também funciona ao abrir pelo catálogo ou código de barras. Composições de dois produtos recebem preços individuais; o valor total de um combo é informado manualmente. Edições pausadas, futuras, encerradas ou sem produtos ativos não aparecem nesses destaques nem fornecem preços automáticos.
+A página inicial exibe a revista ativa do mês atual no carrossel e em uma seção ao final da página, para todos os usuários autenticados. Cada card oferece Stories e Feed. É possível selecionar de dois a cinco produtos para abrir Encarte ou TV com a seleção na mesma ordem e os preços importados da revista. A seleção permanece ao buscar, filtrar e trocar de página; os produtos sem imagem não podem ser incluídos. Os botões de criação em grupo ficam disponíveis a partir de dois itens.
+
+Stories, Feed, Encarte e TV preenchem os preços sugeridos da revista vigente automaticamente, permitindo edição manual. Isso também funciona ao abrir pelo catálogo ou código de barras. Composições com vários produtos recebem preços individuais; o valor total de um combo é informado manualmente. Edições pausadas, futuras, encerradas ou sem produtos ativos não aparecem nesses destaques nem fornecem preços automáticos.
 
 1. Baixe o modelo XLSX na página (arquivo distribuído em `resources/modelo-revista.xlsx`).
 2. Preencha `EAN`, `PREÇO` e `VIGENCIA` a partir da linha 2 da aba `Revista`. Preserve os zeros iniciais do EAN. Use preço numérico ou decimal brasileiro e vigência `MM/AAAA` (datas Excel também são aceitas). Use somente um mês por arquivo.
@@ -179,8 +181,8 @@ manifesto, ícones, rotas, autenticação, fallback offline e fluxo de instalaç
 Até 900 px, as telas usam cabeçalhos compactos, áreas de toque maiores e os
 espaçamentos seguros do aparelho. A central e o catálogo têm navegação inferior
 com **Início**, **Catálogo**, **Stories** e **Feed**. Os cartões, botões e links de
-TV Indoor ficam ocultos no mobile; a rota direta continua disponível. No desktop,
-os acessos a TV Indoor permanecem. O modo instalado é identificado tanto por
+TV ficam ocultos no mobile; a rota direta continua disponível. No desktop,
+os acessos a TV permanecem. O modo instalado é identificado tanto por
 `display-mode: standalone` quanto pelo sinal do Safari no iOS.
 
 O catálogo oferece filtros recolhíveis, categorias com rolagem horizontal,
@@ -291,7 +293,7 @@ para obter as novas URLs; mantenha os PNG até validar os arquivos convertidos.
 | `/catalogo` | Gestão de produtos |
 | `/artes/stories` | Editor de artes para Stories |
 | `/artes/feed` | Editor de artes para Feed vertical (4:5) |
-| `/artes/indoor-h` | Carrossel de cinco produtos para TV Indoor horizontal (16:9) |
+| `/artes/indoor-h` | Carrossel de 2 a 5 produtos para TV horizontal (16:9) |
 | `/api/*` | API JSON interna |
 
 Os caminhos antigos de arquivos continuam funcionando como compatibilidade, mas
@@ -320,16 +322,16 @@ A configuração em `public/js/features/stories/formats.js` separa dimensões,
 automático respeita a área mais curta do Feed. `npm run verify` verifica os dois
 formatos, incluindo geometria, dimensões do MP4, controles das páginas e fundos.
 
-## Vídeo para TV Indoor
+## Vídeo para TV
 
-Abra **TV Indoor** na central ou acesse `/artes/indoor-h`. O editor cria um
-carrossel horizontal de **1920 × 1080 pixels**, com **cinco produtos** em um
-vídeo MP4 de **15 segundos**, sem áudio. Cada produto ocupa um intervalo de
-três segundos, com transições horizontais suaves; a última transição volta ao
+Abra **TV** na central ou acesse `/artes/indoor-h`. O editor cria um
+carrossel horizontal de **1920 × 1080 pixels**, com **dois a cinco produtos** em um
+vídeo MP4 de **15 segundos**, sem áudio. O tempo é dividido igualmente entre os
+produtos, com transições horizontais suaves; a última transição volta ao
 primeiro produto para permitir a reprodução em repetição na televisão.
 
-1. Busque e selecione cinco produtos diferentes do catálogo, todos com imagem
-   local disponível. A seleção mostra quantos produtos faltam para continuar.
+1. Busque e selecione de dois a cinco produtos diferentes do catálogo, todos com imagem
+   local disponível. É possível continuar a partir de dois produtos.
 2. Reordene os produtos na sequência desejada e informe os preços de cada
    oferta, se quiser. Os preços são opcionais e acompanham o produto quando
    sua posição muda. Remova um item para substituí-lo por outro.
@@ -521,7 +523,7 @@ public/
   index.html             central de criação
   catalogo.html          catálogo
   stories.html           editor de Stories
-  indoor-h.html          seleção e vídeo para TV Indoor
+  indoor-h.html          seleção e vídeo para TV
   js/features/stories/   estado, DOM e comportamento do editor
   js/features/indoor/    seleção, prévia e carrossel horizontal
   js/features/tour/      tour contextual e progresso no navegador
@@ -644,7 +646,7 @@ permanecer exclusivamente no servidor. O banco local em `data/` não é
 versionado.
 # Gerenciamento de backgrounds
 
-Administradores podem acessar **Conta → Gerenciar backgrounds** (`/backgrounds`) para adicionar e remover fundos de Stories, Feed e Indoor horizontal. O upload aceita imagens estáticas PNG, JPG e WebP de até 10 MB e 40 megapixels, com nome e prévia antes do envio. A remoção pede confirmação e retira o fundo da lista compartilhada do formato selecionado. Reabra o editor para atualizar os fundos em abas já abertas.
+Administradores podem acessar **Conta → Gerenciar backgrounds** (`/backgrounds`) para adicionar e remover fundos de Stories, Feed e TV. O upload aceita imagens estáticas PNG, JPG e WebP de até 10 MB e 40 megapixels, com nome e prévia antes do envio. A remoção pede confirmação e retira o fundo da lista compartilhada do formato selecionado. Reabra o editor para atualizar os fundos em abas já abertas.
 
 Os arquivos são validados e convertidos para WebP nas pastas de backgrounds configuradas, junto dos fundos existentes. Essas pastas precisam ter permissão de escrita e devem ser incluídas no backup persistente. As rotas POST e DELETE de `/api/story-backgrounds`, `/api/feed-backgrounds` e `/api/indoor-backgrounds` exigem administrador e token CSRF; a exclusão usa `/:filename`.
 

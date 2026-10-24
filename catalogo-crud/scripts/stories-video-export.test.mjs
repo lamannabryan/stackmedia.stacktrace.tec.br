@@ -229,13 +229,13 @@ test('exports Feed MP4 at 1080 × 1350 with 450 frames and 15 seconds', async (t
   assertReleased(recordings);
 });
 
-test('exports Encarte MP4 at 1080 × 1080 with 450 frames and 15 seconds', async (t) => {
+test('exports Encarte MP4 at 1080 × 1440 with 450 frames and 15 seconds', async (t) => {
   const recordings = installEncoder(t);
-  const canvas = { width: 1080, height: 1080 };
+  const canvas = { width: 1080, height: 1440 };
   const blob = await exportStoryVideo(options({ canvas }));
   assert.equal(blob.type, 'video/mp4');
   assert.equal(recordings.frames.length, 450);
-  assert.equal(recordings.supportChecks[0].height, 1080);
+  assert.equal(recordings.supportChecks[0].height, 1440);
   assert.ok(recordings.frames.every((frame) => frame.canvas === canvas));
   const buffer = Buffer.from(await blob.arrayBuffer());
   const boxes = readBoxes(buffer);
@@ -243,7 +243,7 @@ test('exports Encarte MP4 at 1080 × 1080 with 450 frames and 15 seconds', async
   assert.equal(boxDuration(buffer, findBox(boxes, 'mdhd')), 15);
   const header = findBox(boxes, 'tkhd');
   assert.equal(buffer.readUInt32BE(header.end - 8) / 65536, 1080);
-  assert.equal(buffer.readUInt32BE(header.end - 4) / 65536, 1080);
+  assert.equal(buffer.readUInt32BE(header.end - 4) / 65536, 1440);
   assertReleased(recordings);
 });
 
@@ -374,7 +374,7 @@ test('does not return an incomplete MP4 when a frame is missing', async (t) => {
   assertReleased(recordings);
 });
 
-for (const height of [1920, 1350, 1080]) {
+for (const height of [1920, 1350, 1440, 1080]) {
   test(`normalizes WebKit microsecond rounding for 1080 × ${height} without altering MP4 timing`, async (t) => {
     const recordings = installEncoder(t, {
       outputTimestamp: (input) => input.timestamp + (input.index % 3 - 1),

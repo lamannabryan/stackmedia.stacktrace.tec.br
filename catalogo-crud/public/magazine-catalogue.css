@@ -2231,3 +2231,52 @@ body:scope {
 }
 
 }
+
+/* Selection belongs to the magazine; ordinary catalogue cards keep their actions. */
+#revista-atual .product-card-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#revista-atual .product-card.is-selected { border-color: var(--azul); box-shadow: 0 0 0 2px var(--azul); }
+#revista-atual .product-image { position: relative; }
+#revista-atual .magazine-product-select {
+  position: absolute; top: 8px; left: 8px; z-index: 1;
+  display: flex; align-items: center; gap: 7px; min-height: 36px;
+  padding: 5px 9px; border-radius: 9px; background: var(--color-panel);
+  color: var(--color-text); font-size: .75rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 2px 10px #00000012;
+}
+#revista-atual .magazine-product-select input {
+  width: 18px; height: 18px; min-height: 0; margin: 0; padding: 0;
+  accent-color: var(--azul); cursor: inherit;
+}
+#revista-atual .magazine-product-select:has(input:disabled) { opacity: .65; cursor: default; }
+#revista-atual .magazine-selection-bar {
+  position: sticky; top: 76px; z-index: 5;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 0 0 20px; padding: 16px; border: 1px solid var(--color-line);
+  border-radius: 16px; background: var(--color-panel); box-shadow: 0 6px 24px #00000012;
+}
+#revista-atual .magazine-selection-info { flex: 1 1 230px; }
+#revista-atual .magazine-selection-info strong { font-size: 1rem; }
+#revista-atual .magazine-selection-info p { margin: 4px 0 0; color: var(--color-muted); font-size: .8rem; }
+#revista-atual .magazine-selection-actions { display: flex; gap: 8px; }
+#revista-atual .magazine-selection-actions button {
+  min-height: 44px; padding: 10px 18px; border: 0; border-radius: 10px;
+  font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
+}
+#revista-atual .magazine-selection-create { color: #fff; background: var(--azul); }
+#revista-atual .magazine-selection-clear { color: var(--color-text); background: var(--color-surface); }
+#revista-atual .magazine-selection-actions button:disabled { opacity: .45; cursor: default; }
+#revista-atual .magazine-selected-items { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; }
+#revista-atual .magazine-selected-items[hidden] { display: none; }
+#revista-atual .magazine-selected-item {
+  max-width: 220px; min-height: 36px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  padding: 6px 10px; border: 0; border-radius: 8px; cursor: pointer;
+  color: var(--color-text); background: var(--color-blue-soft); font: inherit; font-size: .75rem;
+}
+@media (max-width: 560px) {
+  #revista-atual .magazine-selection-bar { position: static; gap: 10px; padding: 12px; }
+  #revista-atual .magazine-selection-actions { width: 100%; }
+  #revista-atual .magazine-selection-actions button { flex: 1; padding-inline: 8px; }
+  #revista-atual .product-image { padding-top: 44px; }
+  #revista-atual .magazine-product-select { left: 5px; top: 5px; padding-inline: 5px; gap: 4px; font-size: .62rem; }
+  #revista-atual .magazine-selected-item { max-width: 100%; }
+}

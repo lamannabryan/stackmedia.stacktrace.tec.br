@@ -133,7 +133,26 @@
 [data-theme="dark"] .app-navigation-progress::after { background: #e25d1f; }
 
 [data-theme="dark"] .pwa-launch { color: var(--color-ink); background: var(--color-page); }
-[data-theme="dark"] .pwa-launch-track { background: #3a332e; }
+
+/* Abertura da tela inicial: véu escuro com os mesmos halos da marca. */
+[data-theme="dark"] .home-intro { background-color: #121110; }
+[data-theme="dark"] .home-intro-canvas {
+  background-image:
+    radial-gradient(38% 44% at 24% 26%, rgba(226, 26, 89, 0.30), transparent 70%),
+    radial-gradient(42% 48% at 78% 74%, rgba(226, 93, 31, 0.24), transparent 72%),
+    radial-gradient(62% 58% at 50% 50%, rgba(21, 21, 21, 0.55), transparent 78%),
+    conic-gradient(from 205deg at 52% 46%,
+      rgba(226, 26, 89, 0.12), rgba(226, 93, 31, 0.10), rgba(252, 248, 244, 0.03), rgba(226, 26, 89, 0.12));
+}
+[data-theme="dark"] .home-intro-blob.is-ink {
+  background: radial-gradient(circle at 50% 50%, rgba(252, 248, 244, 0.10), transparent 66%);
+}
+[data-theme="dark"] .home-intro-vignette {
+  background:
+    radial-gradient(118% 96% at 50% 44%, transparent 32%, rgba(0, 0, 0, 0.52) 100%),
+    linear-gradient(180deg, rgba(21, 21, 21, 0.6), transparent 26%, transparent 74%, rgba(21, 21, 21, 0.65));
+}
+[data-theme="dark"] .home-intro-caption { color: rgba(252, 248, 244, 0.66); }
 
 [data-theme="dark"] :is(.product-dialog, .dialog-footer, .ean-scanner-dialog, .empty-state,
   .product-open-button, .story-transform-actions .ghost-button, .indoor-scenes button) {

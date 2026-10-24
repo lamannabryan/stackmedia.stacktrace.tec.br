@@ -191,3 +191,77 @@ h2[tabindex="-1"]:focus { outline: none; }
 .is-pricing .indoor-products-layout { grid-template-columns: minmax(0, 1fr); max-width: 780px; margin-inline: auto; }
 .is-pricing .indoor-selection { position: static; }
 @media (max-width: 600px) { .indoor-steps button { flex-direction: column; gap: 4px; } }
+
+/* A viewport-sized workspace: lists scroll, navigation and actions stay visible. */
+body.tv-editor { display: flex; flex-direction: column; height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
+.tv-editor > .site-header { flex: none; }
+.tv-editor .site-header-inner { padding-block: 10px; }
+.tv-editor .indoor-main { display: flex; flex: 1; flex-direction: column; min-height: 0; width: min(1600px, calc(100% - 40px)); margin: 12px auto 16px; }
+.tv-editor .indoor-heading { flex: none; }
+.tv-editor .indoor-heading p { margin: 0; }
+.tv-editor .indoor-format { padding: 5px 10px; }
+.tv-editor .indoor-steps { flex: none; gap: 6px; margin: 12px 0 0; padding: 5px; border: 1px solid var(--glass-line); border-radius: 16px; background: var(--glass-surface); }
+.tv-editor .indoor-steps button { min-height: 50px; padding: 8px 14px; border-color: transparent; background: transparent; box-shadow: none; }
+.tv-editor .indoor-steps [aria-current="step"] { color: var(--azul); border-color: var(--glass-selected-line); background: var(--glass-selected); box-shadow: inset 0 -2px var(--azul); }
+.tv-editor .indoor-status { flex: none; margin: 8px 2px; min-height: 20px; line-height: 1.4; }
+.tv-editor .indoor-main > section { flex: 1; min-height: 0; }
+.tv-editor #indoor-products-panel { display: flex; flex-direction: column; }
+.tv-editor .indoor-products-layout, .tv-editor .indoor-preview-layout { flex: 1; height: 100%; min-height: 0; gap: 14px; align-items: stretch; }
+.tv-editor .indoor-products-layout { grid-template-columns: minmax(0, 1fr) minmax(300px, .42fr); }
+.tv-editor .indoor-panel { padding: 16px; border-radius: 16px; min-height: 0; }
+.tv-editor #indoor-catalog, .tv-editor .indoor-selection, .tv-editor #indoor-background-panel, .tv-editor .indoor-preview-layout > .indoor-panel:first-child { display: flex; flex-direction: column; overflow: hidden; }
+.tv-editor .indoor-selection { position: static; }
+.tv-editor .indoor-panel > h2, .tv-editor .indoor-panel-heading, .tv-editor .indoor-help, .tv-editor .indoor-search, .tv-editor .indoor-button { flex-shrink: 0; }
+.tv-editor .indoor-help { margin-block: 6px; }
+.tv-editor .indoor-search { margin: 8px 0 4px; gap: 4px; }
+.tv-editor .indoor-search input { min-height: 44px; }
+.tv-editor .indoor-results, .tv-editor .indoor-selected, .tv-editor .indoor-backgrounds { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; align-content: start; padding: 3px 6px 3px 3px; }
+.tv-editor .indoor-results { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+.tv-editor .indoor-product { padding: 10px; }
+.tv-editor .indoor-product img { height: 90px; }
+.tv-editor #indoor-load-more { margin-top: 8px; }
+.tv-editor .indoor-selected { margin: 10px 0; gap: 8px; }
+.tv-editor .indoor-selected li { padding: 9px; }
+.tv-editor .indoor-selected .indoor-slot-empty { min-height: 52px; }
+.tv-editor .is-pricing .indoor-products-layout { width: 100%; max-width: 1100px; grid-template-columns: minmax(0, 1fr); }
+.tv-editor .is-pricing .indoor-selected li { align-items: center; grid-template-columns: 28px 56px minmax(0, 1fr); }
+.tv-editor .is-pricing .indoor-selected li > div { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(160px, .4fr); gap: 20px; align-items: center; }
+.tv-editor .indoor-backgrounds { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin: 12px 0; }
+.tv-editor .indoor-background-option { align-self: start; }
+.tv-editor .indoor-footer { flex: none; margin-top: 8px; }
+.tv-editor .indoor-preview-layout { grid-template-columns: minmax(0, 1fr) 280px; }
+.tv-editor .indoor-canvas-wrap { display: flex; flex: 1; min-height: 0; align-items: center; justify-content: center; margin: 10px 0; background: var(--color-surface); }
+.tv-editor #indoor-canvas { width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.tv-editor .indoor-playback, .tv-editor .indoor-scenes { flex: none; }
+.tv-editor .indoor-scenes { margin-top: 10px; }
+.tv-editor .indoor-scenes button { padding: 5px; }
+.tv-editor .indoor-scenes img { height: 30px; margin-bottom: 3px; }
+.tv-editor .indoor-export { overflow: auto; overscroll-behavior: contain; }
+.tv-editor .indoor-specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; margin: 8px 0; }
+.tv-editor .indoor-specs div { padding: 7px 0; }
+.tv-editor .indoor-export-edit { padding-top: 6px; }
+
+@media (max-width: 900px) {
+  .tv-editor .site-header-inner { padding-block: 3px; }
+  .tv-editor .indoor-main { width: calc(100% - 24px); margin: 8px auto; }
+  .tv-editor .indoor-heading { display: none; }
+  .tv-editor .indoor-steps { margin-top: 0; gap: 2px; padding: 3px; border-radius: 12px; }
+  .tv-editor .indoor-steps button { padding: 6px 3px; min-height: 48px; gap: 4px; font-size: .68rem; }
+  .tv-editor .indoor-status { margin-block: 6px; font-size: .7rem; }
+  .tv-editor .indoor-product-views { position: static; flex: none; margin-bottom: 8px; padding: 3px; }
+  .tv-editor .indoor-product-views button { min-height: 36px; padding: 4px; }
+  .tv-editor .indoor-products-layout { grid-template-columns: minmax(0, 1fr); }
+  .tv-editor .indoor-panel { padding: 12px; }
+  .tv-editor #indoor-catalog > .indoor-help:not(#indoor-results-summary) { display: none; }
+  .tv-editor .indoor-results { grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); }
+  .tv-editor .is-pricing .indoor-selected li > div { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+  .tv-editor .is-pricing .indoor-price { grid-column: 1 / -1; }
+  .tv-editor .indoor-item-actions { margin: 0; }
+  .tv-editor .indoor-backgrounds { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .tv-editor #indoor-preview-panel { overflow: auto; overscroll-behavior: contain; }
+  .tv-editor .indoor-preview-layout { height: auto; display: flex; flex-direction: column; gap: 10px; }
+  .tv-editor .indoor-preview-layout > .indoor-panel { flex: none; overflow: visible; }
+  .tv-editor .indoor-canvas-wrap { flex: none; aspect-ratio: 16 / 9; }
+  .tv-editor .indoor-scenes button { min-height: 56px; }
+  .tv-editor .indoor-mobile-dock { position: static; flex: none; box-shadow: none; padding-top: 6px; }
+}

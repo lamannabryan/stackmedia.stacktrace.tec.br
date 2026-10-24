@@ -140,12 +140,13 @@ export function createProductService({ database, imagesDirectory }) {
     const product = serializeProduct(row, imagesDirectory);
     if (!product) return null;
     const offer = product.status === 'ativo' ? database.prepare(`
-      SELECT i.price_cents FROM magazine_items i JOIN magazines m ON m.id = i.magazine_id
+      SELECT i.price_cents, m.background FROM magazine_items i JOIN magazines m ON m.id = i.magazine_id
       WHERE i.product_id = ? AND m.month = ? AND m.active = 1
     `).get(product.id, currentMagazineMonth()) : null;
     const credits = database.prepare('SELECT source_name, source_page, license_url FROM product_image_credits WHERE imagem_arquivo = ?')
       .get(product.imagem_arquivo ?? null);
-    return { ...product, imagem_creditos: credits ?? null, revista_preco_centavos: offer?.price_cents ?? null };
+    return { ...product, imagem_creditos: credits ?? null, revista_preco_centavos: offer?.price_cents ?? null,
+      revista_background: offer?.background ? JSON.parse(offer.background) : null };
   };
 
   function safeLocalImagePath(value) {

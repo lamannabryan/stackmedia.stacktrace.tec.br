@@ -12,13 +12,13 @@ O fluxo principal é escolher um formato, selecionar produtos do catálogo, mont
 | --- | --- | --- | --- | --- |
 | Stories | Peças verticais para Stories e Status | 1080 × 1920 px, proporção 9:16 | Um produto, dois produtos ou combo de dois produtos | PNG ou MP4 de 15 segundos |
 | Feed | Publicações verticais para o feed das redes sociais | 1080 × 1350 px, proporção 4:5 | Um produto, dois produtos ou combo de dois produtos | PNG ou MP4 de 15 segundos |
-| TV Indoor | Ofertas para telas horizontais no estabelecimento | 1920 × 1080 px, proporção 16:9 | Cinco produtos em sequência | MP4 de 15 segundos |
+| TV | Ofertas para telas horizontais no estabelecimento | 1920 × 1080 px, proporção 16:9 | De dois a cinco produtos em sequência | MP4 de 15 segundos |
 
 Os arquivos exportados podem ser publicados nos canais desejados ou transferidos para o sistema de exibição da loja. A publicação e a reprodução ficam a cargo do usuário após o download.
 
 ## Central de criação
 
-A página inicial concentra os atalhos para criar Stories, Feed e vídeos para TV Indoor, explorar o catálogo e localizar produtos por código de barras. Cada formato apresenta suas dimensões e os recursos disponíveis.
+A página inicial concentra os atalhos para criar Stories, Feed e vídeos para TV, explorar o catálogo e localizar produtos por código de barras. Cada formato apresenta suas dimensões e os recursos disponíveis.
 
 A central também exibe os fabricantes cadastrados como parceiros em destaque. Cada parceiro pode levar diretamente à lista de seus produtos no catálogo.
 
@@ -91,13 +91,13 @@ A exportação em **MP4** gera um vídeo de 15 segundos, a 30 quadros por segund
 
 Durante a geração do MP4, o usuário pode acompanhar o progresso, cancelar e, ao finalizar, usar o link para baixar novamente o resultado.
 
-## Editor de TV Indoor
+## Editor de TV
 
-O módulo de TV Indoor cria um carrossel de ofertas para exibição em uma televisão horizontal.
+O módulo de TV cria um carrossel de ofertas para exibição em uma televisão horizontal.
 
-O processo consiste em selecionar **exatamente cinco produtos diferentes**, todos com imagem local disponível, organizar a sequência, informar preços opcionais e escolher um fundo. É possível remover e substituir itens; os preços acompanham os produtos quando a ordem muda.
+O processo consiste em selecionar **de dois a cinco produtos diferentes**, todos com imagem local disponível, organizar a sequência, informar preços opcionais e escolher um fundo. É possível remover e substituir itens; os preços acompanham os produtos quando a ordem muda.
 
-A prévia permite reproduzir a animação e conferir os momentos do vídeo pela linha do tempo e pelas cenas. Cada produto ocupa um intervalo de três segundos, com transições horizontais e retorno ao primeiro item para favorecer a reprodução em repetição.
+A prévia permite reproduzir a animação e conferir os momentos do vídeo pela linha do tempo e pelas cenas. Os 15 segundos são divididos igualmente entre os produtos, com transições horizontais e retorno ao primeiro item para favorecer a reprodução em repetição.
 
 O resultado é um MP4 de 15 segundos em Full HD, sem áudio. A composição reserva uma área à esquerda para a identidade da campanha presente no fundo. Para manter o vídeo em repetição, essa opção deve ser ativada na televisão ou no player utilizado.
 
@@ -126,7 +126,7 @@ O carrossel oferece navegação manual e pausa. Com mais de um parceiro, também
 
 A interface se adapta ao tamanho da tela. No desktop, os editores apresentam painéis de configuração ao lado da área de criação. No celular, Stories e Feed priorizam a arte e abrem os controles de fundo, produtos e oferta em diálogos.
 
-No mobile, o usuário pode mover e redimensionar os elementos diretamente na composição. A central e o catálogo oferecem navegação inferior para Início, Catálogo, Stories e Feed. Os atalhos de TV Indoor ficam ocultos nessa navegação, embora sua rota direta continue disponível.
+No mobile, o usuário pode mover e redimensionar os elementos diretamente na composição. A central e o catálogo oferecem navegação inferior para Início, Catálogo, Stories e Feed. Os atalhos de TV ficam ocultos nessa navegação, embora sua rota direta continue disponível.
 
 A aplicação também oferece:
 
@@ -173,7 +173,7 @@ As composições permanecem no estado da página durante a edição. A versão a
 | `/catalogo` | Consulta e manutenção dos produtos |
 | `/artes/stories` | Editor de Stories |
 | `/artes/feed` | Editor de Feed |
-| `/artes/indoor-h` | Editor de vídeo para TV Indoor |
+| `/artes/indoor-h` | Editor de vídeo para TV |
 | `/parceiros` | Gestão dos fabricantes em destaque |
 | `/login` | Entrada com e-mail e senha |
 | `/usuarios` | Gestão de usuários e perfis, exclusiva de administradores |

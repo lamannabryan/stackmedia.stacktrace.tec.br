@@ -12,7 +12,7 @@ const ENCODER_TIMEOUT_MS = 30000;
 // converting through seconds. Normalize only that rounding, never missing or
 // reordered frames: https://bugs.webkit.org/show_bug.cgi?id=321880
 const TIMESTAMP_ROUNDING_TOLERANCE_US = 1;
-const DIMENSIONS_MESSAGE = 'Use um canvas de 1080 × 1920 (Stories), 1080 × 1350 (Feed), 1080 × 1080 (Encarte) ou 1920 × 1080 (Indoor TV) pixels.';
+const DIMENSIONS_MESSAGE = 'Use um canvas de 1080 × 1920 (Stories), 1080 × 1350 (Feed), 1080 × 1440 (Encarte) ou 1920 × 1080 (TV) pixels.';
 const UNSUPPORTED_MESSAGE = 'Este navegador não oferece exportação MP4 em H.264. Abra o editor em uma versão atual do Chrome ou Edge com suporte a H.264.';
 
 function abortError() {
@@ -28,7 +28,7 @@ function timestampForFrame(frameIndex) {
 }
 
 function supportsDimensions(width, height) {
-  return (width === VIDEO_WIDTH && [VIDEO_HEIGHT, 1350, 1080].includes(height))
+  return (width === VIDEO_WIDTH && [VIDEO_HEIGHT, 1350, 1440, 1080].includes(height))
     || (width === 1920 && height === 1080);
 }
 
@@ -75,7 +75,7 @@ export async function getStoryVideoConfig({ signal, width = VIDEO_WIDTH, height 
 
 /**
  * Encode 450 explicitly timed frames as a real MP4/H.264 file, without audio.
- * renderFrame(seconds) paints the supplied Stories, Feed or Indoor TV canvas and may be async.
+ * renderFrame(seconds) paints the supplied Stories, Feed or TV canvas and may be async.
  * onProgress receives a fraction between 0 and 1; 1 means the MP4 is finalized.
  * The caller owns the canvas and any images/object URLs used while rendering.
  */

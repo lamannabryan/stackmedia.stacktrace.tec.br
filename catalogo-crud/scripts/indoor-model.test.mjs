@@ -21,13 +21,13 @@ test('magazine price is the editable initial price and adding another item prese
   assert.equal(second[1].price, '');
 });
 
-test('selection cannot advance until it contains five distinct products with local images', () => {
+test('selection accepts two to five distinct products with local images', () => {
   assert.equal(PRODUCT_LIMIT, 5);
   let selection = [];
   assert.equal(canContinue(selection), false);
   for (let id = 1; id <= 5; id += 1) {
     selection = addProduct(selection, product(id));
-    assert.equal(canContinue(selection), id === 5);
+    assert.equal(canContinue(selection), id >= 2);
   }
   const duplicates = completeSelection();
   duplicates[4] = { product: product(1), price: '' };
@@ -85,10 +85,11 @@ test('moving beyond the ends or requesting an invalid direction preserves every 
   assert.deepEqual(selection, completeSelection());
 });
 
-test('removing a product blocks continuing until its replacement has been selected', () => {
+test('removing a product preserves the remaining prices and requires at least two items', () => {
   const original = completeSelection();
   const removed = removeProduct(original, 3);
-  assert.equal(canContinue(removed), false);
+  assert.equal(canContinue(removed), true);
+  assert.equal(canContinue(removed.slice(0, 1)), false);
   assert.deepEqual(removed.map((entry) => entry.product.id), [1, 2, 4, 5]);
   assert.deepEqual(removed.map((entry) => entry.price), ['1,90', '2,90', '4,90', '5,90']);
   const replacement = addProduct(removed, product(6));

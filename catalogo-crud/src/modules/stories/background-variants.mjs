@@ -23,7 +23,7 @@ export async function backgroundVariant({ rootDirectory, urlPath, variant, cache
   if (!info.isFile()) throw new HttpError(404, 'Fundo não encontrado.');
   const version = fileVersion(info);
   const hash = (value) => createHash('sha256').update(value).digest('hex').slice(0, 24);
-  const prefix = `${hash(`${source}:${format}:${variant}`)}-`;
+  const prefix = `${hash(`${source}:${format}:${variant}:${format === 'encarte' ? 'portrait-v2' : 'v1'}`)}-`;
   const filename = `${prefix}${hash(version)}.webp`;
   const output = path.join(cacheDirectory, filename);
   const result = { rootDirectory: cacheDirectory, urlPath: filename, cacheVersion: version };
@@ -34,7 +34,7 @@ export async function backgroundVariant({ rootDirectory, urlPath, variant, cache
       await fs.mkdir(cacheDirectory, { recursive: true });
       const temporary = `${output}.${randomUUID()}.tmp`;
       const bounds = variant === 'thumb-v1' ? [240, 240]
-        : format === 'indoor-h' ? [1920, 1080] : format === 'encarte' ? [1080, 1080] : format === 'feed' ? [1080, 1350] : [1080, 1920];
+        : format === 'indoor-h' ? [1920, 1080] : format === 'encarte' ? [1080, 1440] : format === 'feed' ? [1080, 1350] : [1080, 1920];
       try {
         await sharp(source, { limitInputPixels: 64_000_000, sequentialRead: true })
           .rotate().resize(bounds[0], bounds[1], { fit: 'inside', withoutEnlargement: true })

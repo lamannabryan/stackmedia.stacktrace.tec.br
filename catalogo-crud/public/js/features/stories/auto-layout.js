@@ -53,9 +53,11 @@ export function createAutoLayout(options) {
   const bottomMargin = Math.max(MARGIN, safeBottom, height * (options.format?.footerRatio ?? 0.18));
   if (![width, height, safeTop, safeBottom].every(Number.isFinite)
       || width <= MARGIN * 2 || safeTop < 0 || safeBottom < 0 || height <= safeTop + bottomMargin + 24) return null;
+  const encarte = options.format?.downloadPrefix === 'encarte';
+  const sideMargin = encarte ? 40 : MARGIN;
   const SAFE_AREA = {
-    x: MARGIN, y: safeTop + 24,
-    width: width - MARGIN * 2, height: height - bottomMargin - safeTop - 24,
+    x: sideMargin, y: safeTop + 24,
+    width: width - sideMargin * 2, height: height - bottomMargin - safeTop - 24,
   };
   const maximumDetailsWidth = width - 48;
   const { mode, products, measureDetails, freeTextBox = null, orientation = 'vertical' } = options;
@@ -116,6 +118,18 @@ export function createAutoLayout(options) {
     const textScore = detailTargets.reduce((sum, target) => sum + Math.min(1, candidate.details[target].width / idealCardWidth), 0) / detailTargets.length;
     const score = productScore * (count > 2 ? 2 : 1) + textScore * (orientation === 'horizontal' ? 0.9 : 0.65);
     if (score > bestScore + EPSILON / 100) {
+      if (encarte && !candidate.itemAreas) {
+        candidate.itemAreas = {};
+        products.forEach((product, index) => {
+          const columns = orientation === 'vertical' ? count : 1;
+          const rows = orientation === 'horizontal' ? count : 1;
+          candidate.itemAreas[product.target] = {
+            x: area.x + (index % columns) * area.width / columns,
+            y: area.y + Math.floor(index / columns) * area.height / rows,
+            width: area.width / columns, height: area.height / rows,
+          };
+        });
+      }
       best = candidate;
       bestScore = score;
     }
@@ -216,26 +230,42 @@ export function createAutoLayout(options) {
   function grid(area, factor) {
     const columns = orientation === 'horizontal' ? 2 : count === 5 ? 3 : 2;
     const rows = Math.ceil(count / columns);
-    const gap = 24;
-    const cellWidth = (area.width - gap * (columns - 1)) / columns;
-    const cellHeight = (area.height - gap * (rows - 1)) / rows;
+    const gap = encarte ? 0 : 24;
+    const inset = encarte ? 14 : 0;
+    const outerWidth = (area.width - gap * (columns - 1)) / columns;
+    const outerHeight = (area.height - gap * (rows - 1)) / rows;
+    const cellWidth = outerWidth - inset * 2;
+    const cellHeight = outerHeight - inset * 2;
     const cardWidth = cellWidth * factor;
-    const candidate = { products: {}, details: {}, arrangement: 'grid' };
+    const candidate = { products: {}, details: {}, itemAreas: {}, arrangement: 'grid' };
+    const sizes = detailTargets.map(target => measure(target, cardWidth));
+    if (sizes.some(size => !size)) return;
+    const detailsHeight = Math.max(...sizes.map(size => size.height));
     for (let index = 0; index < count; index++) {
-      const size = measure(detailTargets[index], cardWidth);
+      const size = sizes[index];
       if (!size || size.height >= cellHeight) return;
       const rowCount = Math.min(columns, count - Math.floor(index / columns) * columns);
-      const x = area.x + (area.width - (rowCount * cellWidth + (rowCount - 1) * gap)) / 2
-        + (index % columns) * (cellWidth + gap);
-      const y = area.y + Math.floor(index / columns) * (cellHeight + gap);
+      // The last row spans the same total width; its contents retain the common size.
+      const slotWidth = encarte ? area.width / rowCount : outerWidth;
+      const slotX = encarte ? area.x + (index % columns) * slotWidth
+        : area.x + (area.width - (rowCount * outerWidth + (rowCount - 1) * gap)) / 2
+          + (index % columns) * (outerWidth + gap);
+      const slotY = area.y + Math.floor(index / columns) * (outerHeight + gap);
+      candidate.itemAreas[products[index].target] = { x: slotX, y: slotY, width: slotWidth, height: outerHeight };
+      const x = slotX + (slotWidth - cellWidth) / 2;
+      const y = slotY + inset;
       const horizontal = orientation === 'horizontal';
       const imageArea = { x, y, width: horizontal ? cellWidth - cardWidth - 12 : cellWidth,
-        height: horizontal ? cellHeight : cellHeight - size.height - 12 };
+        height: horizontal ? cellHeight - 24 : cellHeight - detailsHeight - 20 };
       if (imageArea.width <= 0 || imageArea.height <= 0) return;
       candidate.products[products[index].target] = fitProduct(products[index], imageArea);
+      if (horizontal) {
+        const product = candidate.products[products[index].target];
+        product.y = y + (cellHeight - product.width / products[index].aspectRatio) / 2;
+      }
       candidate.details[detailTargets[index]] = {
         x: horizontal ? x + cellWidth - cardWidth : x + (cellWidth - cardWidth) / 2,
-        y: horizontal ? y + (cellHeight - size.height) / 2 : y + cellHeight - size.height,
+        y: horizontal ? y + (cellHeight - detailsHeight) / 2 : y + cellHeight - detailsHeight,
         width: cardWidth,
       };
     }
@@ -244,7 +274,7 @@ export function createAutoLayout(options) {
 
   for (const area of availableAreas(obstacle, SAFE_AREA)) {
     if (count > 2) {
-      for (const factor of orientation === 'horizontal' ? [0.56, 0.6, 0.65] : [1, 0.95, 0.9]) grid(area, factor);
+      for (const factor of orientation === 'horizontal' ? [0.56] : [1]) grid(area, factor);
       continue;
     }
     // Remeasure each candidate: wrapping and price badges affect its height.

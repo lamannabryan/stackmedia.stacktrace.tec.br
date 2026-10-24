@@ -14,7 +14,7 @@
     "test:smoke": "node scripts/smoke.mjs",
     "test:catalogue": "node --test scripts/catalogue-loading.test.mjs scripts/catalogue-mobile.test.mjs scripts/product-images.test.mjs scripts/product-image-upload.test.mjs scripts/google-image-search.test.mjs scripts/product-ai.test.mjs scripts/image-cache.test.mjs scripts/background-variants.test.mjs",
     "test:product-import": "node --test scripts/product-import.test.mjs scripts/product-import-ui.test.mjs scripts/product-html-import.test.mjs",
-    "test:app-mobile": "node --test scripts/app-shell.test.mjs scripts/home-mobile.test.mjs scripts/barcode-*.test.mjs",
+    "test:app-mobile": "node --test scripts/app-shell.test.mjs scripts/home-mobile.test.mjs scripts/home-intro.test.mjs scripts/barcode-*.test.mjs",
     "test:tour": "node --test scripts/tour-storage.test.mjs",
     "test:theme": "node --test scripts/theme.test.mjs",
     "test:partners": "node --test scripts/partners.test.mjs",
@@ -26,7 +26,7 @@
     "test:pwa": "node --test scripts/pwa.test.mjs scripts/pwa-launch.test.mjs",
     "verify": "npm run check && npm run test:auth && npm run test:catalogue && npm run test:product-import && npm run test:app-mobile && npm run test:tour && npm run test:theme && npm run test:partners && npm run test:magazines && npm run test:stories-layout && npm run test:stories-prices && npm run test:stories-video && npm run test:stories-mobile && npm run test:indoor && npm run test:pwa && npm run test:smoke",
     "users:create-admin": "node --env-file-if-exists=.env scripts/create-admin.mjs",
-    "test:auth": "node --test scripts/auth.test.mjs",
+    "test:auth": "node --test scripts/auth.test.mjs scripts/session-client.test.mjs",
     "test:magazines": "node --test scripts/magazines.test.mjs"
   },
   "engines": {
@@ -39,5 +39,8 @@
     "jszip": "3.10.1",
     "magic-wand-tool": "1.1.7",
     "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "mariadb": "3.5.4"
   }
 }

@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   drawStoryVideoFrame,
   getStoryVideoLayerState,
+  getEncarteVideoLayerState,
   STORY_VIDEO_DURATION_SECONDS,
 } from '../public/js/features/stories/video-animation.js';
 
@@ -88,6 +89,8 @@ class FakeContext {
     this.stack = [];
     this.draws = [];
     this.clears = [];
+    this.strokes = [];
+    this.fills = [];
   }
 
   state() {
@@ -99,6 +102,9 @@ class FakeContext {
       shadowBlur: this.shadowBlur,
       shadowOffsetX: this.shadowOffsetX,
       shadowOffsetY: this.shadowOffsetY,
+      strokeStyle: this.strokeStyle,
+      lineWidth: this.lineWidth,
+      fillStyle: this.fillStyle,
       matrix: [...this.matrix],
     };
   }
@@ -115,6 +121,14 @@ class FakeContext {
     this.matrix = [a * x, b * x, c * y, d * y, e, f];
   }
   clearRect(...rectangle) { this.clears.push(rectangle); }
+  beginPath() {}
+  moveTo() {}
+  arcTo() {}
+  closePath() {}
+  rect() {}
+  fill() { this.fills.push(this.state()); }
+  fillRect(...rectangle) { this.fills.push({ rectangle, ...this.state() }); }
+  stroke() { this.strokes.push(this.state()); }
   drawImage(canvas, ...position) {
     if (canvas === this.failOn) throw new Error('paint failed');
     this.draws.push({ canvas, position, ...this.state() });
@@ -196,5 +210,92 @@ test('a painting failure still restores the caller canvas state', () => {
     assert.throws(() => drawStoryVideoFrame(context, snapshot(), 0.7), /paint failed/);
     assert.deepEqual(context.state(), initial);
     assert.equal(context.stack.length, 0);
+  }
+});
+
+test('Encarte divides all 15 seconds equally among one through five items', () => {
+  for (let count = 1; count <= 5; count++) {
+    for (let active = 0; active < count; active++) {
+      const seconds = (active + 0.5) * 15 / count;
+      for (let index = 0; index < count; index++) {
+        const product = getEncarteVideoLayerState({ kind: 'product', index }, seconds, count);
+        assert.equal(product.focus, index === active ? 1 : 0);
+        assert.equal(product.opacity, index === active ? 1 : 0.55);
+        assert.equal(product.translateX, 0);
+        assert.equal(product.scale, index === active ? 1 : 0.9);
+        assert.equal(product.translateY, 0);
+        for (const kind of ['details']) {
+          assert.deepEqual(getEncarteVideoLayerState({ kind, index }, seconds, count), product);
+        }
+      }
+    }
+    for (let frame = 0; frame <= 450; frame++) {
+      for (let index = 0; index < count; index++) {
+        const current = getEncarteVideoLayerState({ kind: 'product', index }, frame / 30, count);
+        assert.ok(current.opacity >= 0.55 && current.opacity <= 1);
+        assert.ok(current.scale >= 0.9 && current.scale <= 1);
+        assert.equal(current.translateX, 0);
+        assert.ok(Object.values(current).every(Number.isFinite));
+      }
+    }
+  }
+});
+
+test('Encarte transitions are smooth, deterministic and leave free text stationary', () => {
+  const layer = { kind: 'product', index: 1 };
+  assert.ok(getEncarteVideoLayerState(layer, 2.7, 5).focus < 1e-10);
+  assert.ok(Math.abs(getEncarteVideoLayerState(layer, 3, 5).focus - 0.5) < 1e-10);
+  assert.equal(getEncarteVideoLayerState(layer, 4, 5).focus, 1);
+  assert.ok(getEncarteVideoLayerState(layer, 6.3, 5).focus < 1e-10);
+  const middle = getEncarteVideoLayerState(layer, 4, 5);
+  getEncarteVideoLayerState(layer, 14, 5);
+  assert.deepEqual(getEncarteVideoLayerState(layer, 4, 5), middle);
+  for (const seconds of [0, 3.15, 7.5, 15]) {
+    assert.deepEqual(getEncarteVideoLayerState({ kind: 'text' }, seconds, 5), { ...STILL, focus: 0 });
+  }
+  for (const boundary of [3, 6, 9, 12]) {
+    for (const offset of [-0.3, -0.15, 0, 0.15, 0.3]) {
+      const sum = Array.from({ length: 5 }, (_, index) =>
+        getEncarteVideoLayerState({ kind: 'product', index }, boundary + offset, 5).focus)
+        .reduce((total, focus) => total + focus, 0);
+      assert.ok(Math.abs(sum - 1) < 1e-10, 'focus crosses directly between neighbors');
+    }
+  }
+});
+
+test('Encarte keeps surfaces stationary while clearly emphasizing each image and its offer', () => {
+  const bounds = { x: 50, y: 300, width: 300, height: 400 };
+  const artwork = {
+    width: 1080, height: 1440, format: 'encarte', itemCount: 5, background: 'background',
+    layers: [
+      { kind: 'item-surface', index: 0, bounds, accent: '#123456' },
+      { kind: 'product', index: 0, bounds: { ...bounds, height: 250 }, animationBounds: bounds, canvas: 'product', compositeOperation: 'multiply' },
+      { kind: 'details', index: 0, bounds: { ...bounds, y: 560, height: 140 }, animationBounds: bounds, canvas: 'details' },
+    ],
+  };
+  for (const seconds of [0, 1.5, 4.5, 15]) {
+    const context = new FakeContext();
+    const before = context.state();
+    drawStoryVideoFrame(context, artwork, seconds);
+    assert.equal(context.strokes.length, 0, 'no borders at any point in the animation');
+    assert.equal(context.fills.length, 2, 'only the white surface and its subtle campaign tint');
+    for (const fill of context.fills) {
+      assert.equal(fill.shadowColor, 'transparent');
+      assert.equal(fill.shadowBlur, 0);
+      assert.equal(fill.shadowOffsetX, 0);
+      assert.equal(fill.shadowOffsetY, 0);
+      assert.deepEqual(fill.matrix, [1, 0, 0, 1, 0, 0], 'surface remains fixed');
+    }
+    const [background, product, details] = context.draws;
+    assert.deepEqual(background.matrix, [1, 0, 0, 1, 0, 0]);
+    assert.deepEqual(product.matrix, details.matrix);
+    assert.equal(product.matrix[0], seconds === 4.5 ? 0.9 : 1);
+    assert.equal(product.globalAlpha, seconds === 4.5 ? 0.55 : 1);
+    assert.equal(details.globalAlpha, product.globalAlpha);
+    assert.equal(product.shadowBlur, 0);
+    assert.equal(details.shadowBlur, 0);
+    assert.equal(product.globalCompositeOperation, 'multiply');
+    assert.equal(details.globalCompositeOperation, 'source-over');
+    assert.deepEqual(context.state(), before);
   }
 });

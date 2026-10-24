@@ -26,7 +26,7 @@ function attachImage(container, product) {
   container.append(frame);
 }
 
-export function renderProductCard(product, openProduct) {
+export function renderProductCard(product, openProduct, { formats = ['stories', 'feed', 'encarte'] } = {}) {
   const card = createElement('article', 'product-card');
   card.dataset.productId = product.id;
 
@@ -56,24 +56,21 @@ export function renderProductCard(product, openProduct) {
   footer.append(createElement('span', null, product.fabricante || product.grupo || 'Sem fabricante'));
 
   const actions = createElement('div', 'product-card-actions');
-  const openButton = createElement('button', 'product-open-button', 'Detalhes');
-  openButton.type = 'button';
-  openButton.setAttribute('aria-label', `Ver detalhes de ${product.nome}`);
-  openButton.addEventListener('click', () => openProduct(product.id));
-
-  const storyLink = createElement('a', 'product-story-action', 'Story');
-  storyLink.href = `/artes/stories?productId=${encodeURIComponent(String(product.id))}`;
-  storyLink.setAttribute('aria-label', `Criar Story para ${product.nome}`);
-  storyLink.append(createElement('span', 'product-story-action-icon', '→'));
-  const feedLink = createElement('a', 'product-story-action', 'Feed');
-  feedLink.href = `/artes/feed?productId=${encodeURIComponent(String(product.id))}`;
-  feedLink.setAttribute('aria-label', `Criar Feed para ${product.nome}`);
-  feedLink.append(createElement('span', 'product-story-action-icon', '→'));
-  const encarteLink = createElement('a', 'product-story-action', 'Encarte');
-  encarteLink.href = '/artes/encarte?productId=' + encodeURIComponent(String(product.id));
-  encarteLink.setAttribute('aria-label', 'Criar Encarte para ' + product.nome);
-  encarteLink.append(createElement('span', 'product-story-action-icon', '→'));
-  actions.append(openButton, storyLink, feedLink, encarteLink);
+  if (openProduct) {
+    const openButton = createElement('button', 'product-open-button', 'Detalhes');
+    openButton.type = 'button';
+    openButton.setAttribute('aria-label', `Ver detalhes de ${product.nome}`);
+    openButton.addEventListener('click', () => openProduct(product.id));
+    actions.append(openButton);
+  }
+  for (const format of formats) {
+    const label = { stories: 'Stories', feed: 'Feed', encarte: 'Encarte' }[format];
+    const link = createElement('a', 'product-story-action', label);
+    link.href = `/artes/${format}?productId=${encodeURIComponent(String(product.id))}`;
+    link.setAttribute('aria-label', `Criar ${label} para ${product.nome}`);
+    link.append(createElement('span', 'product-story-action-icon', '→'));
+    actions.append(link);
+  }
 
   content.append(meta, title, subtitle, footer, actions);
   card.append(image, content);

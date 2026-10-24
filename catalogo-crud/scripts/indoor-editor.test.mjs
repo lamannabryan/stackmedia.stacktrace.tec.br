@@ -4,6 +4,9 @@ import test from 'node:test';
 import vm from 'node:vm';
 import * as model from '../public/js/features/indoor/model.js';
 import { bindPriceInput } from '../public/js/features/stories/price-input.js';
+import { selectedProductIds, loadSelectedProducts } from '../public/js/features/magazines/selection.js';
+import { getCarouselState } from '../public/js/features/indoor/renderer.js';
+import { sampleThemeColor } from '../public/js/features/indoor/palette.js';
 
 const [markup, moduleSource] = await Promise.all([
   readFile(new URL('../public/indoor-h.html', import.meta.url), 'utf8'),
@@ -126,6 +129,7 @@ async function openEditor(t, options = {}) {
     'product-views': ['show-catalog', 'show-selection'], 'mobile-dock': ['mobile-back', 'mobile-next'],
   })) elements.get(`indoor-${parent}`).append(...children.map((id) => elements.get(`indoor-${id}`)));
   const window = new Element('window');
+  window.location = { search: options.search || '' };
   const media = new Element('media');
   media.matches = Boolean(options.mobile);
   window.matchMedia = () => media;
@@ -153,12 +157,12 @@ async function openEditor(t, options = {}) {
     }
   }
   const sandbox = vm.createContext({
-    ...model, bindPriceInput, document, window, Image: FakeImage,
+    ...model, bindPriceInput, selectedProductIds, loadSelectedProducts, sampleThemeColor, document, window, Image: FakeImage,
     AbortController, DOMException, URLSearchParams, Blob,
     INDOOR_WIDTH: 1920, INDOOR_HEIGHT: 1080, INDOOR_DURATION: 15,
     drawIndoorFrame: (context, snapshot, seconds) => {
       paints.push({ context, snapshot, seconds });
-      return { index: Math.min(4, Math.floor(seconds / 3)) };
+      return getCarouselState(seconds, snapshot.products.length);
     },
     performance: { now: () => 0 },
     requestAnimationFrame: (callback) => { const id = nextId++; frames.set(id, callback); return id; },
@@ -175,6 +179,9 @@ async function openEditor(t, options = {}) {
       let body;
       if (parsed.pathname === '/api/products') {
         body = options.products ? await options.products(parsed.searchParams, signal) : productPage();
+      } else if (/^\/api\/products\/\d+$/.test(parsed.pathname)) {
+        const id = Number(parsed.pathname.split('/').at(-1));
+        body = options.product ? await options.product(id) : { ...products.find(item => item.id === id), revista_preco_centavos: id * 100 + 99 };
       } else if (url === '/api/indoor-backgrounds') {
         body = { items: options.backgrounds ? await options.backgrounds() : backgrounds };
       } else throw new Error(`Unexpected API URL: ${url}`);
@@ -220,7 +227,7 @@ async function openPreview(fixture) {
   await flush();
 }
 
-test('Indoor requires exactly five products and a background before enabling preview and export', async (t) => {
+test('TV requires at least two products and a background, and limits selection to five', async (t) => {
   const f = await openEditor(t);
   const query = new URL(f.requests[0].url, 'https://local.invalid').searchParams;
   assert.equal(query.get('status'), 'ativo');
@@ -229,10 +236,12 @@ test('Indoor requires exactly five products and a background before enabling pre
   assert.equal(query.get('pageSize'), '18');
   assert.equal(f.get('continue').disabled, true);
   assert.equal(f.get('download').disabled, true);
-  for (let id = 1; id <= 4; id += 1) f.get('results').querySelector(`[data-product-id="${id}"]`).click();
+  f.get('results').querySelector('[data-product-id="1"]').click();
   assert.equal(f.get('continue').disabled, true);
   f.get('continue').click();
-  assert.equal(f.requests.length, 1, 'Four products cannot open the backgrounds step');
+  assert.equal(f.requests.length, 1, 'One product cannot continue');
+  for (let id = 2; id <= 4; id += 1) f.get('results').querySelector(`[data-product-id="${id}"]`).click();
+  assert.equal(f.get('continue').disabled, false);
   f.get('results').querySelector('[data-product-id="5"]').click();
   assert.equal(f.get('selection-count').textContent, '5 / 5');
   assert.equal(f.get('results').querySelector('[data-product-id="6"]').disabled, true);
@@ -261,6 +270,36 @@ test('Indoor requires exactly five products and a background before enabling pre
   assert.equal(f.frames.size, 0, 'Hiding the tab pauses playback');
 });
 
+test('magazine links open TV with the selected order and imported prices and export two products', async t => {
+  const f = await openEditor(t, { search: '?productIds=4,2' });
+  assert.equal(f.get('selected-heading').textContent, 'Preços e ordem');
+  assert.deepEqual(Array.from(f.get('selected').children, row => row.dataset.productId), ['4', '2']);
+  assert.deepEqual(Array.from(f.get('selected').querySelectorAll('input'), input => input.value), ['4,99', '2,99']);
+  f.get('continue').click();
+  await flush();
+  f.get('backgrounds').querySelector('button').click();
+  f.get('open-preview').click();
+  await flush();
+  assert.equal(f.get('scenes').children.length, 2);
+  assert.equal(f.get('sequence-summary').textContent, '2 produtos · 7,5 s por produto');
+  f.get('scenes').children[1].click();
+  assert.equal(f.paints.at(-1).seconds, 7.5);
+  f.get('download').click();
+  await flush();
+  assert.equal(f.exports.length, 1);
+  assert.deepEqual(Array.from(f.paints.at(-1).snapshot.products, item => [item.product.id, item.price]), [[4, 'R$ 4,99'], [2, 'R$ 2,99']]);
+});
+
+test('unavailable preselected products report an error without opening a partial TV campaign', async t => {
+  const f = await openEditor(t, { search: '?productIds=1,2', product: async id => {
+    if (id === 2) throw new Error('Produto indisponível');
+    return products[0];
+  } });
+  assert.equal(f.get('selection-count').textContent, '0 / 5');
+  assert.match(f.get('status').textContent, /Produto indisponível/);
+  assert.equal(f.get('continue').disabled, true);
+});
+
 test('mobile review preserves catalogue scroll and prices while reordering without focusing the keyboard', async (t) => {
   const f = await openEditor(t, { mobile: true });
   assert.equal(f.get('mobile-dock').hidden, false);
@@ -273,7 +312,7 @@ test('mobile review preserves catalogue scroll and prices while reordering witho
   assert.equal(f.get('catalog').hidden, true);
   assert.equal(f.get('selection-panel').hidden, false);
   assert.equal(f.window.scrollY, 0);
-  assert.equal(f.get('mobile-next').disabled, true, 'Partial selection can be reviewed but cannot advance');
+  assert.equal(f.get('mobile-next').disabled, false, 'Two products can advance');
   assert.equal(f.get('selected').querySelector('input'), null);
   for (let id = 3; id <= 5; id++) f.get('results').querySelector(`[data-product-id="${id}"]`).click();
   f.get('mobile-next').click();
@@ -377,7 +416,7 @@ test('editing a price invalidates the preview and revokes the previous MP4 befor
   assert.equal(f.exports[0].height, 1080);
   assert.equal(f.get('download-link').hidden, false);
   assert.equal(f.get('download-link').clickCount, 1);
-  assert.match(f.get('download-link').download, /^stackmedia-indoor-h-.*\.mp4$/);
+  assert.match(f.get('download-link').download, /^stackmedia-tv-.*\.mp4$/);
   assert.equal(f.get('export-progress').hidden, true);
   assert.equal(f.exports[0].canvas.width, 0, 'Export releases its temporary canvas');
   f.steps.find((node) => node.dataset.step === 'pricing').click();

@@ -42,7 +42,18 @@ body.stories-page .editor-action-bar { position: relative; top: auto; display: f
 .artwork-share-menu { position: relative; }
 .artwork-share-menu > summary { cursor: pointer; list-style: none; white-space: nowrap; }
 .artwork-share-menu > summary::-webkit-details-marker { display: none; }
-.artwork-share-menu > summary::after { content: ' ?'; }
+.artwork-share-menu > summary::after {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  vertical-align: middle;
+  background-color: currentColor;
+  --share-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 15V2m-4 4 4-4 4 4M8 10H5v11h14V10h-3'/%3E%3C/svg%3E");
+  -webkit-mask: var(--share-icon) center / contain no-repeat;
+  mask: var(--share-icon) center / contain no-repeat;
+}
 .artwork-share-options { position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; display: grid; gap: 8px; min-width: 220px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px #0002; }
 .artwork-share-options button { width: 100%; }
 #story-mobile-panel-export .artwork-share-options { position: static; margin-top: 8px; }

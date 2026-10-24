@@ -6,6 +6,7 @@ export function createStoriesEditorState(maxProducts = 2) {
     compositionMode: 'single',
     compositionChosen: false,
     autoLayoutOrientation: null,
+    itemAreas: {},
     selectedProduct: null,
     secondaryProduct: null,
     extraProducts: Array.from({ length: Math.max(0, maxProducts - 2) }, () => ({

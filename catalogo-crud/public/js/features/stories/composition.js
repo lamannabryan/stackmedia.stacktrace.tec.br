@@ -13,7 +13,8 @@ export function compositionTargets(mode, kind = 'product') {
 export function compositionCell(format, count, index) {
   const columns = count === 5 ? 3 : 2, rows = Math.ceil(count / columns), gap = 24;
   const width = (format.width - 112 - gap * (columns - 1)) / columns;
-  const height = (format.height - Math.max(56, format.safeBottom || 0) - format.safeTop - 24 - gap * (rows - 1)) / rows;
+  const bottom = Math.max(56, format.safeBottom || 0, format.height * (format.footerRatio ?? 0.18));
+  const height = (format.height - bottom - format.safeTop - 24 - gap * (rows - 1)) / rows;
   const rowCount = Math.min(columns, count - Math.floor(index / columns) * columns);
   const offset = (format.width - (rowCount * width + (rowCount - 1) * gap)) / 2;
   return { x: offset + (index % columns) * (width + gap),

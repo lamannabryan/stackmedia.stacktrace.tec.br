@@ -6,6 +6,114 @@ import { initializeCatalogDatabase } from '../src/database/catalog-database.mjs'
 import { currentMagazineMonth } from '../src/modules/magazines/magazine-service.mjs';
 import { normalizeSpreadsheetNamespaces } from '../src/modules/magazines/xlsx-compat.mjs';
 import { Worker } from 'node:worker_threads';
+import { DatabaseSync } from 'node:sqlite';
+import { initializeMagazineSchema } from '../src/modules/magazines/schema.mjs';
+import { resolveMagazineBackground } from '../public/js/features/magazines/background.js';
+import { selectedProductIds, magazineArtworkUrl, loadSelectedProducts } from '../public/js/features/magazines/selection.js';
+import { suggestedMagazinePrice } from '../public/js/features/stories/price-input.js';
+
+test('magazine artwork links preserve order, accept existing single-product links and limit selection to five', () => {
+  assert.deepEqual(selectedProductIds('?productId=12'), [12]);
+  assert.deepEqual(selectedProductIds('?productIds=4,2,4,0,-1,bad,1.2,9007199254740992,3,1,5,6'), [4, 2, 3, 1, 5]);
+  assert.deepEqual(selectedProductIds('?productIds=4,2,3', 2), [4, 2]);
+  assert.deepEqual(selectedProductIds(''), []);
+  for (const [format, path] of [['tv', 'indoor-h'], ['encarte', 'encarte']]) {
+    const url = new URL(magazineArtworkUrl(format, [2, 1]), 'https://local.test');
+    assert.equal(url.pathname, `/artes/${path}`);
+    assert.deepEqual(selectedProductIds(url.search), [2, 1]);
+  }
+});
+
+test('selected magazine products carry authoritative imported prices in selection order', async t => {
+  const f = await magazineFixture(t);
+  await f.call('/api/revistas/import', { method: 'POST', body: await f.payload() });
+  const products = await loadSelectedProducts([2, 1], async url => (await f.call(url, { session: f.client })).json());
+  assert.deepEqual(products.map(product => product.id), [2, 1]);
+  assert.deepEqual(products.map(suggestedMagazinePrice), ['1.234,56', '19,90']);
+  await assert.rejects(loadSelectedProducts([1, 2], async () => ({ id: 1 })), /carregar um dos produtos/);
+});
+
+test('existing magazine databases gain an optional background without losing editions', () => {
+  const db = new DatabaseSync(':memory:');
+  try {
+    db.exec(`CREATE TABLE products (id INTEGER PRIMARY KEY);
+      CREATE TABLE magazines (id INTEGER PRIMARY KEY, month TEXT UNIQUE, title TEXT,
+        active INTEGER DEFAULT 1, revision INTEGER DEFAULT 1, created_at TEXT, updated_at TEXT);
+      INSERT INTO magazines (id, month, title) VALUES (1, '2026-10', 'Existing edition');`);
+    initializeMagazineSchema(db);
+    initializeMagazineSchema(db);
+    const row = db.prepare('SELECT * FROM magazines').get();
+    assert.equal(row.title, 'Existing edition');
+    assert.equal(row.background, null);
+    assert.equal(row.revision, 1);
+  } finally { db.close(); }
+});
+
+test('magazine backgrounds persist through import, replacement, editing and active product lookup', async t => {
+  const f = await magazineFixture(t);
+  const background = { format: 'stories', arquivo: 'Black Week.webp' };
+  const body = { ...await f.payload(), background };
+  let saved = await (await f.call('/api/revistas/import', { method: 'POST', body })).json();
+  assert.deepEqual(saved.background, background);
+  assert.deepEqual((await (await f.call('/api/revistas')).json()).items[0].background, background);
+  const readProduct = async () => (await f.call('/api/products/1', { session: f.client })).json();
+  assert.deepEqual((await readProduct()).revista_background, background);
+  const featured = (await (await f.call('/api/revistas/destaque', { session: f.client })).json()).revista;
+  assert.deepEqual(featured.background, background);
+  assert.deepEqual(featured.items[0].product.revista_background, background);
+  saved = await (await f.call('/api/revistas/import', { method: 'POST', body: { ...await f.payload(), expectedRevision: saved.revision } })).json();
+  assert.deepEqual(saved.background, background, 'reimport without a background preserves the choice');
+  const replacement = { format: 'encarte', arquivo: 'Campanha.webp' };
+  const update = async change => {
+    const response = await f.call(`/api/revistas/${saved.id}`, { method: 'PUT', body: { title: saved.title, active: saved.active, revision: saved.revision, ...change } });
+    assert.equal(response.status, 200);
+    saved = await response.json();
+  };
+  await update({ background: replacement });
+  assert.deepEqual((await readProduct()).revista_background, replacement);
+  await update({ active: false });
+  assert.equal((await readProduct()).revista_background, null);
+  assert.deepEqual(saved.background, replacement);
+  await update({ active: true });
+  f.database.prepare('UPDATE magazines SET month = ? WHERE id = ?').run('2100-01', saved.id);
+  assert.equal((await readProduct()).revista_background, null);
+  f.database.prepare('UPDATE magazines SET month = ? WHERE id = ?').run(f.month, saved.id);
+  await update({ background: null });
+  assert.equal(saved.background, null);
+  assert.equal((await readProduct()).revista_background, null);
+});
+
+test('invalid magazine background references cannot change the saved edition', async t => {
+  const f = await magazineFixture(t);
+  const saved = await (await f.call('/api/revistas/import', { method: 'POST', body: await f.payload() })).json();
+  for (const background of [false, {}, { format: 'indoor', arquivo: 'ok.webp' },
+    { format: 'stories', arquivo: '../secret.webp' }, { format: 'feed', arquivo: 'https://example.test/a.webp' },
+    { format: 'encarte', arquivo: 'file.svg' }, { format: 'feed', arquivo: '%2e%2e.webp' }]) {
+    const response = await f.call(`/api/revistas/${saved.id}`, { method: 'PUT', body: { title: saved.title, active: true, revision: saved.revision, background } });
+    assert.equal(response.status, 400);
+  }
+  const unchanged = await (await f.call(`/api/revistas/${saved.id}`)).json();
+  assert.equal(unchanged.revision, saved.revision);
+  assert.equal(unchanged.background, null);
+});
+
+test('all three editors resolve the magazine campaign, with original fallback and missing-file handling', async () => {
+  const reference = { format: 'stories', arquivo: 'Black Week story.webp' };
+  const source = { arquivo: reference.arquivo, nome: 'Black Week', url: '/story-backgrounds/original', preview_url: '/story-backgrounds/preview' };
+  let calls = 0;
+  const request = async url => { calls++; assert.equal(url, '/api/story-backgrounds'); return { items: [source] }; };
+  const same = await resolveMagazineBackground(reference, 'stories', [source], request);
+  assert.equal(same.url, source.preview_url);
+  assert.equal(calls, 0);
+  for (const format of ['feed', 'encarte']) {
+    const native = { arquivo: `Black Week ${format}.webp`, nome: 'Black Week', url: `/${format}-backgrounds/native` };
+    const unrelated = { arquivo: 'Natal.webp', nome: 'Natal', url: '/unrelated' };
+    assert.equal((await resolveMagazineBackground(reference, format, [unrelated, native], request)).url, native.url);
+    assert.equal((await resolveMagazineBackground(reference, format, [unrelated], request)).url, source.preview_url);
+    assert.equal(await resolveMagazineBackground(reference, format, [native], async () => ({ items: [] })), null);
+  }
+  assert.equal(await resolveMagazineBackground(null, 'feed', [], request), null);
+});
 
 test('product lookup and search expose only active current magazine prices', async t => {
   const f = await magazineFixture(t);
