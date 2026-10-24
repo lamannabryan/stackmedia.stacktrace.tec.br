@@ -2,7 +2,8 @@ import { readJsonBody, sendError, sendJson, sendNoContent, sendRevalidatedJson }
 import { createRouter } from '../http/router.mjs';
 import { PARTNER_BODY_BYTES } from '../modules/partners/partner-service.mjs';
 import { badRequest } from '../http/errors.mjs';
-import { requireAdmin } from '../modules/users/session-service.mjs';
+import { requireAdmin, requireSuperAdmin } from '../modules/users/session-service.mjs';
+import { createArtworkService } from '../modules/artworks/artwork-service.mjs';
 import { BACKGROUND_BODY_BYTES } from '../modules/stories/background-service.mjs';
 import { MAGAZINE_BODY_BYTES } from '../modules/magazines/import-xlsx.mjs';
 import { serveFile } from '../http/static-files.mjs';
@@ -20,6 +21,14 @@ function getRequestedProductId(productService, value) {
 
 export function createApiRouter({ database, productService, productImportService, partnerService, magazineService, config, storyBackgroundService, feedBackgroundService, encarteBackgroundService, indoorBackgroundService, userService, sessionService, integrationFetch = fetch, productImageDownload }) {
   const router = createRouter();
+  const artworkService = createArtworkService({ database });
+  router.get('/api/artworks/quota', ({ response, session }) => {
+    sendJson(response, 200, artworkService.quota(session.user.id));
+  });
+  router.post('/api/artworks/generations', async ({ request, response, session }) => {
+    const result = artworkService.generate(session.user.id, await readJsonBody(request, { maxBytes: 2048 }));
+    sendJson(response, result.replayed ? 200 : 201, result);
+  });
   const productAi = createProductAiService({ client: createDeepSeekClient({ ...config.deepseek, fetchImpl: integrationFetch }) });
   router.post('/api/products/lookup-ean', async ({ request, response, session }) => {
     const payload = await readJsonBody(request, { maxBytes: 1024 });
@@ -87,17 +96,27 @@ export function createApiRouter({ database, productService, productImportService
     requireAdmin(session);
     sendJson(response, 200, { items: userService.list() });
   });
+  router.get('/api/users/:id/commercial', ({ response, params, session }) => {
+    requireSuperAdmin(session);
+    sendJson(response, 200, artworkService.quota(userId(params.id)));
+  });
+  router.put('/api/users/:id/commercial', async ({ request, response, params, session }) => {
+    requireSuperAdmin(session);
+    const id = userId(params.id);
+    userService.updateCommercial(id, await readJsonBody(request, { maxBytes: 2048 }), { actor: session.user });
+    sendJson(response, 200, artworkService.quota(id));
+  });
   router.post('/api/users', async ({ request, response, session }) => {
     requireAdmin(session);
-    sendJson(response, 201, await userService.create(await readJsonBody(request, { maxBytes: 8192 })));
+    sendJson(response, 201, await userService.create(await readJsonBody(request, { maxBytes: 8192 }), { actor: session.user }));
   });
   router.put('/api/users/:id', async ({ request, response, params, session }) => {
     requireAdmin(session);
-    sendJson(response, 200, await userService.update(userId(params.id), await readJsonBody(request, { maxBytes: 8192 })));
+    sendJson(response, 200, await userService.update(userId(params.id), await readJsonBody(request, { maxBytes: 8192 }), { actor: session.user }));
   });
   router.delete('/api/users/:id', ({ response, params, session }) => {
     requireAdmin(session);
-    userService.remove(userId(params.id), session.user.id);
+    userService.remove(userId(params.id), session.user.id, { actor: session.user });
     sendNoContent(response);
   });
 

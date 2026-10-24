@@ -6,8 +6,8 @@
  *
  * Regras:
  * - só roda na tela inicial (body.home-page);
- * - aparece em abertura direta, recarga e com ?abertura=1;
- * - não repete ao voltar de outra tela do site nem em navegação de histórico;
+ * - aparece apenas na demonstração com ?abertura=1;
+ * - abertura normal, recarga e navegação não aguardam a animação;
  * - com preferência por menos movimento, o conteúdo aparece de imediato;
  * - um toque, uma tecla ou sair da página encerra o véu na hora.
  */
@@ -17,24 +17,11 @@
 
   const body = document.body;
   if (!body?.classList.contains('home-page')) return;
+  const forced = new URLSearchParams(window.location.search).get('abertura') === '1';
+  if (!forced) return;
 
   // Sem véu e sem cascata: as classes de animação nem chegam a ser aplicadas.
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  const fromAnotherPage = () => {
-    try {
-      return Boolean(document.referrer)
-        && new URL(document.referrer).origin === window.location.origin;
-    } catch {
-      return false; // referrer ilegível conta como abertura nova
-    }
-  };
-  const cameFromHistory = () => {
-    const navigation = performance.getEntriesByType?.('navigation')?.[0];
-    return navigation?.type === 'back_forward';
-  };
-  const forced = new URLSearchParams(window.location.search).get('abertura') === '1';
-  if (!forced && (fromAnotherPage() || cameFromHistory())) return;
 
   const overlay = document.createElement('div');
   overlay.className = 'home-intro';

@@ -1,6 +1,6 @@
 # Login, usuários e permissões
 
-O _stackmedia exige login por e-mail e senha para acessar o catálogo, os editores e os dados da aplicação. Cada usuário possui um dos dois perfis abaixo.
+O _stackmedia exige login por e-mail e senha para acessar o catálogo, os editores e os dados da aplicação. Além dos perfis abaixo, o backend possui `superadministrador`, que herda as permissões administrativas e gerencia limites de artes, expiração de acesso e outras contas de superadministradores. Consulte [Regras comerciais](regras-comerciais.md) para criar esse perfil e usar suas APIs; as telas ainda não foram adaptadas para ele.
 
 | Recurso | Administrador | Cliente |
 | --- | --- | --- |
@@ -10,7 +10,7 @@ O _stackmedia exige login por e-mail e senha para acessar o catálogo, os editor
 | Ver os destaques de parceiros na central | Sim | Sim |
 | Cadastrar, editar e excluir produtos | Sim | Não |
 | Gerenciar parceiros e logotipos | Sim | Não |
-| Gerenciar usuários e redefinir senhas | Sim | Não |
+| Gerenciar contas comuns e redefinir suas senhas | Sim | Não |
 
 ## Primeiro acesso
 
@@ -25,6 +25,12 @@ Em Linux, use `npm run users:create-admin`. O comando solicita nome, e-mail, sen
 Execute com a mesma configuração de armazenamento usada pela aplicação, especialmente `CATALOG_DATABASE_PATH` ou `CATALOG_STORAGE_ROOT`, quando definidos. O comando carrega o `.env` local, se existir; variáveis já definidas no ambiente prevalecem. No Plesk, as variáveis configuradas apenas no painel também precisam estar presentes no terminal usado para esse comando.
 
 O banco recebe as novas tabelas automaticamente, preservando os produtos e parceiros existentes. Reinicie a aplicação para carregar o código atualizado e acesse `/login`. Em produção, use `NODE_ENV=production` e HTTPS, pois o cookie de sessão recebe o atributo `Secure`.
+
+A tela de login informa quando o acesso está desativado, expirado ou com o limite
+de artes atingido. O backend verifica essas condições após validar a senha e
+recusa a entrada sem criar uma sessão. Senhas incorretas continuam recebendo uma
+mensagem genérica. O esgotamento da cota bloqueia somente novos logins nesta etapa;
+as regras anteriores de expiração e desativação das sessões permanecem aplicadas.
 
 ## Gerenciar contas
 
@@ -51,6 +57,7 @@ As tabelas são:
 | `users` | Nome, e-mail único, hash da senha, perfil, situação e datas de criação/alteração |
 | `user_sessions` | Hash do token da sessão, usuário, token de proteção CSRF e expiração |
 | `login_attempts` | Identificadores com hash, contadores e prazo das tentativas de login |
+| `artwork_generations` | Gerações registradas na API, usuário, formato, saída, chave de repetição e mês de consumo |
 
 As senhas usam scrypt com salt individual. O navegador recebe um cookie `HttpOnly`, `SameSite=Lax`, com validade de 12 horas; o token original da sessão não é salvo no banco. Gravações exigem token CSRF e rejeitam origens externas. O login limita tentativas por e-mail e endereço de conexão, com janela de 15 minutos.
 

@@ -96,6 +96,7 @@ async function openCatalogue({ productsError = () => null, imageResponse, aiResp
   context.sessionReady = Promise.resolve({ user: { role } });
   vm.runInContext(cardScript.replace('export function renderProductCard', 'function createProductCard'), context, { filename: 'product-card.js' });
   await vm.runInContext(script.replace(/^import .+;\r?\n/gm, ''), context, { filename: 'app.js' });
+  await vm.runInContext('initialLoad', context);
   return { elements, requests, context, fields, opened, readers };
 }
 

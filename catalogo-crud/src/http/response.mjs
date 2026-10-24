@@ -51,8 +51,8 @@ export function sendRevalidatedJson(request, response, body) {
   response.end(unchanged ? undefined : payload);
 }
 
-export function sendError(response, statusCode, message) {
-  sendJson(response, statusCode, { error: message });
+export function sendError(response, statusCode, message, { code } = {}) {
+  sendJson(response, statusCode, { error: message, ...(code ? { code } : {}) });
 }
 
 export function sendNoContent(response) {

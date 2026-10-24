@@ -173,8 +173,8 @@ async function openEditor(t, options = {}) {
       createObjectURL: (blob) => { const url = `blob:indoor-${createdUrls.length}`; createdUrls.push({ url, blob }); return url; },
       revokeObjectURL: (url) => revokedUrls.push(url),
     },
-    fetch: async (url, { signal }) => {
-      requests.push({ url, signal });
+    fetch: async (url, { signal, cache }) => {
+      requests.push({ url, signal, cache });
       const parsed = new URL(url, 'https://local.invalid');
       let body;
       if (parsed.pathname === '/api/products') {
@@ -213,12 +213,17 @@ async function openEditor(t, options = {}) {
   return { get, steps, document, window, resize, requests, imageRequests, paints, exports, createdUrls, revokedUrls, frames, runDebounce };
 }
 
-function selectFive(fixture) {
-  for (let id = 1; id <= 5; id += 1) fixture.get('results').querySelector(`[data-product-id="${id}"]`).click();
+async function selectProduct(fixture, id) {
+  fixture.get('results').querySelector(`[data-product-id="${id}"]`).click();
+  await flush();
+}
+
+async function selectFive(fixture) {
+  for (let id = 1; id <= 5; id += 1) await selectProduct(fixture, id);
 }
 
 async function openPreview(fixture) {
-  selectFive(fixture);
+  await selectFive(fixture);
   fixture.get('continue').click();
   fixture.get('continue').click();
   await flush();
@@ -236,13 +241,13 @@ test('TV requires at least two products and a background, and limits selection t
   assert.equal(query.get('pageSize'), '18');
   assert.equal(f.get('continue').disabled, true);
   assert.equal(f.get('download').disabled, true);
-  f.get('results').querySelector('[data-product-id="1"]').click();
+  await selectProduct(f, 1);
   assert.equal(f.get('continue').disabled, true);
   f.get('continue').click();
-  assert.equal(f.requests.length, 1, 'One product cannot continue');
-  for (let id = 2; id <= 4; id += 1) f.get('results').querySelector(`[data-product-id="${id}"]`).click();
+  assert.equal(f.requests.length, 2, 'One product cannot continue');
+  for (let id = 2; id <= 4; id += 1) await selectProduct(f, id);
   assert.equal(f.get('continue').disabled, false);
-  f.get('results').querySelector('[data-product-id="5"]').click();
+  await selectProduct(f, 5);
   assert.equal(f.get('selection-count').textContent, '5 / 5');
   assert.equal(f.get('results').querySelector('[data-product-id="6"]').disabled, true);
   assert.equal(f.get('continue').disabled, false);
@@ -290,6 +295,42 @@ test('magazine links open TV with the selected order and imported prices and exp
   assert.deepEqual(Array.from(f.paints.at(-1).snapshot.products, item => [item.product.id, item.price]), [[4, 'R$ 4,99'], [2, 'R$ 2,99']]);
 });
 
+test('TV catalogue and search use fresh magazine prices even when the listed price is stale', async t => {
+  const f = await openEditor(t, {
+    products: () => productPage(products.map(product => ({ ...product, revista_preco_centavos: 999 }))),
+    product: async id => ({ ...products[id - 1], revista_preco_centavos: id === 1 ? 1990 : null }),
+  });
+  await selectProduct(f, 1);
+  f.get('search').value = 'Produto 2';
+  f.get('search').dispatch('input');
+  await f.runDebounce();
+  await selectProduct(f, 2);
+  const lookups = f.requests.filter(request => /^\/api\/products\/\d+$/.test(request.url));
+  assert.deepEqual(lookups.map(request => request.url), ['/api/products/1', '/api/products/2']);
+  assert.ok(lookups.every(request => request.cache === 'no-store'));
+  f.get('continue').click();
+  assert.deepEqual(Array.from(f.get('selected').querySelectorAll('input'), input => input.value), ['19,90', '']);
+});
+
+test('TV blocks duplicate clicks while checking the price and allows retry after failure', async t => {
+  const pending = deferred();
+  let retry = false;
+  const f = await openEditor(t, { product: async id => retry
+    ? { ...products[id - 1], revista_preco_centavos: 1990 } : pending.promise });
+  f.get('results').querySelector('[data-product-id="1"]').click();
+  assert.equal(f.get('results').querySelector('[data-product-id="1"]').disabled, true);
+  assert.equal(f.get('continue').disabled, true);
+  assert.match(f.get('status').textContent, /Carregando produto/);
+  pending.reject(new Error('Network unavailable'));
+  await flush();
+  assert.equal(f.get('selection-count').textContent, '0 / 5');
+  assert.match(f.get('status').textContent, /Não foi possível carregar o produto/);
+  assert.equal(f.get('results').querySelector('[data-product-id="1"]').disabled, false);
+  retry = true;
+  await selectProduct(f, 1);
+  assert.equal(f.get('selection-count').textContent, '1 / 5');
+});
+
 test('unavailable preselected products report an error without opening a partial TV campaign', async t => {
   const f = await openEditor(t, { search: '?productIds=1,2', product: async id => {
     if (id === 2) throw new Error('Produto indisponível');
@@ -305,8 +346,8 @@ test('mobile review preserves catalogue scroll and prices while reordering witho
   assert.equal(f.get('mobile-dock').hidden, false);
   assert.equal(f.get('selection-panel').hidden, true);
   assert.equal(f.get('mobile-next').disabled, true);
-  f.get('results').querySelector('[data-product-id="1"]').click();
-  f.get('results').querySelector('[data-product-id="2"]').click();
+  await selectProduct(f, 1);
+  await selectProduct(f, 2);
   f.window.scrollY = 640;
   f.get('mobile-next').click();
   assert.equal(f.get('catalog').hidden, true);
@@ -314,7 +355,7 @@ test('mobile review preserves catalogue scroll and prices while reordering witho
   assert.equal(f.window.scrollY, 0);
   assert.equal(f.get('mobile-next').disabled, false, 'Two products can advance');
   assert.equal(f.get('selected').querySelector('input'), null);
-  for (let id = 3; id <= 5; id++) f.get('results').querySelector(`[data-product-id="${id}"]`).click();
+  for (let id = 3; id <= 5; id++) await selectProduct(f, id);
   f.get('mobile-next').click();
   const input = f.get('selected').querySelector('[data-product-id="1"] input');
   input.value = '1290';
@@ -341,7 +382,7 @@ test('mobile actions complete the campaign and keep export cancellation availabl
   const f = await openEditor(t, { mobile: true, exportVideo: ({ signal }) => new Promise((resolve, reject) => {
     signal.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true });
   }) });
-  selectFive(f);
+  await selectFive(f);
   f.get('mobile-next').click();
   assert.equal(f.get('selection-panel').hidden, false);
   f.get('mobile-next').click();
@@ -370,7 +411,7 @@ test('mobile actions complete the campaign and keep export cancellation availabl
 test('empty background inventory blocks preview and can recover after refreshing', async (t) => {
   let items = [];
   const f = await openEditor(t, { backgrounds: () => items });
-  selectFive(f);
+  await selectFive(f);
   f.get('continue').click();
   f.get('continue').click();
   await flush();
@@ -467,7 +508,7 @@ test('out-of-order search responses cannot replace results from the latest query
     if (params.get('q') === 'nova') return latest.promise;
     return productPage();
   } });
-  f.get('results').querySelector('[data-product-id="1"]').click();
+  await selectProduct(f, 1);
   f.get('search').value = 'antiga';
   f.get('search').dispatch('input');
   await f.runDebounce();

@@ -6,6 +6,10 @@ import { createUserService } from '../src/modules/users/user-service.mjs';
 
 const bootstrapKeys = ['BOOTSTRAP_ADMIN_NAME', 'BOOTSTRAP_ADMIN_EMAIL', 'BOOTSTRAP_ADMIN_PASSWORD'];
 const fromEnvironment = bootstrapKeys.some((key) => process.env[key] !== undefined);
+const superAdmin = process.argv.includes('--super-admin');
+const role = superAdmin ? 'superadministrador' : 'administrador';
+const label = superAdmin ? 'Superadministrador' : 'Administrador';
+const createOptions = superAdmin ? { firstSuperAdminOnly: true } : { firstAdminOnly: true };
 
 if (fromEnvironment) {
   let database;
@@ -20,10 +24,10 @@ if (fromEnvironment) {
       name: process.env.BOOTSTRAP_ADMIN_NAME,
       email: process.env.BOOTSTRAP_ADMIN_EMAIL,
       password: process.env.BOOTSTRAP_ADMIN_PASSWORD,
-      role: 'administrador',
+      role,
       active: true,
-    }, { firstAdminOnly: true });
-    console.log('Administrador criado. Acesse /login para entrar. Remova as variáveis BOOTSTRAP_ADMIN_* da hospedagem.');
+    }, createOptions);
+    console.log(`${label} criado. Acesse /login para entrar. Remova as variáveis BOOTSTRAP_ADMIN_* da hospedagem.`);
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;
@@ -39,8 +43,9 @@ if (fromEnvironment) {
   const output = new Writable({ write(chunk, encoding, callback) { if (!muted) process.stdout.write(chunk, encoding); callback(); } });
   const prompt = createInterface({ input: process.stdin, output, terminal: true });
   try {
-    if (database.prepare('SELECT id FROM users LIMIT 1').get()) throw new Error('Já existem usuários. Use Conta > Gerenciar usuários para criar outras contas.');
-    console.log('Criação do primeiro administrador do _stackmedia.');
+    if (superAdmin ? database.prepare("SELECT id FROM users WHERE role = 'superadministrador' LIMIT 1").get()
+      : database.prepare('SELECT id FROM users LIMIT 1').get()) throw new Error(`Já existe ${role}. Use a gestão de usuários para criar outras contas.`);
+    console.log(`Criação do primeiro ${role} do _stackmedia.`);
     const name = await prompt.question('Nome: ');
     const email = await prompt.question('E-mail: ');
     process.stdout.write('Senha (10 a 128 caracteres; entrada oculta): '); muted = true;
@@ -49,8 +54,8 @@ if (fromEnvironment) {
     const confirmation = await prompt.question('');
     muted = false; process.stdout.write('\n');
     if (password !== confirmation) throw new Error('As senhas não coincidem.');
-    await createUserService({ database }).create({ name, email, password, role: 'administrador', active: true }, { firstAdminOnly: true });
-    console.log('Administrador criado. Acesse /login para entrar.');
+    await createUserService({ database }).create({ name, email, password, role, active: true }, createOptions);
+    console.log(`${label} criado. Acesse /login para entrar.`);
   } catch (error) { muted = false; console.error(`\n${error.message}`); process.exitCode = 1; }
   finally { prompt.close(); database.close(); }
 }

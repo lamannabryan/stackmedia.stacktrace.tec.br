@@ -15,7 +15,7 @@ export function magazineArtworkUrl(format, ids) {
 
 export async function loadSelectedProducts(ids, requestJson) {
   return Promise.all(ids.map(async id => {
-    const product = await requestJson(`/api/products/${id}`);
+    const product = await requestJson(`/api/products/${id}`, { cache: 'no-store', signal: AbortSignal.timeout(15000) });
     if (product?.id !== id) throw new Error('Não foi possível carregar um dos produtos selecionados.');
     return product;
   }));

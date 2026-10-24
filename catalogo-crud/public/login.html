@@ -11,9 +11,11 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
   <link rel="stylesheet" href="/brand.css" />
   <link rel="stylesheet" href="/users.css" />
+  <link rel="stylesheet" href="/page-loading.css" />
   <link rel="stylesheet" href="/theme.css" />
 </head>
 <body class="login-page">
+  <script src="/js/page-loading.js"></script>
   <main class="login-layout">
     <section class="login-intro">
       <img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="288" height="40" alt="_stackmedia" />
@@ -25,7 +27,7 @@
     <section class="login-card" aria-labelledby="login-title">
       <p class="users-eyebrow">Bem-vindo de volta</p>
       <h2 id="login-title">Entre na sua conta</h2>
-      <form id="login-form">
+      <form id="login-form" method="post" action="/api/auth/login" aria-describedby="login-status">
         <label>E-mail<input name="email" type="email" autocomplete="username" maxlength="254" required /></label>
         <label>Senha<input name="password" type="password" autocomplete="current-password" maxlength="128" required /></label>
         <div class="login-options">

@@ -18,7 +18,7 @@ const context = ui.canvas.getContext('2d');
 const mobileViewport = window.matchMedia('(max-width: 900px)');
 const state = {
   step: 'products', selection: [], products: [], page: 0, total: 0, hasMore: false,
-  productRequest: null, productError: false, backgrounds: [], background: null,
+  productRequest: null, productSelectionRequest: null, productError: false, backgrounds: [], background: null,
   backgroundsLoading: false, backgroundsLoaded: false, snapshot: null, previewVersion: 0,
   seconds: 0, playing: false, frame: 0, exportController: null, downloadUrl: null, productView: 'catalog',
 };
@@ -98,6 +98,10 @@ function syncMobileControls() {
     ui['mobile-hint'].textContent = ui['export-status'].textContent;
     ui['mobile-hint'].classList.toggle('is-error', ui['export-status'].classList.contains('is-error'));
   }
+  if (state.productSelectionRequest) {
+    ui['mobile-next'].disabled = true;
+    ui['mobile-hint'].textContent = 'Carregando produto e preço…';
+  }
 }
 
 function showProductView(view, { focus = true } = {}) {
@@ -118,7 +122,7 @@ function selectionStatus() {
 }
 
 function syncControls() {
-  const busy = Boolean(state.exportController);
+  const busy = Boolean(state.exportController || state.productSelectionRequest);
   const complete = canContinue(state.selection);
   for (const node of stepButtons) {
     node.disabled = busy || (node.dataset.step !== 'products' && !complete)
@@ -156,6 +160,7 @@ function invalidatePreview() {
 
 function updateSelection(next) {
   if (state.exportController || next === state.selection) return;
+  state.productSelectionRequest = null;
   state.selection = next;
   invalidatePreview();
   renderSelected();
@@ -224,16 +229,40 @@ function renderSelected() {
   syncControls();
 }
 
+async function selectProductFromCatalogue(product) {
+  if (state.exportController || state.productSelectionRequest) return;
+  if (state.selection.some(entry => entry.product.id === product.id)) {
+    updateSelection(removeProduct(state.selection, product.id));
+    return;
+  }
+  const request = {};
+  state.productSelectionRequest = request;
+  renderResults();
+  status('Carregando produto e preço…');
+  try {
+    const [currentProduct] = await loadSelectedProducts([product.id], fetchJson);
+    if (state.productSelectionRequest !== request) return;
+    if (!currentProduct.imagem_local_url) throw new Error('Este produto está sem imagem. Selecione outro produto.');
+    state.products = state.products.map(item => item.id === currentProduct.id ? currentProduct : item);
+    updateSelection(addProduct(state.selection, currentProduct));
+    ui.results.querySelector(`[data-product-id="${product.id}"]`)?.focus({ preventScroll: true });
+  } catch (error) {
+    if (state.productSelectionRequest === request) status('Não foi possível carregar o produto e seu preço. Tente novamente.', true);
+  } finally {
+    if (state.productSelectionRequest === request) {
+      state.productSelectionRequest = null;
+      renderResults();
+    }
+  }
+}
+
 function renderResults() {
   ui.results.replaceChildren();
   for (const product of state.products) {
     const selected = state.selection.some((entry) => entry.product.id === product.id);
-    const card = button('', () => {
-      updateSelection(selected ? removeProduct(state.selection, product.id) : addProduct(state.selection, product));
-      ui.results.querySelector(`[data-product-id="${product.id}"]`)?.focus({ preventScroll: true });
-    }, 'indoor-product');
+    const card = button('', () => selectProductFromCatalogue(product), 'indoor-product');
     card.dataset.productId = String(product.id);
-    card.disabled = !product.imagem_local_url || (!selected && state.selection.length >= PRODUCT_LIMIT);
+    card.disabled = Boolean(state.productSelectionRequest) || !product.imagem_local_url || (!selected && state.selection.length >= PRODUCT_LIMIT);
     card.setAttribute('aria-pressed', String(selected));
     if (product.imagem_local_url) card.append(thumbnail(product.imagem_local_url));
     card.append(element('strong', '', product.nome), element('small', '', selected ? '✓ Selecionado' : 'Adicionar ao vídeo'));
@@ -249,8 +278,8 @@ function renderResults() {
   syncControls();
 }
 
-async function fetchJson(url, signal) {
-  const response = await fetch(url, { signal });
+async function fetchJson(url, { signal, cache } = {}) {
+  const response = await fetch(url, { signal, cache });
   if (!response.ok) throw new Error(response.status === 401 ? 'Sua sessão expirou. Atualize a página para entrar novamente.'
     : 'Não foi possível carregar os dados. Tente novamente.');
   return response.json();
@@ -271,7 +300,7 @@ async function loadProducts(append = false) {
   const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const params = new URLSearchParams({ q: ui.search.value.trim(), imagem: 'com', status: 'ativo', pageSize: '18', page: String(state.page + 1) });
-    const response = await fetchJson(`/api/products?${params}`, controller.signal);
+    const response = await fetchJson(`/api/products?${params}`, { signal: controller.signal });
     if (state.productRequest !== controller) return;
     state.products = append ? [...state.products, ...response.items] : response.items;
     state.page = response.pagination.page;
@@ -321,7 +350,7 @@ async function loadBackgrounds() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
   try {
-    const response = await fetchJson('/api/indoor-backgrounds', controller.signal);
+    const response = await fetchJson('/api/indoor-backgrounds', { signal: controller.signal });
     state.backgrounds = response.items.map((item) => ({ ...item, url: item.preview_url || item.url }));
     state.backgroundsLoaded = true;
     if (state.background && !state.backgrounds.some((item) => item.url === state.background.url)) {
@@ -434,7 +463,7 @@ async function preparePreview() {
 }
 
 function goTo(step) {
-  if (state.exportController || !['products', 'pricing', 'background', 'preview'].includes(step)) return;
+  if (state.exportController || state.productSelectionRequest || !['products', 'pricing', 'background', 'preview'].includes(step)) return;
   if (step !== 'products' && !canContinue(state.selection)) return;
   if (step === 'preview' && (!state.background || state.backgroundsLoading)) return;
   pause();
@@ -590,4 +619,5 @@ async function initialize() {
     status(error.message, true);
   }
 }
-void initialize();
+const initialLoad = initialize();
+globalThis.appLoading?.track(initialLoad);

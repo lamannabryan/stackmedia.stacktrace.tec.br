@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3ede8" />
+  <title>Superadmin · _stackmedia</title>
+  <script src="/js/theme.js"></script>
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <link rel="icon" href="/pwa-icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+  <link rel="stylesheet" href="/brand.css" />
+  <link rel="stylesheet" href="/users.css" />
+  <link rel="stylesheet" href="/account.css" />
+  <link rel="stylesheet" href="/app-shell.css" />
+  <link rel="stylesheet" href="/page-loading.css" />
+  <link rel="stylesheet" href="/theme.css" />
+  <link rel="stylesheet" href="/superadmin.css" />
+  <script type="module" src="/js/app-shell.js"></script>
+  <script src="/js/pwa.js" defer></script>
+</head>
+<body class="superadmin-page">
+  <script src="/js/page-loading.js"></script>
+  <header class="site-header"><div class="site-header-inner">
+    <a class="site-brand" href="/"><img class="site-brand-logo" src="/branding/stackmedia-wordmark.svg" width="288" height="40" alt="_stackmedia" /></a>
+  </div></header>
+  <main class="users-main">
+    <div class="users-heading"><div><p class="users-eyebrow">Superadmin</p><h1>Usuários e acesso</h1><p>Gerencie contas, limites de artes e validade em um só lugar.</p></div><button id="new-user" class="users-primary" type="button" disabled>+ Novo usuário</button></div>
+    <p class="superadmin-note">O limite mensal renova no início de cada mês, no horário de São Paulo. O pacote total não renova automaticamente. Limite esgotado impede novos logins.</p>
+    <div class="users-toolbar"><label>Buscar usuário<input id="user-search" type="search" placeholder="Nome ou e-mail" /></label><span id="user-count" role="status"></span><button id="reload-users" type="button" disabled>Atualizar lista</button></div>
+    <p id="users-status" class="users-feedback" role="status" aria-live="polite">Carregando usuários…</p>
+    <div class="users-table-wrap"><table class="users-table"><caption class="visually-hidden">Contas e condições de acesso</caption><thead><tr><th>Usuário</th><th>Perfil</th><th>Cadastro</th><th>Limite de artes</th><th>Expiração</th><th>Ações</th></tr></thead><tbody id="user-list"></tbody></table></div>
+    <noscript>Ative o JavaScript para gerenciar as contas.</noscript>
+  </main>
+  <dialog id="user-dialog" class="user-dialog" aria-labelledby="user-dialog-title">
+    <form id="user-form" method="post" action="/api/users">
+      <div class="users-heading"><h2 id="user-dialog-title">Novo usuário</h2><button id="close-user" type="button" aria-label="Fechar">×</button></div>
+      <fieldset id="user-fields">
+        <legend class="visually-hidden">Dados da conta e condições comerciais</legend>
+        <div class="superadmin-grid">
+          <label>Nome<input name="name" autocomplete="name" maxlength="120" required /></label>
+          <label>E-mail<input name="email" type="email" autocomplete="off" maxlength="254" required /></label>
+          <label>Perfil<select name="role"><option value="cliente">Cliente</option><option value="administrador">Administrador</option><option value="superadministrador">Superadministrador</option></select></label>
+          <label class="users-check"><input name="active" type="checkbox" checked /> Conta ativa</label>
+        </div>
+        <label><span id="password-label">Senha</span><input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" aria-describedby="password-help" /></label>
+        <small id="password-help">De 10 a 128 caracteres. Na edição, deixe vazio para manter a senha.</small>
+        <h3>Limite de artes</h3>
+        <div class="superadmin-grid">
+          <label>Modalidade<select name="limit_mode"><option value="unlimited">Ilimitado</option><option value="monthly">Mensal</option><option value="total">Pacote total</option></select></label>
+          <label>Quantidade de artes<input name="artwork_limit" type="number" min="0" step="1" max="9007199254740991" value="100" aria-describedby="limit-help" disabled /></label>
+        </div>
+        <small id="limit-help">Zero impede novos logins. Alterar a modalidade ou o limite preserva o consumo registrado. Para adicionar créditos a um pacote, aumente o limite total.</small>
+        <div id="quota-summary" class="superadmin-note" role="status">O consumo começa em zero para uma nova conta.</div>
+        <h3>Validade do acesso</h3>
+        <label class="users-check"><input name="expires" type="checkbox" /> Definir data de expiração</label>
+        <label>Expira em<input name="access_expires_at" type="datetime-local" step="1" aria-describedby="expiry-help" disabled /></label>
+        <small id="expiry-help">Horário deste dispositivo. Sem data, o acesso não expira. Alterar a validade encerra as sessões atuais.</small>
+      </fieldset>
+      <p id="user-form-status" class="users-feedback" role="status" aria-live="polite"></p>
+      <div class="users-actions"><button id="cancel-user" type="button">Cancelar</button><button id="save-user" class="users-primary" type="submit">Salvar usuário</button></div>
+    </form>
+  </dialog>
+  <script type="module" src="/js/superadmin.js"></script>
+</body>
+</html>

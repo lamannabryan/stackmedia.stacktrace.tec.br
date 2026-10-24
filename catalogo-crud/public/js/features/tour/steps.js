@@ -7,7 +7,7 @@ export const tours = {
     steps: [
       {
         id: 'create',
-        target: '[data-tour="home-create"]',
+        target: '[data-tour="home-create"] > .studio-primary-action',
         eyebrow: 'Seu ponto de partida',
         title: 'Uma oferta começa aqui',
         description: 'Crie Stories e Feed em PNG ou MP4. Para a televisão da loja, escolha Criar vídeo para TV: selecione de 2 a 5 produtos e monte um carrossel animado de 15 segundos.',

@@ -1,6 +1,8 @@
 import { createReadStream, existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pipeline } from 'node:stream/promises';
+import { createGzip } from 'node:zlib';
 import { defaultSecurityHeaders, sendError } from './response.mjs';
 import { fileVersion } from './file-version.mjs';
 
@@ -20,6 +22,17 @@ const mimeTypes = new Map([
   ['.woff2', 'font/woff2'],
   ['.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
 ]);
+
+function acceptsGzip(header = '') {
+  const encodings = String(header).toLowerCase().split(',').map((entry) => {
+    const [name, ...parameters] = entry.trim().split(';');
+    const quality = parameters.find((parameter) => parameter.trim().startsWith('q='));
+    return [name.trim(), quality === undefined ? 1 : Number(quality.trim().slice(2))];
+  });
+  const match = encodings.find(([name]) => name === 'gzip')
+    || encodings.find(([name]) => name === '*');
+  return Boolean(match && match[1] > 0 && match[1] <= 1);
+}
 
 export function fileExists(filePath) {
   return existsSync(filePath);
@@ -66,6 +79,9 @@ export async function serveFile({ request, response, rootDirectory, urlPath, cac
     }
 
     const contentType = mimeTypes.get(path.extname(filePath).toLowerCase()) || 'application/octet-stream';
+    const compressible = info.size >= 1024
+      && /^(?:text\/|application\/(?:json|manifest\+json)|image\/svg\+xml)/.test(contentType);
+    const compressed = compressible && acceptsGzip(request.headers['accept-encoding']);
     const version = cacheVersion || fileVersion(info);
     const etag = `W/"${version}"`;
     const requestedVersion = new URL(request.url, 'http://localhost').searchParams.get('v');
@@ -76,6 +92,8 @@ export async function serveFile({ request, response, rootDirectory, urlPath, cac
         ? 'private, max-age=31536000, immutable' : cacheControl,
       ETag: etag,
       'Last-Modified': info.mtime.toUTCString(),
+      ...(compressible ? { Vary: 'Accept-Encoding' } : {}),
+      ...(compressed ? { 'Content-Encoding': 'gzip' } : {}),
     };
     const matches = request.headers['if-none-match']?.split(',').some((tag) => (
       tag.trim() === '*' || tag.trim().replace(/^W\//, '') === etag.replace(/^W\//, '')
@@ -85,14 +103,15 @@ export async function serveFile({ request, response, rootDirectory, urlPath, cac
       response.end();
       return;
     }
-    response.writeHead(200, { ...headers, 'Content-Length': info.size });
+    response.writeHead(200, { ...headers, ...(!compressed ? { 'Content-Length': info.size } : {}) });
 
     if (request.method === 'HEAD') {
       response.end();
       return;
     }
 
-    createReadStream(filePath).pipe(response);
+    if (compressed) await pipeline(createReadStream(filePath), createGzip(), response);
+    else await pipeline(createReadStream(filePath), response);
   } catch (error) {
     if (error.code === 'ENOENT') {
       sendError(response, 404, 'Arquivo não encontrado.');

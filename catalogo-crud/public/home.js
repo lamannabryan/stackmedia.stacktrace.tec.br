@@ -209,6 +209,8 @@ if (eanOverlay && eanOpenButton && eanCloseButton && eanForm && eanInput) {
   syncScannerMode();
   if ((window.location.search || '').includes('openScanner=1')) {
     window.history.replaceState({}, '', window.location.pathname);
-    requestAnimationFrame(openScanner);
+    if (document.documentElement?.classList.contains('app-is-loading')) {
+      window.addEventListener('app-page-ready', openScanner, { once: true });
+    } else requestAnimationFrame(openScanner);
   }
 }

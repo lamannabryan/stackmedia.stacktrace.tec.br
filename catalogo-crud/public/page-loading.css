@@ -1,0 +1,49 @@
+html.app-is-loading,
+html.app-is-loading body { overflow: hidden !important; }
+
+/* Keep the layout measurable while hiding unfinished content and top-layer dialogs. */
+html.app-is-loading body > :not(.app-loading-overlay),
+html.app-is-loading body > :not(.app-loading-overlay) * { visibility: hidden !important; }
+
+.app-loading-overlay[hidden] { display: none; }
+.app-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 20px;
+  padding: 32px;
+  background: var(--color-page, #f3ede8);
+  color: var(--color-ink, #151515);
+  text-align: center;
+  font: 500 14px/1.5 var(--font-body, system-ui, sans-serif);
+  cursor: progress;
+}
+.app-loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-line, #d8cdc4);
+  border-top-color: var(--red, #e21a59);
+  border-radius: 50%;
+  animation: app-loading-spin .8s linear infinite;
+}
+.app-loading-message { max-width: 30ch; margin: 0; color: var(--color-muted, #625d58); }
+.app-loading-message:empty { display: none; }
+.app-loading-retry {
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-ink, #151515);
+  color: var(--color-page, #f3ede8);
+  font: inherit;
+  cursor: pointer;
+}
+.app-loading-retry:focus-visible { outline: 3px solid var(--red, #e21a59); outline-offset: 4px; }
+.app-loading-retry[hidden] { display: none; }
+@keyframes app-loading-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .app-loading-spinner { animation: none; }
+}

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { badRequest } from '../../http/errors.mjs';
 import { productImageUrl, resolveProductImage } from './product-images.mjs';
 import { currentMagazineMonth } from '../magazines/magazine-service.mjs';
+import { isAdminRole } from '../users/permissions.mjs';
 
 export const PRODUCT_STATUSES = Object.freeze(['pendente', 'ativo', 'inativo']);
 
@@ -98,7 +99,7 @@ function productFilters(searchParams, { role = 'administrador' } = {}) {
   const image = searchParams.get('imagem')?.trim();
   const manufacturer = searchParams.get('fabricante')?.trim();
 
-  if (role !== 'administrador') where.push("status = 'ativo'");
+  if (!isAdminRole(role)) where.push("status = 'ativo'");
 
   if (query) {
     const like = `%${query}%`;
@@ -204,7 +205,7 @@ export function createProductService({ database, imagesDirectory }) {
   }
 
   function getProduct(id, { role = 'administrador' } = {}) {
-    const visibility = role === 'administrador' ? '' : " AND status = 'ativo'";
+    const visibility = isAdminRole(role) ? '' : " AND status = 'ativo'";
     return serialize(database.prepare(`SELECT * FROM products WHERE id = ?${visibility}`).get(id));
   }
 
@@ -212,7 +213,7 @@ export function createProductService({ database, imagesDirectory }) {
     const ean = String(value || '').trim();
     if (!/^\d{8,14}$/.test(ean)) return null;
 
-    const visibility = role === 'administrador' ? '' : " AND status = 'ativo'";
+    const visibility = isAdminRole(role) ? '' : " AND status = 'ativo'";
 
     return serialize(database.prepare(`
       SELECT * FROM products
@@ -248,7 +249,7 @@ export function createProductService({ database, imagesDirectory }) {
   }
 
   function getSummary({ role = 'administrador' } = {}) {
-    const visibility = role === 'administrador' ? '' : "WHERE status = 'ativo'";
+    const visibility = isAdminRole(role) ? '' : "WHERE status = 'ativo'";
     const totals = database.prepare(`
       SELECT
         COUNT(*) AS total,
@@ -268,7 +269,7 @@ export function createProductService({ database, imagesDirectory }) {
   }
 
   function listCategories({ role = 'administrador' } = {}) {
-    const visibility = role === 'administrador' ? '' : "AND status = 'ativo'";
+    const visibility = isAdminRole(role) ? '' : "AND status = 'ativo'";
     return database.prepare(`
       SELECT categoria_produtos AS nome, COUNT(*) AS total
       FROM products
@@ -280,7 +281,7 @@ export function createProductService({ database, imagesDirectory }) {
 
   function createProduct(payload, { role = 'administrador' } = {}) {
     const values = sanitizePayload(payload, { creating: true });
-    const isAdmin = role === 'administrador';
+    const isAdmin = isAdminRole(role);
     const timestamp = nowSqlTimestamp();
     const product = {
       nome: values.nome,

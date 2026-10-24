@@ -1,7 +1,7 @@
 // Bump this version when changing the offline page or one of its dependencies.
 // Keep the namespace so activation removes older shells after the rebrand.
 const CACHE_PREFIX = 'vidamix-offline-';
-const CACHE_NAME = `${CACHE_PREFIX}v14`;
+const CACHE_NAME = `${CACHE_PREFIX}v17`;
 // Separate from the offline shell: image downloads survive app updates.
 const IMAGE_CACHE = 'vidamix-images-v1';
 const MAX_IMAGES = 240;
@@ -78,6 +78,8 @@ const OFFLINE_ASSETS = [
   '/theme.css',
   '/js/theme.js',
   '/app-shell.css',
+  '/page-loading.css',
+  '/js/page-loading.js',
   '/js/app-shell.js',
   '/js/pwa.js',
   '/branding/stackmedia-wordmark.svg',
@@ -92,6 +94,12 @@ const PAGE_PATHS = new Set([
   '/', '/catalogo', '/parceiros', '/artes/stories', '/artes/feed', '/artes/encarte', '/artes/indoor-h',
   '/index.html', '/catalogo.html', '/parceiros.html', '/stories.html', '/feed.html', '/encarte.html', '/indoor-h.html',
   OFFLINE_URL,
+]);
+const NAVIGATION_PATHS = new Set([
+  ...PAGE_PATHS,
+  '/login', '/login.html', '/usuarios', '/usuarios.html',
+  '/backgrounds', '/backgrounds.html', '/revistas', '/revistas.html',
+  '/import-produtos', '/import-produtos.html', '/apresentacao', '/apresentacao.html',
 ]);
 
 self.addEventListener('install', (event) => {
@@ -111,6 +119,8 @@ self.addEventListener('activate', (event) => {
     await Promise.all(names
       .filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
       .map((name) => caches.delete(name)));
+    // Start the document request while the browser wakes the worker.
+    try { await self.registration.navigationPreload?.enable(); } catch { /* Optional optimization. */ }
     await self.clients.claim();
   })());
 });
@@ -126,12 +136,15 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(cachedImage(request));
     return;
   }
-  if (request.mode === 'navigate' && PAGE_PATHS.has(pathname)) {
+  if (request.mode === 'navigate' && NAVIGATION_PATHS.has(pathname)) {
     event.respondWith((async () => {
       try {
         // Never cache application pages, API responses, or authentication errors.
+        const preloaded = await event.preloadResponse?.catch(() => undefined);
+        if (preloaded) return preloaded;
         return await fetch(request);
       } catch {
+        if (!PAGE_PATHS.has(pathname)) return Response.error();
         const cache = await caches.open(CACHE_NAME);
         return (await cache.match(OFFLINE_URL)) || Response.error();
       }

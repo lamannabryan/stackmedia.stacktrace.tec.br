@@ -186,8 +186,14 @@ $('reload-magazines').addEventListener('click', async () => {
   busy(true); try { await load(); $('magazine-status').textContent = 'Lista atualizada.'; }
   catch (error) { $('magazine-status').textContent = error.message; } finally { busy(false); }
 });
-sessionReady.then(async ({ user }) => {
+const initialLoad = sessionReady.then(async ({ user }) => {
   if (user.role !== 'administrador') { location.replace('/'); return; }
-  busy(true); try { await Promise.all([load(), loadBackgroundChoices()]); $('magazine-status').textContent = ''; }
+  busy(true); try {
+    const results = await Promise.allSettled([load(), loadBackgroundChoices()]);
+    const failure = results.find(result => result.status === 'rejected');
+    if (failure) throw failure.reason;
+    $('magazine-status').textContent = '';
+  }
   finally { busy(false); }
 }).catch(error => { $('magazine-status').textContent = error.message; });
+globalThis.appLoading?.track(initialLoad);

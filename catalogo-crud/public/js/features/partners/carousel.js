@@ -124,8 +124,6 @@ async function show(next, announce = false) {
   }
   const partner = partners[index];
   const magazine = partner.magazine;
-  const artwork = magazine ? null : await logoArtwork(partner.logo_url);
-  if (currentTransition !== transitionId) return;
   document.getElementById('magazine-cover').hidden = !magazine;
   root.querySelector('.partner-logo-frame').hidden = Boolean(magazine);
   get('caption').textContent = magazine ? 'SUA SELEÇÃO DO MÊS' : 'MARCAS QUE CONECTAM';
@@ -147,14 +145,13 @@ async function show(next, announce = false) {
     : 'Conheça este parceiro e explore os produtos do catálogo para criar sua próxima campanha.';
   get('products').href = `/catalogo?fabricante=${encodeURIComponent(partner.fabricante)}`;
   get('products').textContent = 'Explorar produtos →';
-  logoImages.forEach(image => { image.hidden = Boolean(artwork.failed); });
-  get('logo-placeholder').hidden = !artwork.failed;
+  logoImages.forEach(image => { image.hidden = true; image.removeAttribute('src'); });
+  get('logo-placeholder').hidden = false;
   get('logo').alt = `Logotipo de ${partner.fabricante}`;
-  if (!artwork.failed) {
-    logoImages.forEach(image => { image.src = artwork.src; });
-    await Promise.all(logoImages.map(image => image.decode().catch(() => {})));
-    if (currentTransition !== transitionId) return;
-  } else logoImages.forEach(image => image.removeAttribute('src'));
+  // Text and navigation are usable immediately, even if this logo is slow.
+  // Prepare only the visible slide; stale completions cannot replace a new one.
+  const logoReady = revealLogo(partner.logo_url, currentTransition);
+  globalThis.appLoading?.track(logoReady);
   }
   get('slide').setAttribute('aria-label', `${index + 1} de ${partners.length}: ${partner.fabricante}`);
   get('counter').textContent = `${index + 1} / ${partners.length}`;
@@ -170,6 +167,16 @@ async function show(next, announce = false) {
   }
   animations.forEach((animation) => animation.cancel());
   animations = [];
+}
+
+async function revealLogo(url, currentTransition) {
+  const artwork = await logoArtwork(url);
+  if (currentTransition !== transitionId || artwork.failed) return;
+  logoImages.forEach(image => { image.src = artwork.src; });
+  try { await Promise.all(logoImages.map(image => image.decode())); } catch { return; }
+  if (currentTransition !== transitionId) return;
+  logoImages.forEach(image => { image.hidden = false; });
+  get('logo-placeholder').hidden = true;
 }
 
 get('logo').addEventListener('error', () => {
@@ -216,9 +223,6 @@ async function load() {
     ]);
     if (!partnerResult && !magazine) throw new Error('load');
     partners = partnerResult || [];
-    const { user } = await sessionReady;
-    // Decode every partner, including the prepared crops, before revealing home.
-    await Promise.all(partners.map(partner => logoArtwork(partner.logo_url)));
     if (magazine) partners.unshift({ fabricante: magazine.title, magazine });
     get('products').hidden = false;
     get('controls').hidden = partners.length < 2;
@@ -234,8 +238,13 @@ async function load() {
     else {
       get('name').textContent = 'Sua próxima campanha começa aqui.';
       get('description').textContent = 'Explore os produtos do catálogo e prepare sua próxima campanha.';
-      get('products').href = user.role === 'administrador' ? '/parceiros' : '/catalogo';
-      get('products').textContent = user.role === 'administrador' ? 'Cadastrar parceiros →' : 'Explorar catálogo →';
+      get('products').href = '/catalogo';
+      get('products').textContent = 'Explorar catálogo →';
+      sessionReady.then(({ user }) => {
+        if (partners.length || user.role !== 'administrador') return;
+        get('products').href = '/parceiros';
+        get('products').textContent = 'Cadastrar parceiros →';
+      }).catch(() => {});
     }
   } catch {
     get('name').textContent = 'Destaques indisponíveis';
@@ -248,4 +257,5 @@ async function load() {
   }
 }
 get('retry').addEventListener('click', load);
-load();
+const initialLoad = load();
+globalThis.appLoading?.track(initialLoad);

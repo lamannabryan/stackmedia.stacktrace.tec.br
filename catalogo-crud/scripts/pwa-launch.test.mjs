@@ -63,10 +63,13 @@ function launch({ standalone = true, apple = false, reduced = false, referrer = 
   };
 }
 
-test('launch appears only for installed apps; browser preview is explicit', () => {
+const preview = (options = {}) => launch({ search: '?abertura=1', ...options });
+
+test('installed apps and browsers open without an artificial splash; preview is explicit', () => {
   assert.equal(launch({ standalone: false }).overlay, undefined);
-  assert.ok(launch().overlay);
-  assert.ok(launch({ standalone: false, apple: true }).overlay);
+  assert.equal(launch().overlay, undefined);
+  assert.equal(launch({ standalone: false, apple: true }).overlay, undefined);
+  assert.equal(launch().timers.size, 0);
   assert.ok(launch({ standalone: false, search: '?abertura=1' }).overlay);
 });
 
@@ -79,11 +82,11 @@ test('the home screen never receives the PWA splash: it has its own opening', ()
 test('internal links, reloads and history never replay the launch', () => {
   assert.equal(launch({ referrer: 'https://vidamix.test/catalogo' }).overlay, undefined);
   for (const type of ['reload', 'back_forward']) assert.equal(launch({ type }).overlay, undefined);
-  assert.ok(launch({ referrer: 'https://other.test/' }).overlay);
+  assert.equal(launch({ referrer: 'https://other.test/' }).overlay, undefined);
 });
 
 test('launch reveals the app after the introduction and releases every timer', () => {
-  const app = launch();
+  const app = preview();
   app.advance(3199);
   assert.equal(app.overlay.classes.has('is-leaving'), false);
   app.advance(1);
@@ -94,7 +97,7 @@ test('launch reveals the app after the introduction and releases every timer', (
 });
 
 test('reduced motion does not impose the animated introduction delay', () => {
-  const app = launch({ reduced: true });
+  const app = preview({ reduced: true });
   app.advance(300);
   app.advance(0);
   assert.equal(app.overlay.classes.has('is-leaving'), true);
@@ -103,12 +106,12 @@ test('reduced motion does not impose the animated introduction delay', () => {
 });
 
 test('slow initialization is bounded and late readiness cannot resurrect the overlay', () => {
-  const app = launch({ loading: true });
+  const app = preview({ loading: true });
   app.advance(4500);
   assert.equal(app.overlay.removed, true);
   app.document.dispatch('DOMContentLoaded');
   assert.equal(app.timers.size, 0);
-  const ready = launch({ loading: true });
+  const ready = preview({ loading: true });
   ready.advance(1800);
   ready.document.dispatch('DOMContentLoaded');
   ready.advance(2120);
@@ -117,7 +120,7 @@ test('slow initialization is bounded and late readiness cannot resurrect the ove
 
 test('interaction and leaving the page remove the overlay before a history snapshot', () => {
   for (const event of ['keydown', 'pagehide', 'pointerdown']) {
-    const app = launch({ loading: true });
+    const app = preview({ loading: true });
     (event === 'pointerdown' ? app.overlay : app.window).dispatch(event);
     assert.equal(app.overlay.removed, true, event);
     assert.equal(app.timers.size, 0, event);
@@ -127,12 +130,12 @@ test('interaction and leaving the page remove the overlay before a history snaps
 test('every application entry loads the launch before visible content', async () => {
   for (const page of ['index', 'catalogo', 'stories', 'feed', 'indoor-h']) {
     const html = await readFile(new URL(`../public/${page}.html`, import.meta.url), 'utf8');
-    assert.match(html, /<body[^>]*>\s*<script src="\/js\/pwa-launch.js"><\/script>/, page);
+    assert.match(html, /<body[^>]*>\s*<script src="\/js\/page-loading.js"><\/script>\s*<script src="\/js\/pwa-launch.js"><\/script>/, page);
   }
 });
 
 test('suspending and restoring repeatedly never retains or resurrects the splash', () => {
-  const app = launch({ loading: true });
+  const app = preview({ loading: true });
   app.window.dispatch('pageshow', { persisted: false });
   assert.equal(app.overlay.removed, false);
   for (let cycle = 0; cycle < 4; cycle++) {
@@ -147,9 +150,9 @@ test('suspending and restoring repeatedly never retains or resurrects the splash
     assert.equal(app.overlay.removed, true);
     assert.equal(app.timers.size, 0);
   }
-  const restored = launch();
+  const restored = preview();
   restored.window.dispatch('pageshow', { persisted: true });
   assert.equal(restored.overlay.removed, true);
   assert.equal(restored.timers.size, 0);
-  assert.equal(launch({ hidden: true }).overlay.removed, true);
+  assert.equal(preview({ hidden: true }).overlay.removed, true);
 });

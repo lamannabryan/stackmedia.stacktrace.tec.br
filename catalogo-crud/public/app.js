@@ -552,7 +552,9 @@ async function saveProduct(event) {
     });
     closeDialog();
     if (!editing) state.page = 1;
-    await Promise.all([loadCategories(), loadProducts()]);
+    const results = await Promise.allSettled([loadCategories(), loadProducts()]);
+    const failure = results.find(result => result.status === 'rejected');
+    if (failure) throw failure.reason;
     showToast(editing
       ? `${product.nome} foi atualizado.`
       : canManageProducts ? `${product.nome} foi criado.` : `${product.nome} foi enviado para aprovação.`);
@@ -716,4 +718,5 @@ async function initialize() {
   }
 }
 
-initialize();
+const initialLoad = initialize();
+globalThis.appLoading?.track(initialLoad);

@@ -67,8 +67,12 @@ form.addEventListener('submit', async (event) => {
   } catch (error) { $('user-form-status').textContent = error.message; }
   finally { $('save-user').disabled = false; }
 });
-try {
-  currentUser = (await sessionReady).user;
-  if (currentUser.role !== 'administrador') throw new Error('Acesso exclusivo para administradores.');
-  await load(); $('new-user').disabled = false;
-} catch (error) { $('users-status').textContent = error.message; }
+async function initialize() {
+  try {
+    currentUser = (await sessionReady).user;
+    if (currentUser.role !== 'administrador') throw new Error('Acesso exclusivo para administradores.');
+    await load(); $('new-user').disabled = false;
+  } catch (error) { $('users-status').textContent = error.message; }
+}
+const initialLoad = initialize();
+globalThis.appLoading?.track(initialLoad);

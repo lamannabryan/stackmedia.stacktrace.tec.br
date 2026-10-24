@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getAppScreen, hasSoftwareKeyboard, initAppShell, initNavigationFeedback } from '../public/js/app-shell.js';
+import { getAppScreen, hasSoftwareKeyboard, initAppShell } from '../public/js/app-shell.js';
 
 class EventHost {
   listeners = new Map();
@@ -154,41 +154,4 @@ test('standalone detection supports both installed iOS and display-mode changes'
   browser.standalone.matches = true;
   browser.standalone.emit('change');
   assert.equal(browser.doc.documentElement.classList.contains('is-standalone'), true);
-});
-
-test('navigation feedback handles links, cancellation, new tabs, back/forward and recovery timeout', async () => {
-  const win = new EventHost();
-  const doc = new EventHost();
-  const timers = new Map();
-  Object.assign(win, {
-    location: new URL('https://vidamix.test/catalogo'),
-    setTimeout: (callback) => { timers.set(1, callback); return 1; },
-    clearTimeout: (id) => timers.delete(id),
-  });
-  Object.assign(doc, { body: element(), createElement: element, readyState: 'complete' });
-  initNavigationFeedback(win, doc);
-  const click = async (href, overrides = {}, linkOverrides = {}) => {
-    const link = { href, target: '', hasAttribute: () => false, ...linkOverrides };
-    doc.emit('click', { button: 0, target: { closest: () => link }, ...overrides });
-    await Promise.resolve();
-  };
-  for (const href of ['#products', '/catalogo', 'https://external.test/', '/assets/imagens/a.png']) await click(href);
-  await click('/artes/stories', { ctrlKey: true });
-  await click('/artes/stories', { defaultPrevented: true });
-  await click('/artes/stories', {}, { target: '_blank' });
-  await click('/artes/stories', {}, { hasAttribute: () => true });
-  assert.equal(doc.body.children.length, 0);
-  await click('/artes/stories?productId=42');
-  const indicator = doc.body.children[0];
-  assert.equal(indicator.hidden, false);
-  assert.equal(indicator.getAttribute('role'), 'status');
-  win.emit('pageshow');
-  assert.equal(indicator.hidden, true);
-  await click('/artes/feed');
-  timers.get(1)();
-  assert.equal(indicator.hidden, true);
-  assert.equal(doc.body.children.length, 1);
-  await click('/');
-  win.emit('pagehide');
-  assert.equal(indicator.hidden, true);
 });

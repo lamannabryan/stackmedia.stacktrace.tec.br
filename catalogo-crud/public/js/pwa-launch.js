@@ -3,18 +3,9 @@
   if (document.body?.classList.contains('home-page')) return;
 
   const preview = new URLSearchParams(window.location.search).get('abertura') === '1';
-  const standalone = window.matchMedia('(display-mode: standalone)').matches
-    || navigator.standalone === true;
-  if (!preview && !standalone) return;
-
-  // Cada tela é um documento: links internos não reexecutam a introdução.
-  const navigation = performance.getEntriesByType('navigation')[0];
-  let internal = false;
-  try {
-    internal = Boolean(document.referrer)
-      && new URL(document.referrer).origin === window.location.origin;
-  } catch { /* referrer indisponível = tratamos como nova abertura */ }
-  if (!preview && (internal || ['reload', 'back_forward'].includes(navigation?.type))) return;
+  // O sistema já apresenta a abertura nativa do PWA. Não acrescente uma espera
+  // artificial a cada inicialização; preserve a animação para demonstrações.
+  if (!preview) return;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

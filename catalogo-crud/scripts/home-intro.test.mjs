@@ -80,8 +80,18 @@ function intro({ home = true, reduced = false, referrer = '', type = 'navigate',
   };
 }
 
-test('o véu monta o gradient animado e entrega a tela exatamente em 2 s', () => {
-  const app = intro();
+const preview = (options = {}) => intro({ search: '?abertura=1', ...options });
+
+test('abertura normal e recarga não montam véu nem timers', () => {
+  for (const type of ['navigate', 'reload', 'back_forward']) {
+    const app = intro({ type });
+    assert.equal(app.overlay, undefined);
+    assert.equal(app.timers.size, 0);
+  }
+});
+
+test('a demonstração monta o gradient animado e entrega a tela exatamente em 2 s', () => {
+  const app = preview();
   assert.equal(app.overlay.className, 'home-intro');
   assert.match(app.overlay.innerHTML, /home-intro-canvas/);
   assert.equal((app.overlay.innerHTML.match(/home-intro-blob/g) || []).length, 3);
@@ -105,7 +115,7 @@ test('o véu monta o gradient animado e entrega a tela exatamente em 2 s', () =>
 });
 
 test('a abertura aparece só na tela inicial', () => {
-  assert.equal(intro({ home: false }).overlay, undefined);
+  assert.equal(preview({ home: false }).overlay, undefined);
 });
 
 test('voltar de outra tela ou do histórico não reexecuta a abertura', () => {
@@ -119,29 +129,29 @@ test('?abertura=1 força a abertura para demonstração', () => {
 });
 
 test('menos movimento entrega o conteúdo de imediato, sem véu', () => {
-  const app = intro({ reduced: true });
+  const app = preview({ reduced: true });
   assert.equal(app.overlay, undefined);
   assert.equal(app.document.body.classList.contains('home-entry-ready'), false);
   assert.equal(app.timers.size, 0);
 });
 
 test('toque, tecla ou saída da tela encerram o véu na hora', () => {
-  const tapped = intro();
+  const tapped = preview();
   tapped.overlay.dispatch('pointerdown');
   assert.equal(tapped.overlay.removed, true);
   assert.equal(tapped.document.body.classList.contains('home-entry-ready'), true);
   assert.equal(tapped.timers.size, 0);
 
-  const typed = intro();
+  const typed = preview();
   typed.window.dispatch('keydown');
   assert.equal(typed.overlay.removed, true);
   assert.equal(typed.timers.size, 0);
 
-  const left = intro();
+  const left = preview();
   left.window.dispatch('pagehide');
   assert.equal(left.overlay.removed, true, 'o véu sai antes do snapshot do histórico');
   assert.equal(left.timers.size, 0);
-  assert.equal(left.document.body.classList.contains('home-entry-ready'), false);
+  assert.equal(left.document.body.classList.contains('home-entry-ready'), true);
 });
 
 test('a tela inicial carrega a abertura antes de qualquer conteúdo visível', () => {
@@ -152,7 +162,7 @@ test('a tela inicial carrega a abertura antes de qualquer conteúdo visível', (
 });
 
 test('suspensão sem pagehide e restauração não preservam o véu', () => {
-  const app = intro();
+  const app = preview();
   app.window.dispatch('pageshow', { persisted: false });
   assert.equal(app.overlay.removed, false);
   for (let cycle = 0; cycle < 4; cycle++) {
@@ -165,9 +175,9 @@ test('suspensão sem pagehide e restauração não preservam o véu', () => {
     app.window.dispatch('pageshow', { persisted: true });
     assert.equal(app.overlay.removed, true);
   }
-  const restored = intro();
+  const restored = preview();
   restored.window.dispatch('pageshow', { persisted: true });
   assert.equal(restored.overlay.removed, true);
   assert.equal(restored.timers.size, 0);
-  assert.equal(intro({ hidden: true }).overlay.removed, true);
+  assert.equal(preview({ hidden: true }).overlay.removed, true);
 });

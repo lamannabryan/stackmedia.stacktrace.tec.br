@@ -135,7 +135,10 @@ test('anonymous access redirects pages, denies data and mutations, keeps login/P
   for (const route of ['/api/products', '/api/users', '/api/featured-partners', '/api/product-images/search/3017620422003']) assert.equal((await f.call(route)).status, 401, route);
   assert.equal((await f.call('/api/products', { method: 'POST', body: { nome: 'Unauthorized' } })).status, 401);
   for (const route of ['/login', '/login.html', '/users.css', '/js/login.js', '/manifest.json', '/pwa-icons/icon-192.png', '/offline.html', '/sw.js']) {
-    assert.equal((await f.call(route)).status, 200, route);
+    const response = await f.call(route);
+    assert.equal(response.status, 200, route);
+    // Finish static streams before teardown closes every server connection.
+    await response.arrayBuffer();
   }
 });
 
@@ -215,7 +218,9 @@ test('blocking users, password reset, expiration and logout revoke sessions', as
   const f = await fixture(t); let session = await f.login(f.client.email, 'client-password-123');
   await f.service.update(f.client.id, { ...f.client, active: false });
   assert.equal((await f.call('/api/auth/me', { session })).status, 401);
-  assert.equal((await f.call('/api/auth/login', { method: 'POST', body: { email: f.client.email, password: 'client-password-123' } })).status, 401);
+  const inactive = await f.call('/api/auth/login', { method: 'POST', body: { email: f.client.email, password: 'client-password-123' } });
+  assert.equal(inactive.status, 403);
+  assert.equal((await inactive.json()).code, 'ACCOUNT_INACTIVE');
   await f.service.update(f.client.id, { ...f.client, active: true });
   session = await f.login(f.client.email, 'client-password-123');
   await f.service.update(f.client.id, { ...f.client, password: 'changed-password' });

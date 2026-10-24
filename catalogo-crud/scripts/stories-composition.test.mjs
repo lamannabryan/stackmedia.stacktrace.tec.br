@@ -7,15 +7,20 @@ import { createStoriesEditorState } from '../public/js/features/stories/state.js
 import { createAutoLayout } from '../public/js/features/stories/auto-layout.js';
 import { getArtworkFormat } from '../public/js/features/stories/formats.js';
 import { getStoryVideoLayerState } from '../public/js/features/stories/video-animation.js';
+import { suggestedMagazinePrice } from '../public/js/features/stories/price-input.js';
+import { loadSelectedProducts, selectedProductIds } from '../public/js/features/magazines/selection.js';
 
 const source = await readFile(new URL('../public/js/features/stories/editor.js', import.meta.url), 'utf8');
 function selectionFixture(mode, formatName = 'stories') {
   const state = createStoriesEditorState(getArtworkFormat(formatName).maxProducts || 2); state.compositionMode = mode;
   const sandbox = vm.createContext({ state, COMPOSITION_COUNTS, compositionTargets,
+    productSelectionRequest: null, loadSelectedProducts, selectedProductIds, compositionModes, formatName,
+    format: getArtworkFormat(formatName), productPanel: {},
+    addProductToResults(product) { state.productResults.push(product); },
     COMPOSITION_MODES: new Set(compositionModes(formatName)), compositionPanel: {},
     elements: { productContent: { contains: () => false } }, document: { activeElement: null },
     syncCompositionModeControls() {}, setPanelCollapsed() {}, syncProductPanel() {},
-    renderProducts() {}, syncProductEditor() {}, renderPreview() {},
+    renderProducts() {}, syncProductEditor() {}, renderPreview() {}, updateAvailability() {},
     suggestedMagazinePrice: product => product?.price || '', setProductRemovalStatus() {},
     refreshProductSelection() {}, setStatus() {}, mobileEditor: null });
   for (const name of ['getCompositionProductLimit', 'isMultiProductMode', 'productTargets', 'detailTargets', 'extraSlot',
@@ -24,8 +29,83 @@ function selectionFixture(mode, formatName = 'stories') {
     const start = source.indexOf(`function ${name}(`);
     vm.runInContext(source.slice(start, source.indexOf('\nfunction ', start + 1)), sandbox);
   }
+  for (const name of ['selectProductFromCatalogue', 'preselectProductFromLocation']) {
+    const start = source.indexOf(`async function ${name}(`);
+    const end = source.slice(start + 1).search(/\n(?:async )?function /);
+    vm.runInContext(source.slice(start, start + 1 + end), sandbox);
+  }
   return sandbox;
 }
+
+for (const formatName of ['stories', 'feed', 'encarte']) {
+  test(`${formatName} refreshes magazine prices before selecting from an already loaded catalogue`, async () => {
+    const f = selectionFixture('two-products', formatName);
+    f.suggestedMagazinePrice = suggestedMagazinePrice;
+    const current = { id: 1, imagem_local_url: '/product.png', revista_preco_centavos: 1990 };
+    const requests = [];
+    f.requestJson = async (url, options) => {
+      requests.push(url);
+      assert.equal(options.cache, 'no-store');
+      return { ...current };
+    };
+    await f.selectProductFromCatalogue({ ...current, revista_preco_centavos: 999 });
+    assert.equal(f.state.price, '19,90');
+    assert.deepEqual(requests, ['/api/products/1']);
+    f.state.price = '17,50';
+    current.id = 2;
+    current.revista_preco_centavos = 2990;
+    await f.selectProductFromCatalogue({ id: 2 });
+    assert.equal(f.state.price, '17,50', 'adding another product preserves manual edits');
+    assert.equal(f.state.secondaryPrice, '29,90');
+    await f.selectProductFromCatalogue(current);
+    assert.equal(requests.length, 2, 'deselecting requires no lookup');
+    current.revista_preco_centavos = null;
+    await f.selectProductFromCatalogue({ ...current, revista_preco_centavos: 2990 });
+    assert.equal(f.state.secondaryPrice, '', 'an expired or removed offer cannot survive in the catalogue');
+  });
+
+  test(`${formatName} applies magazine prices to single and multiple product links`, async () => {
+    for (const search of ['?productId=1', '?productIds=1,2']) {
+      const f = selectionFixture('single', formatName);
+      f.suggestedMagazinePrice = suggestedMagazinePrice;
+      f.window = { location: { search } };
+      f.requestJson = async url => ({ id: Number(url.split('/').at(-1)), revista_preco_centavos: 1990 });
+      assert.equal(await f.preselectProductFromLocation(), true);
+      assert.equal(f.state.price, '19,90');
+      assert.equal(f.state.secondaryPrice, search.includes('productIds') ? '19,90' : '');
+    }
+  });
+}
+
+test('catalogue selection fails without inserting stale prices and can retry', async () => {
+  const f = selectionFixture('single');
+  const messages = [];
+  f.suggestedMagazinePrice = suggestedMagazinePrice;
+  f.setStatus = (...args) => messages.push(args);
+  f.requestJson = async () => { throw new Error('Network unavailable'); };
+  await f.selectProductFromCatalogue({ id: 1, revista_preco_centavos: 999 });
+  assert.equal(f.state.selectedProduct, null);
+  assert.equal(f.state.price, '');
+  assert.equal(messages.at(-1)[1], true);
+  f.requestJson = async () => ({ id: 1, imagem_local_url: '/product.png', revista_preco_centavos: 1990 });
+  await f.selectProductFromCatalogue({ id: 1 });
+  assert.equal(f.state.price, '19,90');
+});
+
+test('pending catalogue selections cannot apply after removal or a composition change', async () => {
+  for (const cancel of [f => f.removeProductFromComposition('all'), f => f.setCompositionMode('single')]) {
+    const f = selectionFixture('two-products');
+    let resolve;
+    f.requestJson = () => new Promise(done => { resolve = done; });
+    const pending = f.selectProductFromCatalogue({ id: 1 });
+    await f.selectProductFromCatalogue({ id: 2 });
+    cancel(f);
+    resolve({ id: 1, imagem_local_url: '/product.png', revista_preco_centavos: 1990 });
+    await pending;
+    assert.equal(f.state.selectedProduct, null);
+    assert.equal(f.productSelectionRequest, null);
+  }
+});
 
 test('both editors offer only one product, two products and a two-product combo', async () => {
   assert.deepEqual(compositionModes('stories'), ['single', 'two-products', 'combo']);

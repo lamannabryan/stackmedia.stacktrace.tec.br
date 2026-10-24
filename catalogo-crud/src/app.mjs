@@ -4,7 +4,7 @@ import { backgroundVariant } from './modules/stories/background-variants.mjs';
 import { isRequestAuthorized, sendUnauthorized } from './http/auth.mjs';
 import { defaultSecurityHeaders, sendError, sendJson, readJsonBody } from './http/response.mjs';
 import { createUserService } from './modules/users/user-service.mjs';
-import { createSessionService, requireAdmin, validateMutation } from './modules/users/session-service.mjs';
+import { createSessionService, requireAdmin, requireSuperAdmin, validateMutation } from './modules/users/session-service.mjs';
 import { serveFile } from './http/static-files.mjs';
 import { createProductService } from './modules/products/product-service.mjs';
 import { createProductImportService } from './modules/products/product-import-service.mjs';
@@ -151,7 +151,11 @@ export function createApplication({ config, database, logger = console, integrat
         || /^\/(js|fonts|branding)\/[a-zA-Z0-9_./-]+\.(js|woff2|svg)$/.test(pathname);
       if (isSafeStaticMethod(request.method) && (loginPage || publicResource)) {
         await serveFile({ request, response, rootDirectory: config.publicDirectory,
-          urlPath: loginPage ? 'login.html' : pathname.slice(1) });
+          urlPath: loginPage ? 'login.html' : pathname.slice(1),
+          // Reuse unchanged assets on every screen, while checking each deployment.
+          // HTML and the worker itself must always come from the server.
+          cacheControl: loginPage || pathname === '/offline.html' || pathname === '/sw.js'
+            ? 'no-store' : 'private, no-cache' });
         return;
       }
       if (pathname === '/api/health' && request.method === 'GET') {
@@ -176,12 +180,14 @@ export function createApplication({ config, database, logger = console, integrat
         }
         return;
       }
+      if (['/superadmin', '/superadmin.html'].includes(pathname.toLowerCase())) requireSuperAdmin(session);
       if (['/parceiros', '/parceiros.html', '/usuarios', '/usuarios.html', '/backgrounds', '/backgrounds.html', '/revistas', '/revistas.html', '/import-produtos', '/import-produtos.html'].includes(pathname.toLowerCase())
         || pathname.toLowerCase().startsWith('/api/users')) requireAdmin(session);
       if (!isSafeStaticMethod(request.method)) {
         const isProductCreation = request.method === 'POST' && pathname === '/api/products';
         const isProductLookup = request.method === 'POST' && pathname === '/api/products/lookup-ean';
-        if (pathname !== '/api/auth/logout' && !isProductCreation && !isProductLookup) requireAdmin(session);
+        const isArtworkGeneration = request.method === 'POST' && pathname === '/api/artworks/generations';
+        if (pathname !== '/api/auth/logout' && !isProductCreation && !isProductLookup && !isArtworkGeneration) requireAdmin(session);
         validateMutation(request, session, { production: config.environment === 'production' });
       }
       if (url.pathname.startsWith('/api/')) {
@@ -280,7 +286,9 @@ export function createApplication({ config, database, logger = console, integrat
         ? error.message
         : 'Erro interno do servidor.';
 
-      if (!response.headersSent) sendError(response, statusCode, message);
+      if (!response.headersSent) sendError(response, statusCode, message, {
+        code: error instanceof HttpError && error.expose ? error.code : undefined,
+      });
       else response.destroy();
     }
   };

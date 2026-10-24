@@ -268,6 +268,7 @@ function initTour() {
   }
 
   function open({ replay = false } = {}) {
+    if (document.documentElement.classList.contains('app-is-loading')) return;
     if (dialog.open) return;
     tour = currentTour();
     // Let the scanner or product dialog finish before offering onboarding.
@@ -334,6 +335,7 @@ function initTour() {
   }
 
   function offerTour() {
+    if (document.documentElement.classList.contains('app-is-loading')) return;
     if (!autoPending || document.visibilityState !== 'visible') return;
     clearTimeout(autoTimer);
     autoTimer = setTimeout(() => {
@@ -341,7 +343,8 @@ function initTour() {
       if (autoPending) offerTour();
     }, 700);
   }
-  // Wait for the page, without waiting indefinitely for image downloads or API calls.
+  // Offer onboarding only after the initial content has been revealed.
+  window.addEventListener('app-page-ready', offerTour);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', offerTour, { once: true });
   else offerTour();
   document.addEventListener('visibilitychange', offerTour);

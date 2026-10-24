@@ -23,12 +23,14 @@
     <link rel="stylesheet" href="/magazine-catalogue.css" />
     <link rel="stylesheet" href="/tour.css" />
     <link rel="stylesheet" href="/app-shell.css" />
+    <link rel="stylesheet" href="/page-loading.css" />
     <link rel="stylesheet" href="/account.css" />
     <link rel="stylesheet" href="/theme.css" />
     <script type="module" src="/js/app-shell.js"></script>
     <script type="module" src="/js/session.js"></script>
   </head>
   <body class="home-page" data-tour-page="home">
+    <script src="/js/page-loading.js"></script>
     <script src="/js/pwa-launch.js"></script>
     <script src="/js/home-intro.js"></script>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -114,26 +116,87 @@
 
           <div class="format-grid format-grid-available" data-tour="home-formats">
             <article class="format-card format-card-story is-ready">
-              <div class="format-card-topline"><span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="7" y="3" width="10" height="18" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M10 6h4M10.5 18h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
-              <div><h3>Stories</h3><p>Campanhas verticais para Instagram e WhatsApp.</p></div>
-              <div class="format-card-footer"><span>1080 × 1920 · 9:16</span><a href="/artes/stories">Criar Story <b aria-hidden="true">→</b></a></div>
+              <div class="format-card-topline">
+                <span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="7" y="3" width="10" height="18" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M10 6h4M10.5 18h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                <span class="format-card-visual" aria-hidden="true">
+                  <span class="format-ratio">9:16</span>
+                  <span class="format-preview"></span>
+                </span>
+              </div>
+              <h3>Stories</h3>
+              <p>Campanhas verticais para Instagram e WhatsApp.</p>
+              <ul class="format-features">
+                <li>Imagem ou vídeo</li>
+                <li>Instagram e WhatsApp</li>
+                <li>Fundo próprio</li>
+              </ul>
+              <div class="format-card-footer">
+                <span>1080 × 1920 px</span>
+                <a href="/artes/stories" aria-label="Criar Story">Criar <span class="format-cta-word">Story</span> <b aria-hidden="true">→</b></a>
+              </div>
             </article>
 
-            <article class="format-card format-card-encarte is-ready" aria-label="Encarte quadrada">
-              <div class="format-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div>
-              <div><h3>Encarte</h3><p>Até 5 produtos em uma arte quadrada, com fundos próprios.</p></div>
-              <div class="format-card-footer"><span>1080 × 1080 · 1:1</span><a href="/artes/encarte">Criar Encarte <b aria-hidden="true">→</b></a></div>
-            </article>
-            <article class="format-card format-card-feed is-ready" aria-label="Feed vertical">
-              <div class="format-card-topline"><span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M9 16.3 11.3 13l1.8 2.1 1.7-1.7 1.2 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-              <div><h3>Feed</h3><p>Artes em 4:5 para destacar suas ofertas no Instagram.</p></div>
-              <div class="format-card-footer"><span>1080 × 1350 · 4:5</span><a href="/artes/feed">Criar Feed <b aria-hidden="true">→</b></a></div>
+            <article class="format-card format-card-feed is-ready">
+              <div class="format-card-topline">
+                <span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M9 16.3 11.3 13l1.8 2.1 1.7-1.7 1.2 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span class="format-card-visual" aria-hidden="true">
+                  <span class="format-ratio">4:5</span>
+                  <span class="format-preview"></span>
+                </span>
+              </div>
+              <h3>Feed</h3>
+              <p>Artes em 4:5 para destacar suas ofertas no Instagram.</p>
+              <ul class="format-features">
+                <li>Imagem ou vídeo</li>
+                <li>Carrossel</li>
+                <li>Fundo próprio</li>
+              </ul>
+              <div class="format-card-footer">
+                <span>1080 × 1350 px</span>
+                <a href="/artes/feed" aria-label="Criar Feed">Criar <span class="format-cta-word">Feed</span> <b aria-hidden="true">→</b></a>
+              </div>
             </article>
 
-            <article class="format-card format-card-indoor is-ready" aria-label="TV horizontal">
-              <div class="format-card-topline"><span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 22h8m-4-4v4m-2-14 5 3-5 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-              <div><h3>TV</h3><p>Ofertas em movimento para a televisão da sua loja.</p></div>
-              <div class="format-card-footer"><span>1920 × 1080 · 16:9</span><a href="/artes/indoor-h">Criar vídeo para TV <b aria-hidden="true">→</b></a></div>
+            <article class="format-card format-card-encarte is-ready">
+              <div class="format-card-topline">
+                <span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke="currentColor" stroke-width="1.8"/></svg></span>
+                <span class="format-card-visual" aria-hidden="true">
+                  <span class="format-ratio">1:1</span>
+                  <span class="format-preview"></span>
+                </span>
+              </div>
+              <h3>Encarte</h3>
+              <p>Até 5 produtos em uma arte quadrada, com fundos próprios.</p>
+              <ul class="format-features">
+                <li>Até 5 produtos</li>
+                <li>Fundo próprio</li>
+                <li>Vitrine e impressão</li>
+              </ul>
+              <div class="format-card-footer">
+                <span>1080 × 1080 px</span>
+                <a href="/artes/encarte" aria-label="Criar Encarte">Criar <span class="format-cta-word">Encarte</span> <b aria-hidden="true">→</b></a>
+              </div>
+            </article>
+
+            <article class="format-card format-card-indoor is-ready">
+              <div class="format-card-topline">
+                <span class="format-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 22h8m-4-4v4m-2-14 5 3-5 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span class="format-card-visual" aria-hidden="true">
+                  <span class="format-ratio">16:9</span>
+                  <span class="format-preview"></span>
+                </span>
+              </div>
+              <h3>TV</h3>
+              <p>Ofertas em movimento para a televisão da sua loja.</p>
+              <ul class="format-features">
+                <li>2 a 5 ofertas</li>
+                <li>MP4 de 15 s</li>
+                <li>Fundo próprio</li>
+              </ul>
+              <div class="format-card-footer">
+                <span>1920 × 1080 px</span>
+                <a href="/artes/indoor-h" aria-label="Criar vídeo para TV">Criar <span class="format-cta-word">vídeo para TV</span> <b aria-hidden="true">→</b></a>
+              </div>
             </article>
           </div>
         </section>
@@ -142,10 +205,9 @@
     
         <section id="revista-atual" class="home-magazine" aria-labelledby="home-magazine-title" hidden>
           <div class="home-magazine-heading">
-            <div><p class="studio-kicker" id="home-magazine-period">Revista do mês</p><h2 id="home-magazine-title"></h2><p>Uma seleção para inspirar suas próximas ofertas, com preços sugeridos para suas campanhas.</p></div>
-            <span id="home-magazine-count" class="home-magazine-count"></span>
+            <div><p class="studio-kicker" id="home-magazine-period">Revista do mês</p><h2 id="home-magazine-title"></h2></div>
           </div>
-          <label class="home-magazine-search">Encontre um produto nesta edição<input id="home-magazine-search" type="search" placeholder="Nome ou EAN" /></label>
+          <div class="home-magazine-search"><input id="home-magazine-search" type="search" aria-label="Buscar produtos da revista" placeholder="Buscar produto, EAN ou fabricante" autocomplete="off" enterkeyhint="search" /></div>
           <p id="home-magazine-status" role="status"></p>
           <div id="home-magazine-products" class="home-magazine-grid"></div>
           <button id="home-magazine-more" class="partner-button" type="button" hidden>Ver mais produtos</button>

@@ -37,6 +37,7 @@ let mobileEditor;
 let artworkReady = false;
 let previewTask = null;
 let formatConverting = false;
+let productSelectionRequest = null;
 
 let COMPOSITION_MODES = new Set(compositionModes(formatName));
 const extraControls = new Map();
@@ -55,8 +56,8 @@ function createElement(tagName, className, textContent) {
   return element;
 }
 
-async function requestJson(url, { signal } = {}) {
-  const response = await fetch(url, { headers: { Accept: 'application/json' }, signal });
+async function requestJson(url, { signal, cache } = {}) {
+  const response = await fetch(url, { headers: { Accept: 'application/json' }, signal, cache });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.error || 'Não foi possível carregar os dados.');
   return payload;
@@ -225,7 +226,8 @@ function updateAvailability() {
   );
   const pricesReady = detailTargets().every(target => hasPrice(target));
   const ready = Boolean(
-    state.selectedBackground
+    !productSelectionRequest
+      && state.selectedBackground
       && state.selectedProduct
       && state.backgroundImage
       && state.backgroundImageUrl === state.selectedBackground.url
@@ -2013,6 +2015,7 @@ function setCompositionMode(value) {
   }
 
   const previousMode = state.compositionMode;
+  productSelectionRequest = null;
   setProductRemovalStatus();
   state.compositionMode = nextMode;
   // A combo price describes the complete bundle, not either individual item.
@@ -2065,6 +2068,7 @@ function refreshProductSelection({ collapseWhenComplete = false } = {}) {
 }
 
 function removeProductFromComposition(position) {
+  productSelectionRequest = null;
   if (isMultiProductMode()) {
     const entries = selectedProducts().map((product, index) => ({ product, price: getPriceForDetailsTarget(detailTargets()[index]) }));
     if (position === 'all') entries.length = 0;
@@ -2153,6 +2157,36 @@ function addProductToResults(product) {
   const productsById = new Map(state.productResults.map((item) => [item.id, item]));
   productsById.set(product.id, product);
   state.productResults = rankStoryProducts([...productsById.values()], elements.search.value.trim());
+}
+
+async function selectProductFromCatalogue(product) {
+  if (productSelectionRequest) return;
+  if (selectedProducts().some(item => item?.id === product.id)) {
+    selectProductForComposition(product);
+    return;
+  }
+  const request = {};
+  productSelectionRequest = request;
+  renderProducts();
+  updateAvailability();
+  setStatus('Carregando produto e preço…');
+  try {
+    // Reuse the link-selection lookup so an already open catalogue cannot supply an old offer.
+    const [currentProduct] = await loadSelectedProducts([product.id], requestJson);
+    if (productSelectionRequest !== request) return;
+    if (!currentProduct.imagem_local_url) throw new Error('Este produto está sem imagem. Selecione outro produto.');
+    addProductToResults(currentProduct);
+    productSelectionRequest = null;
+    selectProductForComposition(currentProduct);
+  } catch (error) {
+    if (productSelectionRequest === request) setStatus('Não foi possível carregar o produto e seu preço. Tente novamente.', true);
+  } finally {
+    if (productSelectionRequest === request) {
+      productSelectionRequest = null;
+      renderProducts();
+      updateAvailability();
+    }
+  }
 }
 
 async function preselectProductFromLocation() {
@@ -2262,9 +2296,9 @@ function renderProducts() {
       button.setAttribute('aria-label', `${product.nome}, produto ${selectedIndex + 1} selecionado`);
       copy.append(createElement('small', null, `Produto ${selectedIndex + 1}`));
     }
-    button.disabled = isMultiProductMode() && selectedIndex < 0 && selectedProducts().every(Boolean);
+    button.disabled = Boolean(productSelectionRequest) || (isMultiProductMode() && selectedIndex < 0 && selectedProducts().every(Boolean));
     button.append(imageWrap, copy);
-    button.addEventListener('click', () => selectProductForComposition(product));
+    button.addEventListener('click', () => selectProductFromCatalogue(product));
     return button;
   });
 
@@ -3372,7 +3406,7 @@ export async function initStoriesEditor() {
   setThirdsGridVisible(state.thirdsGridVisible);
   drawPreviewNow();
   try {
-    await Promise.all([loadBackgrounds(), loadProducts()]);
+    await Promise.allSettled([loadBackgrounds(), loadProducts()]);
     await preselectProductFromLocation();
     await renderPreview();
     // The mobile canvas stays expanded even when a product arrives from the catalogue.

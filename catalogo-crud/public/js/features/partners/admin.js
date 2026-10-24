@@ -190,5 +190,6 @@ retry.addEventListener('click', load);
 window.addEventListener('beforeunload', (event) => {
   if (cards.some((card) => card.isDirty())) { event.preventDefault(); event.returnValue = ''; }
 });
-load();
+const initialLoad = load();
+globalThis.appLoading?.track(initialLoad);
 

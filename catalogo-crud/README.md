@@ -108,6 +108,11 @@ terminal no servidor, com a mesma configuração de banco da aplicação. No Win
 use `npm.cmd run users:create-admin`. Não há senha padrão.
 Consulte [Login, usuários e permissões](docs/usuarios-e-permissoes.md).
 
+O backend também oferece o perfil `superadministrador`, limites de artes por mês
+ou pacote total e expiração de acesso por usuário. Crie o primeiro perfil com
+`npm run users:create-super-admin`. As regras, APIs e a integração ainda necessária
+com os editores estão em [Regras comerciais](docs/regras-comerciais.md).
+
 ## Identidade visual
 
 
@@ -142,12 +147,26 @@ Para regenerar os PNGs, execute `node scripts/generate-pwa-icons.mjs`.
 
 `public/manifest.json` define o modo standalone e a abertura na central.
 Todas as telas e seus aliases carregam o manifesto e `public/js/pwa.js`.
-A abertura animada está em `public/js/pwa-launch.js` e `public/pwa.css`.
-Ela aparece na entrada do app instalado (inclusive no iOS), sem repetir em links
-internos, recargas ou retorno pelo histórico. A apresentação leva cerca de 1,8 s,
-respeita movimento reduzido e pode ser encerrada por toque ou teclado.
-Para visualizar no navegador, abra `/?abertura=1`. A animação é exibida dentro
-do app; a tela nativa anterior à página continua sendo controlada pelo sistema.
+A abertura normal não impõe um tempo mínimo de animação. As apresentações de
+marca ficam disponíveis apenas com `?abertura=1`: na central, em
+`public/js/home-intro.js` e `public/home.css`; nas outras telas, em
+`public/js/pwa-launch.js` e `public/pwa.css`. Elas respeitam movimento reduzido
+e podem ser encerradas por toque ou teclado. A tela nativa anterior à página
+continua sendo controlada pelo sistema.
+
+CSS e JavaScript usam cache privado com ETag e revalidação: arquivos inalterados
+retornam 304, e alterações são verificadas a cada acesso. HTML, sessão e o worker
+continuam com `no-store`. Arquivos de texto a partir de 1 KiB são enviados com
+gzip quando aceito pelo navegador, com `Vary: Accept-Encoding`; imagens e fontes
+já comprimidas são transmitidas diretamente. No PWA, navigation preload inicia
+o download da página enquanto o worker desperta, quando suportado. Páginas e
+respostas de API não são armazenadas no Cache Storage.
+
+A revista e os parceiros são consultados em paralelo com a sessão. O carrossel
+libera texto e links sem esperar os logotipos e prepara apenas a marca visível.
+O módulo da lista de produtos da revista é carregado quando a seção se aproxima
+da área visível, com alternativa para navegadores sem IntersectionObserver.
+Valide esses comportamentos com `npm run test:pwa` e `npm run test:app-mobile`.
 O manifesto e os ícones de instalação aceitam GET/HEAD sem autenticação, para
 que a descoberta do ícone não dependa da sessão HTTP Basic do navegador.
 As páginas e os dados exigem uma sessão de usuário. O login e seus recursos
@@ -180,8 +199,9 @@ manifesto, ícones, rotas, autenticação, fallback offline e fluxo de instalaç
 
 Até 900 px, as telas usam cabeçalhos compactos, áreas de toque maiores e os
 espaçamentos seguros do aparelho. A central e o catálogo têm navegação inferior
-com **Início**, **Catálogo**, **Stories** e **Feed**. Os cartões, botões e links de
-TV ficam ocultos no mobile; a rota direta continua disponível. No desktop,
+com **Início**, **Catálogo**, **Stories** e **Feed**. A seção de formatos exibe
+o cartão de TV também no mobile, com acesso à criação de vídeo. Os demais links
+de TV fora das ações principais continuam ocultos no mobile. No desktop,
 os acessos a TV permanecem. O modo instalado é identificado tanto por
 `display-mode: standalone` quanto pelo sinal do Safari no iOS.
 

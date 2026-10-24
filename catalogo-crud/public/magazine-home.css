@@ -7,10 +7,9 @@
 .home-magazine { margin-top: 48px; padding: 32px; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); scroll-margin-top: 100px; }
 .home-magazine-heading { display: flex; align-items: start; justify-content: space-between; gap: 24px; }
 .home-magazine h2 { margin: 10px 0; font-size: clamp(25px, 3vw, 38px); letter-spacing: -.04em; overflow-wrap: anywhere; }
-.home-magazine-heading p:not(.studio-kicker) { max-width: 600px; color: var(--muted); font-size: 14px; line-height: 1.6; }
-.home-magazine-count { flex-shrink: 0; padding: 10px 14px; border-radius: 10px; background: var(--color-red-soft); color: var(--red-text); font-size: 12px; }
-.home-magazine-search { display: grid; gap: 8px; max-width: 420px; margin-top: 24px; font-size: 12px; color: var(--muted); }
+.home-magazine-search { width: 100%; margin-top: 16px; }
 .home-magazine-search input { width: 100%; min-height: 44px; padding: 10px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: inherit; font-size: 14px; }
+.home-magazine-search input:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 #home-magazine-status { font-size: 12px; color: var(--muted); margin-block: 16px; }
 .home-magazine-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .home-magazine-product { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }

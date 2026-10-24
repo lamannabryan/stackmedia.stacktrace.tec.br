@@ -1,13 +1,16 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { HttpError } from '../../http/errors.mjs';
 import { publicUser, verifyPassword } from './user-service.mjs';
+import { accessExpired, isAdminRole, SUPER_ADMIN_ROLE } from './permissions.mjs';
+import { createArtworkService } from '../artworks/artwork-service.mjs';
 
 const COOKIE = 'stackmedia_session';
 const SESSION_MS = 12 * 60 * 60 * 1000;
 const WINDOW_MS = 15 * 60 * 1000;
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 
-export function createSessionService({ database, config }) {
+export function createSessionService({ database, config, now = Date.now }) {
+  const artworks = createArtworkService({ database, now });
   function cookie(token, clear = false) {
     const secure = config.environment === 'production' || config.secureCookies;
     return `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${clear ? 0 : SESSION_MS / 1000}${secure ? '; Secure' : ''}`;
@@ -22,14 +25,18 @@ export function createSessionService({ database, config }) {
     if (!token) return null;
     const row = database.prepare(`SELECT users.*, user_sessions.csrf_token FROM user_sessions
       JOIN users ON users.id = user_sessions.user_id
-      WHERE token_hash = ? AND expires_at > ? AND users.active = 1`).get(token, Date.now());
+      WHERE token_hash = ? AND expires_at > ? AND users.active = 1`).get(token, now());
+    if (row && accessExpired(row, now())) {
+      database.prepare('DELETE FROM user_sessions WHERE user_id = ?').run(row.id);
+      return null;
+    }
     return row ? { user: publicUser(row), csrfToken: row.csrf_token } : null;
   }
   async function login(request, payload) {
     const email = typeof payload?.email === 'string' ? payload.email.trim().toLowerCase().slice(0, 254) : '';
-    const now = Date.now();
-    database.prepare('DELETE FROM login_attempts WHERE expires_at <= ?').run(now);
-    database.prepare('DELETE FROM user_sessions WHERE expires_at <= ?').run(now);
+    const startedAt = now();
+    database.prepare('DELETE FROM login_attempts WHERE expires_at <= ?').run(startedAt);
+    database.prepare('DELETE FROM user_sessions WHERE expires_at <= ?').run(startedAt);
     // Use the socket address, never an untrusted forwarded IP header.
     const keys = [[`email:${email}`, 10], [`ip:${request.socket.remoteAddress}`, 100]];
     for (const [key, limit] of keys) {
@@ -37,22 +44,31 @@ export function createSessionService({ database, config }) {
       if (entry?.attempts >= limit) throw new HttpError(429, 'Muitas tentativas. Aguarde 15 minutos e tente novamente.');
     }
     for (const [key] of keys) database.prepare(`INSERT INTO login_attempts (key, attempts, expires_at) VALUES (?, 1, ?)
-      ON CONFLICT(key) DO UPDATE SET attempts = attempts + 1`).run(digest(key), now + WINDOW_MS);
+      ON CONFLICT(key) DO UPDATE SET attempts = attempts + 1`).run(digest(key), startedAt + WINDOW_MS);
     const account = database.prepare('SELECT * FROM users WHERE email = ?').get(email);
     const valid = await verifyPassword(payload?.password, account?.password_hash);
-    // Recheck after password derivation: disabling/resetting a user must win a concurrent login.
-    const latest = account && database.prepare('SELECT * FROM users WHERE id = ?').get(account.id);
-    if (!valid || !latest?.active || latest.password_hash !== account.password_hash) {
-      throw new HttpError(401, 'E-mail ou senha inválidos.');
-    }
-    database.prepare('DELETE FROM login_attempts WHERE key = ?').run(digest(`email:${email}`));
-    const token = randomBytes(32).toString('hex');
-    const csrfToken = randomBytes(32).toString('hex');
-    const old = tokenHash(request);
-    if (old) database.prepare('DELETE FROM user_sessions WHERE token_hash = ?').run(old);
-    database.prepare('INSERT INTO user_sessions (token_hash, user_id, csrf_token, expires_at) VALUES (?, ?, ?, ?)')
-      .run(digest(token), latest.id, csrfToken, now + SESSION_MS);
-    return { user: publicUser(latest), csrfToken, cookie: cookie(token) };
+    if (!valid) throw new HttpError(401, 'E-mail ou senha inválidos.');
+    // Authenticate before exposing any account restriction. Recheck the account
+    // and quota after password hashing, then issue the session atomically.
+    database.exec('BEGIN IMMEDIATE');
+    try {
+      const latest = account && database.prepare('SELECT * FROM users WHERE id = ?').get(account.id);
+      if (!latest || latest.password_hash !== account.password_hash) throw new HttpError(401, 'E-mail ou senha inválidos.');
+      if (!latest.active) throw new HttpError(403, 'O acesso desta conta está desativado.', { code: 'ACCOUNT_INACTIVE' });
+      if (accessExpired(latest, now())) throw new HttpError(403, 'O acesso desta conta expirou.', { code: 'ACCESS_EXPIRED' });
+      if (latest.artwork_limit !== null && artworks.quota(latest.id).remaining === 0) {
+        throw new HttpError(403, 'O limite de artes desta conta foi atingido.', { code: 'ARTWORK_LIMIT_REACHED' });
+      }
+      database.prepare('DELETE FROM login_attempts WHERE key = ?').run(digest(`email:${email}`));
+      const token = randomBytes(32).toString('hex');
+      const csrfToken = randomBytes(32).toString('hex');
+      const old = tokenHash(request);
+      if (old) database.prepare('DELETE FROM user_sessions WHERE token_hash = ?').run(old);
+      database.prepare('INSERT INTO user_sessions (token_hash, user_id, csrf_token, expires_at) VALUES (?, ?, ?, ?)')
+        .run(digest(token), latest.id, csrfToken, now() + SESSION_MS);
+      database.exec('COMMIT');
+      return { user: publicUser(latest), csrfToken, cookie: cookie(token) };
+    } catch (error) { database.exec('ROLLBACK'); throw error; }
   }
   function logout(request) {
     const token = tokenHash(request);
@@ -64,7 +80,12 @@ export function createSessionService({ database, config }) {
 
 export function requireAdmin(session) {
   if (!session) throw new HttpError(401, 'Faça login para continuar.');
-  if (session.user.role !== 'administrador') throw new HttpError(403, 'Acesso exclusivo para administradores.');
+  if (!isAdminRole(session.user.role)) throw new HttpError(403, 'Acesso exclusivo para administradores.');
+}
+
+export function requireSuperAdmin(session) {
+  if (!session) throw new HttpError(401, 'Faça login para continuar.');
+  if (session.user.role !== SUPER_ADMIN_ROLE) throw new HttpError(403, 'Acesso exclusivo para superadministradores.');
 }
 
 export function validateMutation(request, session, { login = false, production = false } = {}) {

@@ -1,6 +1,3 @@
-import { sessionReady } from '../../session.js';
-import { mountMagazineCatalogue } from './catalogue.js';
-
 export const magazineMonth = month => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${month}-01T12:00:00Z`));
 
 function renderMagazine(magazine) {
@@ -9,17 +6,44 @@ function renderMagazine(magazine) {
   section.hidden = false;
   document.getElementById('home-magazine-title').textContent = magazine.title;
   document.getElementById('home-magazine-period').textContent = `Revista do mês / ${magazineMonth(magazine.month)}`;
-  document.getElementById('home-magazine-count').textContent = `${magazine.items.length} produtos selecionados`;
-  mountMagazineCatalogue(magazine);
-
+  // The hero only needs the edition metadata. Load and build the product grid
+  // when it approaches the viewport, instead of delaying the first screen.
+  let mounting;
+  const mount = () => {
+    if (mounting) return mounting;
+    mounting = import('./catalogue.js').then(({ mountMagazineCatalogue }) => {
+      mountMagazineCatalogue(magazine);
+    }).catch(() => {
+      mounting = null;
+      const status = document.getElementById('home-magazine-status');
+      status.textContent = 'Não foi possível carregar os produtos da revista. ';
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'partner-button';
+      retry.textContent = 'Tentar novamente';
+      retry.addEventListener('click', () => { status.textContent = ''; mount(); });
+      status.append(retry);
+    });
+    globalThis.appLoading?.track(mounting);
+    return mounting;
+  };
+  if (!('IntersectionObserver' in window)) { mount(); return; }
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    observer.disconnect();
+    mount();
+  }, { rootMargin: '300px' });
+  observer.observe(section);
 }
 
+// This authenticated GET uses the session cookie and can run alongside /auth/me.
 // A single request supplies both the hero and the monthly selection.
-export const currentMagazine = sessionReady.then(async () => {
+export const currentMagazine = (async () => {
   const response = await fetch('/api/revistas/destaque', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error('Revista indisponível');
   const { revista } = await response.json();
   if (!revista?.items?.length) return null;
-  renderMagazine(revista);
   return revista;
-}).catch(() => null);
+})().catch(() => null);
+
+currentMagazine.then(magazine => { if (magazine) renderMagazine(magazine); });

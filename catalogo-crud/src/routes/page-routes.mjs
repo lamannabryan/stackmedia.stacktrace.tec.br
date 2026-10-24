@@ -8,6 +8,7 @@ const pages = new Map([
   ['/import-produtos', 'import-produtos.html'],
   ['/parceiros', 'parceiros.html'],
   ['/usuarios', 'usuarios.html'],
+  ['/superadmin', 'superadmin.html'],
   ['/backgrounds', 'backgrounds.html'],
   ['/revistas', 'revistas.html'],
   ['/login', 'login.html'],

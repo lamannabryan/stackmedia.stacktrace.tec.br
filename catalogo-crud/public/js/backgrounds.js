@@ -74,7 +74,8 @@ $('background-form').addEventListener('submit', async event => {
 });
 $('background-format').addEventListener('change', reload);
 $('reload-backgrounds').addEventListener('click', reload);
-sessionReady.then(({ user }) => {
+const initialLoad = sessionReady.then(({ user }) => {
   if (user.role !== 'administrador') { location.replace('/'); return; }
   return reload();
 }).catch(error => status(error.message));
+globalThis.appLoading?.track(initialLoad);

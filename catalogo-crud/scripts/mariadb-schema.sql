@@ -1,4 +1,4 @@
--- Estrutura de destino para as nove tabelas de data/catalogo.sqlite.
+-- Estrutura de destino para as tabelas de data/catalogo.sqlite.
 -- Datas permanecem texto para preservar formatos e valores do SQLite.
 -- Execute no banco selecionado pela conexão, sem DROP ou substituição de dados.
 CREATE TABLE app_meta (
@@ -55,10 +55,13 @@ CREATE TABLE users (
   name LONGTEXT NOT NULL,
   email VARCHAR(768) COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
   password_hash LONGTEXT NOT NULL,
-  role VARCHAR(32) NOT NULL CHECK (role IN ('administrador', 'cliente')),
+  role VARCHAR(32) NOT NULL CHECK (role IN ('superadministrador', 'administrador', 'cliente')),
   active BIGINT NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
   created_at LONGTEXT NOT NULL,
-  updated_at LONGTEXT NOT NULL
+  updated_at LONGTEXT NOT NULL,
+  access_expires_at LONGTEXT,
+  artwork_limit BIGINT CHECK (artwork_limit IS NULL OR artwork_limit >= 0),
+  artwork_limit_period VARCHAR(16) NOT NULL DEFAULT 'total' CHECK (artwork_limit_period IN ('monthly', 'total'))
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE user_sessions (
@@ -75,6 +78,19 @@ CREATE TABLE login_attempts (
   `key` VARCHAR(768) NOT NULL PRIMARY KEY,
   attempts BIGINT NOT NULL,
   expires_at BIGINT NOT NULL
+) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE artwork_generations (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  idempotency_key VARCHAR(128) NOT NULL,
+  format VARCHAR(16) NOT NULL CHECK (format IN ('stories', 'feed', 'encarte', 'indoor-h')),
+  output VARCHAR(8) NOT NULL CHECK (output IN ('png', 'mp4')),
+  period_month VARCHAR(7) NOT NULL,
+  created_at LONGTEXT NOT NULL,
+  UNIQUE KEY idx_artwork_generations_key (user_id, idempotency_key),
+  INDEX idx_artwork_generations_user_month (user_id, period_month),
+  CONSTRAINT fk_artwork_generations_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE magazines (

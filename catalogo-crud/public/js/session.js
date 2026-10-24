@@ -40,11 +40,14 @@ function showAccount({ user }) {
   const name = document.createElement('strong');
   name.textContent = user.name;
   const role = document.createElement('small');
-  role.textContent = user.role === 'administrador' ? 'Administrador' : 'Cliente';
+  role.textContent = user.role === 'superadministrador' ? 'Superadministrador' : user.role === 'administrador' ? 'Administrador' : 'Cliente';
   panel.append(name, role);
   const themeSlot = document.createElement('div');
   themeSlot.className = 'account-theme-slot';
   panel.append(themeSlot);
+  if (user.role === 'superadministrador') {
+    const link = document.createElement('a'); link.href = '/superadmin'; link.textContent = 'Painel superadmin'; panel.append(link);
+  }
   if (user.role === 'administrador') {
     for (const [href, text] of [['/revistas', 'Gerenciar revistas'], ['/backgrounds', 'Gerenciar backgrounds'], ['/usuarios', 'Gerenciar usuários'], ['/parceiros', 'Gerenciar parceiros']]) {
       const link = document.createElement('a'); link.href = href; link.textContent = text; panel.append(link);
@@ -69,10 +72,12 @@ function showAccount({ user }) {
     if (event.key === 'Escape' && menu.open) { menu.open = false; summary.focus(); }
   });
 }
-sessionReady.then(showAccount).catch((error) => {
+const accountReady = sessionReady.then(showAccount).catch((error) => {
   const message = document.createElement('p'); message.className = 'session-error';
   message.setAttribute('role', 'alert'); message.textContent = error.message; document.body.prepend(message);
 });
+globalThis.appLoading?.track(sessionReady);
+globalThis.appLoading?.track(accountReady);
 // Retomar uma página preservada não exige uma nova navegação do PWA.
 // Revalide a autenticação e o CSRF; recarregue somente se a identidade mudou.
 let restoringSession;

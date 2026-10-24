@@ -147,10 +147,10 @@ test('instalação independe do alias /icons/ e do MIME de .webmanifest no proxy
   assert.ok(report.checked.every((url) => !url.startsWith('/icons/') && !url.endsWith('.webmanifest')));
 });
 
-function workerHarness() {
+function workerHarness({ preload = true } = {}) {
   const handlers = new Map();
   const stores = new Map([['another-app-cache', new Map()], ['vidamix-offline-old', new Map()]]);
-  const state = { fetch: (request) => fetch(request), claimed: false, stores };
+  const state = { fetch: (request) => fetch(request), claimed: false, stores, preloadEnabled: false };
   const key = (request) => new URL(typeof request === 'string' ? request : request.url, origin).href;
   const caches = {
     keys: async () => [...stores.keys()],
@@ -182,6 +182,7 @@ function workerHarness() {
     fetch: (request) => state.fetch(request),
     self: {
       location: { origin },
+      registration: { ...(preload ? { navigationPreload: { enable: async () => { state.preloadEnabled = true; } } } : {}) },
       addEventListener: (type, handler) => handlers.set(type, handler),
       clients: { claim: async () => { state.claimed = true; } },
     },
@@ -191,10 +192,11 @@ function workerHarness() {
     handlers.get(type)({ waitUntil: (promise) => { work = promise; } });
     await work;
   };
-  state.request = (pathname, options = {}) => {
+  state.request = (pathname, { preloadResponse, ...options } = {}) => {
     let response = null;
     handlers.get('fetch')({
       request: { url: new URL(pathname, origin).href, method: 'GET', mode: 'navigate', ...options },
+      preloadResponse,
       respondWith: (promise) => { response = promise; },
     });
     return response;
@@ -217,6 +219,31 @@ test('service worker instala recursos existentes e oferece fallback offline nas 
   for (const pathname of ['/brand.css', '/pwa.css', '/branding/stackmedia-wordmark.svg', '/js/pwa.js']) {
     assert.equal((await worker.request(pathname, { mode: 'cors' })).status, 200);
   }
+});
+
+test('navigation preload reuses the document request including auth failures without a second fetch', async () => {
+  const worker = workerHarness();
+  await worker.lifecycle('activate');
+  assert.equal(worker.preloadEnabled, true);
+  let requests = 0;
+  worker.fetch = async () => { requests++; return new Response('fallback'); };
+  for (const status of [200, 401, 403, 500]) {
+    const response = await worker.request('/', { preloadResponse: Promise.resolve(new Response('preloaded', { status })) });
+    assert.equal(response.status, status);
+    assert.equal(await response.text(), 'preloaded');
+  }
+  assert.equal(requests, 0);
+  for (const pathname of ['/login', '/usuarios', '/revistas', '/backgrounds', '/import-produtos']) {
+    const response = await worker.request(pathname, { preloadResponse: Promise.resolve(new Response('preloaded page')) });
+    assert.equal(await response.text(), 'preloaded page');
+  }
+  assert.equal(requests, 0);
+  assert.equal(await (await worker.request('/', { preloadResponse: Promise.reject(new Error('preload unavailable')) })).text(), 'fallback');
+  assert.equal(requests, 1);
+  const unsupported = workerHarness({ preload: false });
+  await unsupported.lifecycle('activate');
+  assert.equal(unsupported.claimed, true);
+  assert.equal(unsupported.preloadEnabled, false);
 });
 
 test('worker mantém respostas online e erros de autenticação; não intercepta APIs, gravações ou imagens de produtos', async () => {
