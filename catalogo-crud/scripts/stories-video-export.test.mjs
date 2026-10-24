@@ -247,16 +247,16 @@ test('exports Encarte MP4 at 1080 × 1440 with 450 frames and 15 seconds', async
   assertReleased(recordings);
 });
 
-test('exports Indoor TV MP4 at 1920 × 1080 with 450 timed frames and 15 seconds', async (t) => {
+test('exports Indoor TV MP4 at 1920 × 1080 with 1200 timed frames and 40 seconds', async (t) => {
   const recordings = installEncoder(t);
   const canvas = { width: 1920, height: 1080 };
   const rendered = [];
-  const blob = await exportStoryVideo(options({ canvas, renderFrame: (seconds) => rendered.push(seconds) }));
+  const blob = await exportStoryVideo(options({ canvas, duration: 40, renderFrame: (seconds) => rendered.push(seconds) }));
   assert.equal(blob.type, 'video/mp4');
-  assert.equal(recordings.frames.length, 450);
-  assert.equal(rendered.length, 450);
+  assert.equal(recordings.frames.length, 1200);
+  assert.equal(rendered.length, 1200);
   assert.equal(rendered[0], 0);
-  assert.equal(rendered.at(-1), 449 / 30);
+  assert.equal(rendered.at(-1), 1199 / 30);
   assert.equal(recordings.supportChecks[0].width, 1920);
   assert.equal(recordings.supportChecks[0].height, 1080);
   assert.equal(recordings.encoders[0].config.width, 1920);
@@ -267,15 +267,15 @@ test('exports Indoor TV MP4 at 1920 × 1080 with 450 timed frames and 15 seconds
     assert.equal(frame.timestamp, totalDuration, 'Landscape timestamps have no gaps or overlap');
     totalDuration += frame.duration;
   }
-  assert.equal(totalDuration, 15_000_000);
+  assert.equal(totalDuration, 40_000_000);
   const buffer = Buffer.from(await blob.arrayBuffer());
   const boxes = readBoxes(buffer);
-  assert.equal(boxDuration(buffer, findBox(boxes, 'mvhd')), 15);
-  assert.equal(boxDuration(buffer, findBox(boxes, 'mdhd')), 15);
+  assert.equal(boxDuration(buffer, findBox(boxes, 'mvhd')), 40);
+  assert.equal(boxDuration(buffer, findBox(boxes, 'mdhd')), 40);
   const header = findBox(boxes, 'tkhd');
   assert.equal(buffer.readUInt32BE(header.end - 8) / 65536, 1920);
   assert.equal(buffer.readUInt32BE(header.end - 4) / 65536, 1080);
-  assert.equal(buffer.readUInt32BE(findBox(boxes, 'stsz').start + 16), 450);
+  assert.equal(buffer.readUInt32BE(findBox(boxes, 'stsz').start + 16), 1200);
   assertReleased(recordings);
 });
 

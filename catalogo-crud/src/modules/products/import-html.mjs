@@ -33,6 +33,9 @@ export function validateHtmlProduct(payload) {
 export function parseProductHtml(payload) {
   if (typeof payload?.html !== 'string' || !payload.html.trim()) throw badRequest('Cole o HTML da lista de produtos.');
   if (Buffer.byteLength(payload.html, 'utf8') > 1024 * 1024) throw badRequest('O HTML deve ter até 1 MB.');
+  if (payload.fabricante != null && typeof payload.fabricante !== 'string') throw badRequest('Informe o fabricante como texto.');
+  const batchManufacturer = text(payload.fabricante);
+  if (batchManufacturer.length > 255) throw badRequest('Fabricante maior que 255 caracteres.');
   const $ = load(payload.html, {}, false);
   // Parse as data only: scripts are never run and remote resources are never loaded.
   $('script, style, template, noscript').remove();
@@ -50,7 +53,7 @@ export function parseProductHtml(payload) {
       // Use the explicit EAN field: image alt text can contain a padded, different code.
       ean: field(/^GTIN\s*\/\s*EAN\s*:\s*/i),
       nome: text(item.find('.content .item-title > a').first().text()),
-      fabricante: field(/^Fabricante\s*:\s*/i),
+      fabricante: batchManufacturer || field(/^Fabricante\s*:\s*/i),
       imagem_url: item.find('.picture img').first().attr('src')?.trim() || '',
     };
     try { return { position: index + 1, product: validateHtmlProduct(product), error: null }; }

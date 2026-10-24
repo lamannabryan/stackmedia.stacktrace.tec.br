@@ -1,0 +1,8 @@
+// Regras revisadas: referencia a fabricante ou marca distintiva, nunca palavras genericas.
+module.exports = {
+ direct: ['Vitapower','Amakha Paris','Phallebeauty','Via Aroma','Nupill','Essential Nutrition','Vitafor','Mayben','Bio Extratus','Salon Line','Giverny','Dalsan','Bem Basico','Eurofito','Mercur','Probelle','Ada Nutracêuticos','Marco Boni','Wella','Paris Elysees','Macrophytus','Muriel','Nutrata','Haskell','Health Labs','Vittore Labs','Bio Instinto','Katiguá','Griffus','Naturavene','Medquímica','Baruel','Hello Mini','Therapi','Lifar','Tok Bothanico','Omron','Desincha','KANECHOM','Amazonia Aromas','Incoterm','Sobral','Lolly','Catarinense','Farmax','Parentex','Doctor Berger','Skelt','Kestal','Minancora','Top Beauty','Mia Make','Skala','La Rive','Better Me','Bioland'],
+ tokens: {
+  'fiorucci':'Greenwood','aussie':'P&G','minesol':'Kenvue','darkness':'Integralmedica','topz':'Cremer','hidraderm':'Farmax','piquitucho':'Cremer','tabu':'Dana','anjinho':'Parentex','voxx':'Cimed','olla':'Reckitt','suplevit':'EMS','redubio':'Cimed','neostrata':'Kenvue','vitamel':'Herbaphytus','mili':'Mili','carmed':'Cimed','equaliv':'Althaia','impala':'Mundial','cimegripe':'Cimed','amend':'Amend Cosméticos','vodol':'União Química','kess':'Belliz','benatux':'Cifarma','rinosoro':'Hypera','novex':'Embelleze','ensure':'Abbott','bepantriz':'Cimed','acnezil':'Cimed','lisador':'Hypera','guacoflus':'Airela','ziinziin':'Ziinziin M Ltda','stomaliv':'Geolab','paixao':'Coty','hidramais':'Biocap','maxton':'Embelleze','depiroll':'Química Geral','skalinha':'Skala','miorrelax':'Neo Química','phytoderm':'Flora','viter':'Natulab','babybee':'Upa Br','dermskin':'Ada Nutracêuticos','advil':'Haleon',
+  'bodyaction':'Body Action'
+ }
+};

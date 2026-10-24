@@ -159,7 +159,7 @@ async function openEditor(t, options = {}) {
   const sandbox = vm.createContext({
     ...model, bindPriceInput, selectedProductIds, loadSelectedProducts, sampleThemeColor, document, window, Image: FakeImage,
     AbortController, DOMException, URLSearchParams, Blob,
-    INDOOR_WIDTH: 1920, INDOOR_HEIGHT: 1080, INDOOR_DURATION: 15,
+    INDOOR_WIDTH: 1920, INDOOR_HEIGHT: 1080, INDOOR_PRODUCT_DURATION: 8,
     drawIndoorFrame: (context, snapshot, seconds) => {
       paints.push({ context, snapshot, seconds });
       return getCarouselState(seconds, snapshot.products.length);
@@ -267,7 +267,9 @@ test('TV requires at least two products and a background, and limits selection t
   assert.equal(f.get('scenes').children.length, 5);
   assert.deepEqual(Array.from(f.paints.at(-1).snapshot.products, (entry) => entry.product.id), [1, 2, 3, 4, 5]);
   f.get('scenes').children[4].click();
-  assert.equal(f.paints.at(-1).seconds, 12);
+  assert.equal(f.paints.at(-1).seconds, 32);
+  assert.equal(f.get('duration-summary').textContent, '40 segundos');
+  assert.equal(Number(f.get('time').max), 40 - 1 / 30);
   f.get('play').click();
   assert.equal(f.frames.size, 1);
   f.document.hidden = true;
@@ -286,9 +288,9 @@ test('magazine links open TV with the selected order and imported prices and exp
   f.get('open-preview').click();
   await flush();
   assert.equal(f.get('scenes').children.length, 2);
-  assert.equal(f.get('sequence-summary').textContent, '2 produtos · 7,5 s por produto');
+  assert.equal(f.get('sequence-summary').textContent, '2 produtos · 8 s por produto');
   f.get('scenes').children[1].click();
-  assert.equal(f.paints.at(-1).seconds, 7.5);
+  assert.equal(f.paints.at(-1).seconds, 8);
   f.get('download').click();
   await flush();
   assert.equal(f.exports.length, 1);

@@ -21,6 +21,7 @@ h2[tabindex="-1"]:focus { outline: none; }
 .indoor-steps b { font-weight: inherit; }
 .indoor-step-short, .indoor-product-views, .indoor-mobile-dock { display: none; }
 .indoor-status { min-height: 24px; color: var(--color-muted); font-size: .82rem; }
+.indoor-status:empty { display: none; }
 .is-error { color: var(--red-text) !important; }
 .indoor-products-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); gap: 22px; align-items: start; }
 .indoor-panel { min-width: 0; padding: 24px; border: 1px solid var(--glass-line); border-radius: 20px; background: var(--glass-surface); box-shadow: var(--glass-highlight), var(--glass-shadow); }

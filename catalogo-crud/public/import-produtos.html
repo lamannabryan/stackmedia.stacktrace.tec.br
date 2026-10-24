@@ -16,6 +16,9 @@
     <h1>Importar produtos</h1>
     <p class="intro">Cole o HTML da lista para cadastrar os produtos e baixar suas imagens.</p>
     <form id="import-form">
+      <label for="batch-manufacturer">Fabricante do lote</label>
+      <input id="batch-manufacturer" name="fabricante" type="text" maxlength="255" aria-describedby="manufacturer-help" placeholder="Ex.: Nome do fabricante">
+      <p id="manufacturer-help" class="hint">O fabricante informado será aplicado a todos os produtos deste lote, substituindo o fabricante do HTML. Deixe vazio para usar os dados do HTML.</p>
       <label for="product-html">HTML dos produtos</label>
       <textarea id="product-html" name="html" rows="12" required spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="import-help" placeholder="Cole aqui o trecho &lt;ul id=&quot;tbl-produtos&quot;&gt;…&lt;/ul&gt;"></textarea>
       <p id="import-help" class="hint">Até 500 produtos por vez. EANs já cadastrados serão ignorados. Itens sem foto serão cadastrados sem imagem.</p>

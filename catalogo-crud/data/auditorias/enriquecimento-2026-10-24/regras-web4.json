@@ -1,0 +1,100 @@
+[
+  {
+    "pattern": "\\bneuromax\\b",
+    "fabricante": "Ecofitus",
+    "fontes": [
+      "https://www.ecofitus.com.br/produtos/neuromax/neuromax-hair"
+    ]
+  },
+  {
+    "pattern": "\\bcapitrat\\b",
+    "fabricante": "Hertz",
+    "fontes": [
+      "https://www.dismed.com.br/download/catalogs/hertz.pdf"
+    ]
+  },
+  {
+    "pattern": "\\bskinscience\\b",
+    "fabricante": "Cimed",
+    "fontes": [
+      "https://consultaremedios.com.br/creme-facial-skinscience-vitamina-c/p"
+    ]
+  },
+  {
+    "pattern": "\\bvizzela\\b",
+    "fabricante": "Vizzela",
+    "fontes": [
+      "https://www.vizzela.com.br/sobre-nos"
+    ]
+  },
+  {
+    "pattern": "\\bmondial\\b",
+    "fabricante": "Mondial",
+    "fontes": [
+      "https://www.mondial.com.br/cuidados-pessoais/cortador-de-cabelos"
+    ]
+  },
+  {
+    "pattern": "\\bwahl\\b",
+    "fabricante": "Wahl",
+    "fontes": [
+      "https://www.lojawahlbrasil.com.br/quem-somos"
+    ]
+  },
+  {
+    "pattern": "\\bwnf\\b",
+    "fabricante": "WNF",
+    "fontes": [
+      "https://www.wnf.com.br/quem-somos"
+    ]
+  },
+  {
+    "pattern": "\\bbarrominas\\b",
+    "fabricante": "Barro Minas",
+    "fontes": [
+      "https://barrominas.com.br/produtos/"
+    ]
+  },
+  {
+    "pattern": "\\b(higifral|personalidade)\\b",
+    "fabricante": "Eurofral",
+    "fontes": [
+      "https://eurofral.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\beudora\\b",
+    "fabricante": "Grupo Boticário",
+    "fontes": [
+      "https://www.boticario.com.br/marcas-amigas/eudora/"
+    ]
+  },
+  {
+    "pattern": "\\babove\\b",
+    "fabricante": "Baston",
+    "fontes": [
+      "https://baston.com.br/marcas/"
+    ]
+  },
+  {
+    "pattern": "\\b(blancy|glycare)\\b",
+    "fabricante": "Hypera",
+    "fontes": [
+      "https://www.panpharma.com.br/uploads/2021/05/Catalogo%20Panpharma%20HDNC_10-05-2021.pdf"
+    ]
+  },
+  {
+    "pattern": "\\b(baby free|baby star|babybless)\\b",
+    "fabricante": "Qualybless",
+    "fontes": [
+      "https://qlbdobrasil.corpsuite.com.br/toalhas"
+    ]
+  },
+  {
+    "pattern": "\\bdompel\\b",
+    "fabricante": "Dompel",
+    "fontes": [
+      "https://www.perfumariairene.com.br/produto/touca-metalizada-profissional-termica-para-hidratacao.html"
+    ]
+  }
+]

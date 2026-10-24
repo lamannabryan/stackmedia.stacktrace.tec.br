@@ -1,0 +1,11 @@
+[
+ {"pattern":"\\b(perdigao|qualy)\\b","fabricante":"BRF","fontes":["https://www.brf-global.com/en/our_brands/","https://www.qualy.com.br/profissionais-da-saude/politica-de-privacidade/"]},
+ {"pattern":"\\bype\\b","fabricante":"Química Amparo","fontes":["https://www.ype.ind.br/Contato"]},
+ {"pattern":"\\bitalac\\b","fabricante":"Italac","fontes":["https://www.italac.com.br/"]},
+ {"pattern":"\\b(neugebauer|bibs|stikadinho)\\b","fabricante":"Neugebauer","fontes":["https://www.neugebauer.com.br/","https://catalogo.marsil.com.br/catalogos/fornecedores/1251"]},
+ {"pattern":"\\b(lacta|oreo|sonho de valsa|laka|bis)\\b","exclude":"\\b(sorvete|mousse|picol[e]?|chocotone|panettone|panetone|bebida|shake)\\b","fabricante":"Mondelēz Brasil","fontes":["https://www.mondelezinternational.com/brazil/"]},
+ {"pattern":"\\b(toddy|toddynho|quaker|elma chips|ruffles|doritos|cheetos|lays)\\b","fabricante":"PepsiCo Brasil","fontes":["https://www.pepsico.com.br/quem-somos/sobre-a-pepsico"]},
+ {"pattern":"\\b(omo|arisco|tresemme)\\b","fabricante":"Unilever","fontes":["https://www.unilever.com.br/brands/"]},
+ {"pattern":"\\b(gillette|oral b|pantene)\\b","fabricante":"P&G","fontes":["https://br.pg.com/marcas-e-produtos-pg/"]},
+ {"pattern":"\\b(ninho|nescafe|maggi|mucilon|nutren)\\b","fabricante":"Nestlé","fontes":["https://www.nestleprofessional.com.br/marcas","https://www.nestle.com.br/marcas"]}
+]

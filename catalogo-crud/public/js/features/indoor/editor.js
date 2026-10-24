@@ -1,5 +1,5 @@
 import { PRODUCT_LIMIT, PRODUCT_MINIMUM, addProduct, removeProduct, moveProduct, canContinue } from './model.js';
-import { INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_DURATION, drawIndoorFrame } from './renderer.js';
+import { INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_PRODUCT_DURATION, drawIndoorFrame } from './renderer.js';
 import { sampleThemeColor } from './palette.js';
 import { bindPriceInput } from '../stories/price-input.js';
 import { selectedProductIds, loadSelectedProducts } from '../magazines/selection.js';
@@ -117,7 +117,7 @@ function showProductView(view, { focus = true } = {}) {
 function selectionStatus() {
   if (state.step === 'pricing') { status('Use as setas para ordenar os produtos e informe os preços opcionais.'); return; }
   const remaining = Math.max(0, PRODUCT_MINIMUM - state.selection.length);
-  status(remaining ? `Escolha mais ${remaining} ${remaining === 1 ? 'produto' : 'produtos'} para completar o vídeo.`
+  status(remaining ? ''
     : `${state.selection.length} produtos selecionados. Continue para configurar preços e ordem ou adicione até 5 produtos.`);
 }
 
@@ -394,7 +394,7 @@ function paint() {
   if (!state.snapshot) return;
   const carousel = drawIndoorFrame(context, state.snapshot, state.seconds);
   ui.time.value = String(state.seconds);
-  ui['time-label'].textContent = `${state.seconds.toFixed(1).replace('.', ',')} / 15 s`;
+  ui['time-label'].textContent = `${state.seconds.toFixed(1).replace('.', ',')} / ${state.snapshot.products.length * INDOOR_PRODUCT_DURATION} s`;
   [...ui.scenes.children].forEach((node, index) => node.setAttribute('aria-pressed', String(index === carousel.index)));
 }
 
@@ -411,7 +411,7 @@ function play() {
   const origin = performance.now() - state.seconds * 1000;
   function tick(now) {
     if (!state.playing) return;
-    state.seconds = ((now - origin) / 1000) % INDOOR_DURATION;
+    state.seconds = ((now - origin) / 1000) % (state.snapshot.products.length * INDOOR_PRODUCT_DURATION);
     paint();
     state.frame = requestAnimationFrame(tick);
   }
@@ -435,19 +435,23 @@ async function preparePreview() {
     if (state.previewVersion !== version || state.step !== 'preview') return;
     state.snapshot = { background, themeColor: sampleThemeColor(background), products: selected.map((entry, index) => ({ ...entry, image: loaded[index] })) };
     state.seconds = 0;
+    const duration = selected.length * INDOOR_PRODUCT_DURATION;
+    ui.time.max = String(duration - 1 / 30);
+    byId('duration-summary').textContent = `${duration} segundos`;
+    ui.download.textContent = `Baixar MP4 · ${duration} s`;
     selected.forEach((entry, index) => {
       const node = button('', () => {
         pause();
-        state.seconds = index * INDOOR_DURATION / selected.length;
+        state.seconds = index * INDOOR_PRODUCT_DURATION;
         paint();
       });
       node.setAttribute('aria-label', `Ver produto ${index + 1}: ${entry.product.nome}`);
-      const slot = INDOOR_DURATION / selected.length;
+      const slot = INDOOR_PRODUCT_DURATION;
       const time = value => value.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
       node.append(thumbnail(entry.product.imagem_local_url), element('span', '', `${index + 1} · ${time(index * slot)}–${time((index + 1) * slot)} s`));
       ui.scenes.append(node);
     });
-    byId('sequence-summary').textContent = `${selected.length} produtos · ${(INDOOR_DURATION / selected.length).toLocaleString('pt-BR')} s por produto`;
+    byId('sequence-summary').textContent = `${selected.length} produtos · ${INDOOR_PRODUCT_DURATION.toLocaleString('pt-BR')} s por produto`;
     paint();
     ui['preview-loading'].hidden = true;
     status('Prévia pronta. Reproduza o vídeo e baixe o MP4 quando estiver tudo certo.');
@@ -508,7 +512,7 @@ async function download() {
     const exportContext = canvas.getContext('2d');
     if (!exportContext) throw new Error('Não foi possível preparar o vídeo neste navegador.');
     const blob = await exportStoryVideo({
-      canvas, signal: controller.signal,
+      canvas, signal: controller.signal, duration: snapshot.products.length * INDOOR_PRODUCT_DURATION,
       renderFrame: (seconds) => drawIndoorFrame(exportContext, snapshot, seconds),
       onProgress: (fraction) => {
         const percentage = Math.round(fraction * 100);
@@ -586,7 +590,7 @@ ui['load-more'].addEventListener('click', () => void loadProducts(state.page > 0
 ui.play.addEventListener('click', () => state.playing ? pause() : play());
 ui.time.addEventListener('input', () => {
   pause();
-  state.seconds = Math.min(INDOOR_DURATION - 1 / 30, Math.max(0, Number(ui.time.value) || 0));
+  state.seconds = Math.min(state.selection.length * INDOOR_PRODUCT_DURATION - 1 / 30, Math.max(0, Number(ui.time.value) || 0));
   paint();
 });
 ui.download.addEventListener('click', () => void download());

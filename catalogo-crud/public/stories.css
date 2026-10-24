@@ -2067,6 +2067,11 @@ body.stories-page {
 .story-price-input.is-missing { border-color: #df9ea8; background: var(--color-red-soft); box-shadow: 0 0 0 3px rgba(226, 26, 89, .04); }
 .story-price-input.is-missing > span { color: var(--brand-red-dark); border-right-color: rgba(226, 26, 89, .25); background: var(--color-red-soft); }
 .story-price-input.is-missing:focus-within { border-color: var(--brand-red-dark); box-shadow: 0 0 0 3px rgba(226, 26, 89, .17); }
+.story-quantity-fields { display: grid; gap: 12px; margin-bottom: 10px; }
+.story-quantity-fields label[hidden] { display: none; }
+.story-quantity-input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--color-line); border-radius: 12px; background: var(--color-surface); color: var(--ink); font: inherit; }
+.story-quantity-input:focus-visible { outline: 2px solid var(--brand-blue-dark); outline-offset: 2px; }
+.story-quantity-input:disabled { opacity: .54; cursor: not-allowed; }
 .story-price-field.is-disabled { opacity: .54; }
 .story-price-field.is-disabled .story-price-input { border-color: var(--color-line); background: var(--color-surface); box-shadow: none; }
 .story-price-field.is-disabled .story-price-input > span { color: var(--color-muted); border-right-color: var(--color-line); background: var(--color-surface); }

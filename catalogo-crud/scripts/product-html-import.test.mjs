@@ -42,6 +42,26 @@ test('HTML is data only; entities, leading zeros and explicit manufacturer survi
   assert.throws(() => validateHtmlProduct({ ...product, imagem_url: 'https://user:pass@example.com/x' }), /HTTPS/);
 });
 
+test('batch manufacturer overrides every HTML manufacturer, while an empty field preserves the source', () => {
+  const input = html.replace('NCM:', 'Fabricante:');
+  const output = parseProductHtml({ html: input, fabricante: '  Indústria   São José  ' });
+  assert.ok(output.items.every(item => item.product.fabricante === 'Indústria São José'));
+  assert.ok(output.items.every(item => item.error === null));
+  assert.equal(parseProductHtml({ html: input, fabricante: '  ' }).items[0].product.fabricante, '2828.90.11');
+  assert.throws(() => parseProductHtml({ html, fabricante: 'x'.repeat(256) }), /255 caracteres/);
+  assert.throws(() => parseProductHtml({ html, fabricante: {} }), /como texto/);
+});
+
+test('batch manufacturer is persisted for imported products and leaves existing EANs unchanged', async t => {
+  const f = await htmlProductFixture(t, { download: async () => photo });
+  const { items } = await f.post('parse', { html, fabricante: 'Fabricante do lote' });
+  for (const item of items.slice(0, 3)) assert.equal((await f.post('item', item.product)).status, 'imported');
+  assert.ok(f.database.prepare('SELECT fabricante FROM products').all().every(row => row.fabricante === 'Fabricante do lote'));
+  const repeated = await f.post('parse', { html, fabricante: 'Outro fabricante' });
+  assert.equal((await f.post('item', repeated.items[0].product)).status, 'ignored');
+  assert.equal(f.database.prepare('SELECT fabricante FROM products WHERE ean = ?').get(items[0].product.ean).fabricante, 'Fabricante do lote');
+});
+
 test('new page, aliases and APIs require an administrator and mutations require CSRF', async t => {
   const f = await htmlProductFixture(t);
   for (const route of ['/import-produtos', '/import-produtos/', '/import-produtos.html', '/IMPORT-PRODUTOS.HTML', '/%69mport-produtos.html']) {

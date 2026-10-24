@@ -1,0 +1,186 @@
+[
+  {
+    "pattern": "\\b(francis|phytoderm)\\b",
+    "fabricante": "Flora",
+    "fontes": [
+      "https://flora.com.br/marca/francis/"
+    ]
+  },
+  {
+    "pattern": "\\b(l oreal|loreal|garnier|cerave|la roche|cicaplast|effaclar|maybelline)\\b",
+    "fabricante": "L'Oréal",
+    "fontes": [
+      "https://www.loreal.com/pt-br/brazil/news/grupo/conheca-as-24-marcas-que-fazem-parte-do-grupo-loreal/"
+    ]
+  },
+  {
+    "pattern": "\\b(palmolive)\\b",
+    "fabricante": "Colgate-Palmolive",
+    "fontes": [
+      "https://www.colgatepalmolive.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\b(closeup|maizena|dove|lux)\\b",
+    "fabricante": "Unilever",
+    "fontes": [
+      "https://www.unilever.com.br/brands/"
+    ]
+  },
+  {
+    "pattern": "\\b(head shoulders|head soulders|vick vaporub)\\b",
+    "fabricante": "P&G",
+    "fontes": [
+      "https://br.pg.com/marcas-e-produtos-pg/"
+    ]
+  },
+  {
+    "pattern": "\\b(origem|sfera|grupy kids|loiro perfeito)\\b",
+    "fabricante": "Nazca",
+    "fontes": [
+      "https://www.nazca.com.br/quem-somos"
+    ]
+  },
+  {
+    "pattern": "\\b(tra la la|tralala)\\b",
+    "fabricante": "Phisalia",
+    "fontes": [
+      "https://phisalia.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\b(teatrical|asepxia|goicochea|goicoechea)\\b",
+    "fabricante": "Genomma",
+    "fontes": [
+      "https://www.mygenommalab.com/products/"
+    ]
+  },
+  {
+    "pattern": "\\bsunless\\b",
+    "fabricante": "Farmax",
+    "fontes": [
+      "https://www.farmax.com.br/sunless"
+    ]
+  },
+  {
+    "pattern": "\\b(ogx|band aid|neutrogena|neutrogen)\\b",
+    "fabricante": "Kenvue",
+    "fontes": [
+      "https://www.kenvue.com/our-brands"
+    ]
+  },
+  {
+    "pattern": "\\b(carolina herrera|jean paul|paco rabanne)\\b",
+    "fabricante": "Puig",
+    "fontes": [
+      "https://careers.puig.com/en/love-brands?category=fragrances"
+    ]
+  },
+  {
+    "pattern": "\\b(gucci|hugo boss|calvin klein|bozzano)\\b",
+    "fabricante": "Coty",
+    "fontes": [
+      "https://www.sec.gov/Archives/edgar/data/1024305/000102430526000048/coty-20260630.htm"
+    ]
+  },
+  {
+    "pattern": "\\bgiovanna baby\\b",
+    "fabricante": "Nasha",
+    "fontes": [
+      "https://onepharma.com.br/produtos-marca/nasha/"
+    ]
+  },
+  {
+    "pattern": "\\b(centrum|sensodyne|corega)\\b",
+    "fabricante": "Haleon",
+    "fontes": [
+      "https://www.haleon.com/our-brands"
+    ]
+  },
+  {
+    "pattern": "\\b(coqueiro)\\b",
+    "fabricante": "Camil Alimentos",
+    "fontes": [
+      "https://ri.camil.com.br/camil/nossas-marcas/"
+    ]
+  },
+  {
+    "pattern": "\\badria\\b",
+    "fabricante": "M. Dias Branco",
+    "fontes": [
+      "https://mdiasbranco.com.br/wp-content/uploads/2025/03/CATALOGO-ADRIA.pdf"
+    ]
+  },
+  {
+    "pattern": "\\b(pepsi|h2oh)\\b",
+    "fabricante": "Ambev",
+    "fontes": [
+      "https://ri.ambev.com.br/perguntas-frequentes/"
+    ]
+  },
+  {
+    "pattern": "\\b(fandangos|cebolitos)\\b",
+    "fabricante": "PepsiCo Brasil",
+    "fontes": [
+      "https://www.cadandistribuicao.com.br/f/16801/pepsico-do-brasil-ltda"
+    ]
+  },
+  {
+    "pattern": "\\b(darrow|actine|suavie)\\b",
+    "fabricante": "Pierre Fabre",
+    "fontes": [
+      "https://darrow.com.br/sobre-a-darrow/"
+    ]
+  },
+  {
+    "pattern": "\\bimunyone\\b",
+    "fabricante": "Vittore Labs",
+    "fontes": [
+      "https://www.conar.org.br/pdf/conar221.pdf"
+    ]
+  },
+  {
+    "pattern": "\\b(capricho|bummis)\\b",
+    "fabricante": "Capricho",
+    "fontes": [
+      "https://epgrupo.com.br/capricho-bummis-snoopy-em-nova-embalagem/"
+    ]
+  },
+  {
+    "pattern": "\\b(estrelinha|scooby doo|confort master|wellness)\\b",
+    "fabricante": "CCM",
+    "fontes": [
+      "https://cdnc.heyzine.com/files/uploaded/v2/3218dd01a69d4a7f40f420f3fb0b6fb69134e162.pdf"
+    ]
+  },
+  {
+    "pattern": "\\benergel black\\b",
+    "fabricante": "Body Action",
+    "fontes": [
+      "https://www.bodyaction.com.br/energel-black-cx-c-10-saches?variant_id=109"
+    ]
+  },
+  {
+    "pattern": "\\bjoao e maria\\b",
+    "fabricante": "Cimed",
+    "fontes": [
+      "https://cimedremedios.com.br/"
+    ]
+  },
+  {
+    "ids": [
+      43515
+    ],
+    "fabricante": "Atlhetica Nutrition",
+    "fontes": [
+      "SQLite products.id=35892; EAN 7899621100359 idêntico"
+    ]
+  },
+  {
+    "pattern": "\\bsorvete\\b.*\\blacta\\b",
+    "fabricante": "Froneri",
+    "fontes": [
+      "https://wmccann.com/noticias/wmccann-e-a-nova-agencia-de-publicidade-da-froneri-brasil/"
+    ]
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "pattern": "\\bcenoura (e )?bronze\\b",
+    "fabricante": "Coty",
+    "fontes": [
+      "https://www.coty.com/our-brands/consumer-brands/cenoura-e-bronze"
+    ]
+  },
+  {
+    "pattern": "\\bciclo\\b",
+    "fabricante": "Ciclo Cosméticos",
+    "fontes": [
+      "https://ciclocosmeticos.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\bkeraton\\b",
+    "fabricante": "Kert Cosméticos",
+    "fontes": [
+      "https://keraton.com.br/somos-o-grupo-kert/"
+    ]
+  },
+  {
+    "pattern": "\\bnatucor\\b",
+    "fabricante": "Embelleze",
+    "fontes": [
+      "https://embelleze.com/collections/tinta-de-cabelo"
+    ]
+  },
+  {
+    "pattern": "\\b(ricca|vertix)\\b",
+    "fabricante": "Belliz",
+    "fontes": [
+      "https://www.bellizcompany.com.br/nossas-marcas"
+    ]
+  },
+  {
+    "pattern": "\\bstilgrip\\b",
+    "fabricante": "Hertz",
+    "fontes": [
+      "https://www.hertzfarma.com.br/produto/stilgrip/"
+    ]
+  },
+  {
+    "pattern": "\\bacneless\\b",
+    "fabricante": "Biocap",
+    "fontes": [
+      "https://www.cliquefarma.com.br/preco/acneless-sabonete-liquido-495ml"
+    ]
+  },
+  {
+    "pattern": "\\bla san day\\b",
+    "fabricante": "La San Day Pharma",
+    "fontes": [
+      "https://www.lasanday.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\b(picole|picole)\\b.*\\blacta\\b",
+    "fabricante": "Froneri",
+    "fontes": [
+      "https://wmccann.com/noticias/wmccann-e-a-nova-agencia-de-publicidade-da-froneri-brasil/"
+    ]
+  },
+  {
+    "pattern": "\\bnovalgina\\b",
+    "fabricante": "Opella",
+    "fontes": [
+      "https://portaliq.mdic.gov.br/listagem-alertas/alertas/20-medicamentos/4103-novalgina"
+    ]
+  }
+]

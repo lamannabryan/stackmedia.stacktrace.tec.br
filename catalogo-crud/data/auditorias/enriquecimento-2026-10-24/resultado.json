@@ -1,0 +1,31 @@
+{
+  "data": "2026-10-24T17:25:16.669Z",
+  "banco": "D:\\stacktrace.tec.br\\stackmedia.stacktrace.tec.br\\catalogo-crud\\data\\catalogo.sqlite",
+  "backup": "D:\\stacktrace.tec.br\\stackmedia.stacktrace.tec.br\\catalogo-crud\\data\\auditorias\\enriquecimento-2026-10-24\\aplicacao-2026-10-24T17-25-16-669Z\\catalogo-antes.sqlite",
+  "antes": {
+    "total": 12611,
+    "sem_fabricante": 2241,
+    "sem_imagem": 6170,
+    "com_imagem_sem_fabricante": 1399,
+    "fabricantes_distintos": 874
+  },
+  "depois": {
+    "total": 12611,
+    "sem_fabricante": 328,
+    "sem_imagem": 6170,
+    "com_imagem_sem_fabricante": 57,
+    "fabricantes_distintos": 926
+  },
+  "atribuicoes": 1913,
+  "normalizacoes": 686,
+  "total_alterado": 2599,
+  "cobertura_fabricante_percentual": 97.4,
+  "validacao": {
+    "quick_check": "ok",
+    "foreign_key_check": 0,
+    "variantes_graficas_equivalentes": 0,
+    "outros_campos_e_tabelas_preservados": true,
+    "backup_verificado": true
+  },
+  "auditoria": "D:\\stacktrace.tec.br\\stackmedia.stacktrace.tec.br\\catalogo-crud\\data\\auditorias\\enriquecimento-2026-10-24\\aplicacao-2026-10-24T17-25-16-669Z\\alteracoes.json"
+}

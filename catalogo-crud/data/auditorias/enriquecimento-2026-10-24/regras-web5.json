@@ -1,0 +1,126 @@
+[
+  {
+    "pattern": "\\bmultigrip\\b",
+    "fabricante": "Multilab",
+    "fontes": [
+      "https://medicamentos.api.br/medicamento/multigrip-multilab-industria-e-comercio-de-produtos-farmaceuticos-ltda-118190230/"
+    ]
+  },
+  {
+    "pattern": "\\bnaturetti\\b",
+    "fabricante": "Hypera",
+    "fontes": [
+      "https://hlg.hypera.com.br/produtos/isentos-de-prescricao/naturetti-geleia"
+    ]
+  },
+  {
+    "pattern": "\\bneopiridin\\b",
+    "fabricante": "Neo Química",
+    "fontes": [
+      "https://www.neoquimica.com.br/nossas-marcas/neopiridin"
+    ]
+  },
+  {
+    "pattern": "\\bvitamedley\\b",
+    "fabricante": "Medley",
+    "fontes": [
+      "https://www.sanofi.com.br/pt/noticias/informacoes-de-produtos/2022-12-23-descontinuacao-vitamedley"
+    ]
+  },
+  {
+    "pattern": "\\bforday\\b",
+    "fabricante": "Vitamedic",
+    "fontes": [
+      "https://www.vitamedic.ind.br/wp-content/uploads/2022/03/NOVO-CATALOGO-2022-VITAMEDIC-VERSAO-02.pdf"
+    ]
+  },
+  {
+    "pattern": "\\bfrusalt\\b",
+    "fabricante": "Cimed",
+    "fontes": [
+      "https://medicamentos.api.br/medicamento/frusalt-cimed-industria-s-a-143810164"
+    ]
+  },
+  {
+    "pattern": "\\bporan\\b",
+    "fabricante": "Porán",
+    "fontes": [
+      "https://porancosmeticos.com.br/pages/sobre-nos"
+    ]
+  },
+  {
+    "pattern": "\\bred ?apple\\b",
+    "fabricante": "Red Apple",
+    "fontes": [
+      "https://www.redapplecosmeticos.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\bnosewash\\b",
+    "fabricante": "Agaplastic",
+    "fontes": [
+      "https://www.totalmedica.com.br/seringa-para-lavagem-nasal-de-10ml-leao-gato-ou-pato-da-nosewash-unidade"
+    ]
+  },
+  {
+    "pattern": "\\bhedera\\b",
+    "fabricante": "Hedera",
+    "fontes": [
+      "https://www.hedera.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\bhalley baby\\b",
+    "fabricante": "Labate",
+    "fontes": [
+      "https://www.labatesp.com.br/"
+    ]
+  },
+  {
+    "pattern": "\\bst ives\\b",
+    "fabricante": "Unilever",
+    "fontes": [
+      "https://www.unilever.com.mx/brands/"
+    ]
+  },
+  {
+    "pattern": "\\b(probiotica|max titanium|mass titanium)\\b",
+    "fabricante": "Supley",
+    "fontes": [
+      "https://supley.com.br/quem-somos/"
+    ]
+  },
+  {
+    "pattern": "\\b(mu mu|noig)\\b",
+    "fabricante": "Neugebauer",
+    "fontes": [
+      "https://www.neugebauer.com.br/pt/produtos/doce-de-leite/doce-de-leite/mu-mu/mu-mu-com-chocolate",
+      "https://www.neugebauer.com.br/pt/produtos/chocolates/tabletes/noig"
+    ]
+  },
+  {
+    "pattern": "\\b(pom pom|bigfral|babysec)\\b",
+    "exclude": "\\bpomada\\b",
+    "fabricante": "Softys",
+    "fontes": [
+      "https://ontex.com/news/ontex-completes-the-divestment-of-its-brazilian-business-to-softys/",
+      "https://www.babysec.com.br/onde-comprar"
+    ]
+  },
+  {
+    "ids": [
+      38837,
+      38838,
+      38865,
+      39785,
+      41784
+    ],
+    "fabricante": "One Farma",
+    "fontes": [
+      "https://www.drogarianovaesperanca.com.br/vitaone-ative-com-30-comprimidos-31095/",
+      "https://www.drogarianovaesperanca.com.br/vitaone-mulher-com-60-comprimidos-26853/",
+      "https://www.drogarianovaesperanca.com.br/vitaone-homem-com-60-comprimidos-26852/",
+      "https://www.drogarianovaesperanca.com.br/vitaone-cabelos-e-unhas-com-30-capsulas-26856/"
+    ]
+  }
+]

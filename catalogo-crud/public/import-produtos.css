@@ -6,6 +6,9 @@ h1 { margin: 0; font-size: clamp(24px, 4vw, 34px); letter-spacing: -.04em; }
 .intro { color: var(--muted); margin: 12px 0 28px; }
 form, section { padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); }
 label { display: block; margin-bottom: 12px; font-weight: 700; }
+input[type="text"] { display: block; width: 100%; min-height: 48px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; }
+input:read-only { opacity: .7; }
+#manufacturer-help { margin-bottom: 24px; }
 textarea { display: block; width: 100%; min-height: 270px; resize: vertical; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: 13px/1.6 ui-monospace, Consolas, monospace; }
 textarea::placeholder { color: var(--muted); opacity: 1; }
 textarea:read-only { opacity: .7; }

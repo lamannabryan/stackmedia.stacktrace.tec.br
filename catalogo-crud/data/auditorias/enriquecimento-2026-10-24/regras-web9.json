@@ -1,0 +1,341 @@
+[
+  {
+    "pattern": "\\bjay ?luc\\b",
+    "fabricante": "Jay Luc",
+    "fontes": [
+      "https://www.jayluc.com.br/collections/kit-shampoo-condicionador"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bshell vittan\\b",
+    "fabricante": "Shell Nutry",
+    "fontes": [
+      "https://www.magazineluiza.com.br/shell-vittan-unhas-e-cabelos-com-60-comprimidos-shell-nutry/p/cdfc3jha91/sa/btna/"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bbabasoul\\b",
+    "fabricante": "Soul Cosméticos",
+    "fontes": [
+      "https://www.revendadecosmeticos.com.br/kit-capilar-3-pecas-babasoul-cheirinho-de-chiclete-uva-soul-cosmeticos-2111"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bnatusday\\b",
+    "fabricante": "La San Day Pharma",
+    "fontes": [
+      "https://www.lasanday.com.br/produtos/coenzima-q10-60-capsulas-natusday/"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\besmalte.*\\banita\\b",
+    "fabricante": "Anita Cosméticos",
+    "fontes": [
+      "https://www.stillusshop.com.br/loja/produto/esmalte-anita-vibes-da-estacao-so-falta-nevar-10ml-PROD-11165"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\b(serum|cr fac)\\b.*\\bcapim limao\\b",
+    "fabricante": "Climao",
+    "fontes": [
+      "https://consultaremedios.com.br/serum-facial-capim-limao-colageno-acido-hialuronico/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bmedix pro\\b",
+    "fabricante": "Brass Hill Cosméticos",
+    "fontes": [
+      "https://consultaremedios.com.br/shampoo-medix-pro-cachos-poderosos/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bduom\\b",
+    "fabricante": "Duom",
+    "fontes": [
+      "https://apppharma.com.br/produto/maca-peruana-premium-caps-duom-55346"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bmaxpantol baby\\b",
+    "fabricante": "Emis Minas",
+    "fontes": [
+      "https://consultaremedios.com.br/creme-para-prevencao-de-assaduras-massime-maxpantol-baby/60g/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bbaby poppy\\b",
+    "fabricante": "Cless Cosméticos",
+    "fontes": [
+      "https://consultaremedios.com.br/lencos-umedecidos-baby-poppy/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bturma (da )?alegria\\b",
+    "fabricante": "NT Produtos Higiênicos",
+    "fontes": [
+      "https://consultaremedios.com.br/toalha-umedecida-turma-da-alegria/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bfiltrum\\b",
+    "fabricante": "Libbs",
+    "fontes": [
+      "https://apppharma.com.br/produto/protetor-solar-libbs-filtrum-hidrat-fps-g-65331"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bselect ?wipes\\b",
+    "fabricante": "Higiecare",
+    "fontes": [
+      "https://www.lojainbahia.com.br/toalha-umed-selectwipes-roxo3263-c50-un-47636-1"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\b(socorro cap|socorro capilar)\\b",
+    "fabricante": "Salon Line",
+    "fontes": [
+      "https://consultaremedios.com.br/shampoo-salon-line-socorro-capilar-reconstrucao-intensa/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\b(dinky|dink) baby\\b",
+    "fabricante": "Capricho",
+    "fontes": [
+      "https://www.nordil.com.br/fralda-dinky-baby-mega-g-com-42-unidades-219283-3"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\burban men\\b",
+    "fabricante": "Farmaervas",
+    "fontes": [
+      "https://consultaremedios.com.br/balm-pos-barba-urban-men-ipa-beer/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bglucerna\\b",
+    "fabricante": "Abbott",
+    "fontes": [
+      "https://apppharma.com.br/produto/suplemento-alimentar-glucerna-fit-sabor-baunilha-com-ml-70073"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bdermaone\\b",
+    "fabricante": "Cimed",
+    "fontes": [
+      "https://www.dismed.com.br/download/catalogs/cimed_now.pdf"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\binstant baby\\b",
+    "fabricante": "Prevent Pharma",
+    "fontes": [
+      "https://consultaremedios.com.br/teste-de-gravidez-instant-baby/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bbeyoung\\b",
+    "fabricante": "Beyoung",
+    "fontes": [
+      "https://apppharma.com.br/produto/beyoung-agua-micelar-ml-33855"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\banadrey\\b",
+    "fabricante": "Anadrey",
+    "fontes": [
+      "https://consultaremedios.com.br/cera-depilatoria-corporal-anadrey/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bsensilatte\\b",
+    "fabricante": "Prati-Donaduzzi",
+    "fontes": [
+      "https://apppharma.com.br/produto/sensilatte-fcc-baunilha-com-comprimidos-67645"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bso ?pes\\b",
+    "fabricante": "All Pé",
+    "fontes": [
+      "https://consultaremedios.com.br/protetor-de-calosidade-so-pes/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\blittle baby nemo\\b",
+    "fabricante": "CCM",
+    "fontes": [
+      "https://consultaremedios.com.br/toalhas-umedecidas-little-baby-procurando-nemo/50-unidades/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bbeleza natural\\b",
+    "fabricante": "Beleza Natural",
+    "fontes": [
+      "https://consultaremedios.com.br/shampoo-beleza-natural-cachos-intensos/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bclinerize\\b",
+    "fabricante": "Cifarma",
+    "fontes": [
+      "https://consultaremedios.com.br/enxaguante-bucal-clinerize/sem-fluor-menta-300ml/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\b(sanavita)\\b",
+    "fabricante": "Sanavita",
+    "fontes": [
+      "https://www.sanavita.com.br/produtos/"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bmidway\\b",
+    "fabricante": "Midway",
+    "fontes": [
+      "https://loja.midwaylabsusa.com/"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\btoque (de )?natureza\\b",
+    "fabricante": "Marchetti",
+    "fontes": [
+      "https://marchetti.com.br/toque-de-natureza/"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\b(tracta|frederika)\\b",
+    "fabricante": "Farmaervas",
+    "fontes": [
+      "https://consultaremedios.com.br/fabricante/farmaervas",
+      "https://www.linkedin.com/company/grupo-farmamake"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\byes\\b",
+    "fabricante": "Yes! Cosmetics",
+    "fontes": [
+      "https://www.yescosmetics.com.br/"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bmassime\\b.*\\b(sol|solar|fps)\\b",
+    "fabricante": "Emis Minas",
+    "fontes": [
+      "https://consultaremedios.com.br/protetor-solar-facial-massime/p",
+      "https://consultaremedios.com.br/protetor-solar-massime/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\baccu ckeckit\\b",
+    "fabricante": "Roche",
+    "fontes": [
+      "https://www.accu-chek.com.vn/may-do-duong-huyet/active"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\b(ada nut|ada nut400g)\\b",
+    "fabricante": "Ada Nutracêuticos",
+    "fontes": [
+      "https://consultaremedios.com.br/omega-3-ada-nutraceuticos-health/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bnatura\\b",
+    "fabricante": "Natura",
+    "fontes": [
+      "https://consultaremedios.com.br/perfume-masculino-natura-homem-verum/p"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bdepi roll\\b",
+    "fabricante": "Química Geral",
+    "fontes": [
+      "https://api.cosmos.bluesoft.com.br/produtos/7898567750246-depi-roll-creme-dep-corp-argan"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bferinha\\b",
+    "fabricante": "Ferinha",
+    "fontes": [
+      "https://fraldasferinha.com.br/wp-content/uploads/2023/06/catalogo-ferinha.pdf"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bcoca cola\\b",
+    "fabricante": "Coca-Cola",
+    "fontes": [
+      "https://api.cosmos.bluesoft.com.br/fabricantes/14846-the-coca-cola-company/produtos",
+      "https://www.coca-cola.com/br/pt/about-us/history/nossos-fabricantes"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bmedley\\b",
+    "fabricante": "Medley",
+    "fontes": [
+      "https://www.sanofi.com.br/pt/noticias/informacoes-de-produtos/2022-12-23-descontinuacao-vitamedley"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bruby kisses\\b",
+    "fabricante": "Kiss New York",
+    "fontes": [
+      "https://aniversariosoneda.com.br/assets/docs/LISTA%20COMPLETA%20PRODUTOS%20PARTICIPANTES.pdf"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bsonho valsa\\b",
+    "fabricante": "Mondelēz Brasil",
+    "fontes": [
+      "https://www.mondelezinternational.com/brazil/"
+    ],
+    "tipo": "marca_distintiva_validada"
+  },
+  {
+    "pattern": "\\bathletica nutrition\\b",
+    "fabricante": "Atlhetica Nutrition",
+    "fontes": [
+      "https://www.atlheticanutrition.com.br/sobre-nos"
+    ],
+    "tipo": "marca_distintiva_validada"
+  }
+]

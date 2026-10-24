@@ -1,0 +1,7 @@
+[
+ {"id":41864,"motivo":"Cadastro de teste; imagem de foguete. Não representa produto comercial identificável."},
+ {"id":44603,"motivo":"Nome de aveia Quaker com imagem de telefone Samsung. Não atribuir fabricante pela imagem."},
+ {"id":41911,"motivo":"Nome de sabonete líquido 400ml e EAN associado a Lovecare, mas imagem de gel antisséptico Vida Farmácias 1 litro. Identidade conflitante; exige revisão antes de atribuição ou exclusão."},
+ {"id":37983,"motivo":"Imagem identifica Petúnia Lovely Girl, enquanto a busca somente por nome também retornou Giverny. Atribuição baseada na imagem e em fonte específica de Petúnia."},
+ {"id":44340,"motivo":"Torta Lacta licenciada produzida por Mr. Bey; diferenciada dos chocolates Mondelēz e sorvetes Froneri."}
+]

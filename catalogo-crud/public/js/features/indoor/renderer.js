@@ -2,7 +2,7 @@ import { DEFAULT_THEME_COLOR } from './palette.js';
 
 export const INDOOR_WIDTH = 1920;
 export const INDOOR_HEIGHT = 1080;
-export const INDOOR_DURATION = 15;
+export const INDOOR_PRODUCT_DURATION = 8;
 export const INDOOR_PRODUCT_COUNT = 5;
 
 const TRANSITION_DURATION = 0.35;
@@ -16,20 +16,20 @@ const SAFE_BOTTOM = INDOOR_HEIGHT - 84;
 const SLIDE_WIDTH = SAFE_RIGHT - SAFE_LEFT;
 const FONT_FAMILY = 'Arial, Helvetica, sans-serif';
 const PRODUCT_BOX = { x: CONTENT_LEFT, y: 120, width: 540, height: 840 };
-const CARD = { x: CONTENT_LEFT + 580, y: 220, width: 660, height: 640 };
+const CARD = { x: CONTENT_LEFT + 580, y: 220, width: 660 };
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
-/** A deterministic, seamless 15-second loop, divided equally among the products. */
+/** A deterministic loop with eight seconds per product. */
 export function getCarouselState(seconds, productCount = INDOOR_PRODUCT_COUNT) {
   if (!Number.isInteger(productCount) || productCount < 2 || productCount > INDOOR_PRODUCT_COUNT) {
     throw new RangeError('O vídeo para TV precisa de 2 a 5 produtos.');
   }
-  const slotDuration = INDOOR_DURATION / productCount;
+  const slotDuration = INDOOR_PRODUCT_DURATION;
   const input = Number(seconds);
-  const time = Number.isFinite(input) ? Math.max(0, input) % INDOOR_DURATION : 0;
+  const time = Number.isFinite(input) ? Math.max(0, input) % (slotDuration * productCount) : 0;
   const index = Math.floor(time / slotDuration);
   const nextIndex = (index + 1) % productCount;
   const localTime = time - index * slotDuration;
@@ -159,12 +159,26 @@ function drawDetails(context, entry, motion, themeColor) {
   context.save();
   try {
     context.translate(motion.cardX, 0);
+    const manufacturer = cleanText(product.fabricante);
+    const titleY = CARD.y + 56 + (manufacturer ? 56 : 0);
+    context.font = `700 60px ${FONT_FAMILY}`;
+    const titleLines = wrapText(context, product.nome || 'Produto', contentWidth, 3);
+    const titleBottom = titleY + titleLines.length * 70;
+    const subtitleY = titleBottom + 22;
+    context.font = `400 34px ${FONT_FAMILY}`;
+    const subtitleLines = wrapText(context, product.subtitulo, contentWidth, 2);
+    const textBottom = subtitleLines.length ? subtitleY + subtitleLines.length * 44 : titleBottom;
+    const price = cleanText(entry.price);
+    const priceY = textBottom + 24;
+    const cardHeight = (price ? priceY + 160 : textBottom + 36) - CARD.y;
+    const productCenterY = PRODUCT_BOX.y + PRODUCT_BOX.height / 2 + motion.imageY;
+    context.translate(0, productCenterY - cardHeight / 2 - CARD.y);
     context.globalAlpha *= motion.cardAlpha;
     context.shadowColor = 'rgba(14, 29, 56, 0.16)';
     context.shadowBlur = 28;
     context.shadowOffsetY = 10;
     context.fillStyle = '#ffffff';
-    roundedRectangle(context, CARD.x, CARD.y, CARD.width, CARD.height, 36);
+    roundedRectangle(context, CARD.x, CARD.y, CARD.width, cardHeight, 36);
     context.fill();
     context.shadowColor = 'transparent';
     context.shadowBlur = 0;
@@ -175,32 +189,25 @@ function drawDetails(context, entry, motion, themeColor) {
     context.textBaseline = 'top';
     context.textAlign = 'left';
 
-    let titleY = CARD.y + 56;
-    const manufacturer = cleanText(product.fabricante);
     if (manufacturer) {
       context.font = `600 28px ${FONT_FAMILY}`;
       context.fillStyle = mixColor(themeColor, 0, 0.45);
-      drawLayer(context, motion.title, () => context.fillText(ellipsize(context, manufacturer, contentWidth), contentX, titleY));
-      titleY += 56;
+      drawLayer(context, motion.title, () => context.fillText(ellipsize(context, manufacturer, contentWidth), contentX, CARD.y + 56));
     }
 
     context.font = `700 60px ${FONT_FAMILY}`;
     context.fillStyle = '#142c54';
-    const titleLines = wrapText(context, product.nome || 'Produto', contentWidth, 3);
     drawLayer(context, motion.title, () => {
       titleLines.forEach((line, index) => context.fillText(line, contentX, titleY + index * 70));
     });
 
-    const subtitleY = titleY + titleLines.length * 70 + 22;
     context.font = `400 34px ${FONT_FAMILY}`;
     context.fillStyle = '#49566b';
-    const subtitleLines = wrapText(context, product.subtitulo, contentWidth, 2);
     drawLayer(context, motion.subtitle, () => {
       subtitleLines.forEach((line, index) => context.fillText(line, contentX, subtitleY + index * 44));
     });
 
     // The controller supplies an already formatted Brazilian price; blank means no price.
-    const price = cleanText(entry.price);
     if (price) {
       let fontSize = 112;
       context.font = `700 ${fontSize}px ${FONT_FAMILY}`;
@@ -209,7 +216,6 @@ function drawDetails(context, entry, motion, themeColor) {
         context.font = `700 ${fontSize}px ${FONT_FAMILY}`;
       }
       drawLayer(context, 0.7 + motion.price * 0.3, () => {
-        const priceY = CARD.y + CARD.height - 168;
         context.fillStyle = mixColor(themeColor, 255, 0.9);
         roundedRectangle(context, contentX - 16, priceY - 16, contentWidth + 32, 140, 24);
         context.fill();
@@ -263,7 +269,7 @@ function drawProduct(context, entry, age, index, themeColor) {
   }
   const size = imageSize(entry.image);
   if (size) {
-    const scale = Math.min((PRODUCT_BOX.width - 60) / size.width, (PRODUCT_BOX.height - 100) / size.height);
+    const scale = 0.92 * Math.min((PRODUCT_BOX.width - 60) / size.width, (PRODUCT_BOX.height - 160) / size.height);
     const width = size.width * scale;
     const height = size.height * scale;
     context.save();

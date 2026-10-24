@@ -186,6 +186,17 @@
               <p>Digite o valor de destaque da oferta.</p>
             </div>
           </div>
+          <div class="story-quantity-fields">
+            <label class="story-price-field" for="story-offer-quantity">
+              <span class="story-price-field-label">Unidades na oferta</span>
+              <input class="story-quantity-input" id="story-offer-quantity" type="number" inputmode="numeric" min="1" max="99" step="1" value="1" aria-describedby="story-quantity-hint" />
+            </label>
+            <label class="story-price-field" for="story-secondary-offer-quantity" hidden>
+              <span class="story-price-field-label">Unidades do produto 2</span>
+              <input class="story-quantity-input" id="story-secondary-offer-quantity" type="number" inputmode="numeric" min="1" max="99" step="1" value="1" aria-describedby="story-quantity-hint" disabled />
+            </label>
+          </div>
+          <p class="story-field-hint" id="story-quantity-hint">Use 1 para preço unitário, 2 para “2 por...” ou 3 para “3 por...”. Informe o preço total das unidades (de 1 a 99).</p>
           <div class="story-price-fields">
             <label class="story-price-field">
               <span class="story-price-field-label" id="story-primary-price-label">Preço da oferta</span>

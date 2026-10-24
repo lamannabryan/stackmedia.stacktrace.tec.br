@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_DURATION, INDOOR_PRODUCT_COUNT,
+  INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_PRODUCT_DURATION, INDOOR_PRODUCT_COUNT,
   getCarouselState, getProductMotion, drawIndoorFrame,
 } from '../public/js/features/indoor/renderer.js';
 
@@ -64,25 +64,25 @@ function snapshot(overrides = {}) {
   };
 }
 
-test('Indoor uses Full HD and five products in a deterministic 15-second loop', () => {
-  assert.deepEqual([INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_DURATION, INDOOR_PRODUCT_COUNT], [1920, 1080, 15, 5]);
+test('Indoor uses Full HD and five products in a deterministic 40-second loop', () => {
+  assert.deepEqual([INDOOR_WIDTH, INDOOR_HEIGHT, INDOOR_PRODUCT_DURATION, INDOOR_PRODUCT_COUNT], [1920, 1080, 8, 5]);
   for (let index = 0; index < 5; index += 1) {
     for (const phase of [0, 1.5, 2.5]) {
-      const state = getCarouselState(index * 3 + phase);
+      const state = getCarouselState(index * 8 + phase);
       assert.equal(state.index, index);
       assert.equal(state.transition, false);
       assert.deepEqual(state.slides, [{ index, offsetX: 0, opacity: 1 }]);
-      assert.deepEqual(getCarouselState(index * 3 + phase), state);
+      assert.deepEqual(getCarouselState(index * 8 + phase), state);
     }
   }
-  assert.deepEqual(getCarouselState(15), getCarouselState(0));
-  assert.deepEqual(getCarouselState(45), getCarouselState(0));
+  assert.deepEqual(getCarouselState(40), getCarouselState(0));
+  assert.deepEqual(getCarouselState(120), getCarouselState(0));
   for (const invalid of [-10, NaN, Infinity, undefined]) assert.deepEqual(getCarouselState(invalid), getCarouselState(0));
 });
 
 test('each transition slides to the next product and the last slides back to the first', () => {
   for (let index = 0; index < 5; index += 1) {
-    const middle = getCarouselState(index * 3 + 2.825);
+    const middle = getCarouselState(index * 8 + 7.825);
     assert.equal(middle.transition, true);
     assert.equal(middle.nextIndex, (index + 1) % 5);
     assert.ok(Math.abs(middle.progress - 0.5) < 1e-12);
@@ -90,8 +90,8 @@ test('each transition slides to the next product and the last slides back to the
     assert.ok(Math.abs(middle.slides[0].offsetX + 640) < 1e-8);
     assert.ok(Math.abs(middle.slides[1].offsetX - 640) < 1e-8);
     assert.ok(Math.abs(middle.slides[1].offsetX - middle.slides[0].offsetX - 1280) < 1e-8);
-    const before = getCarouselState((index + 1) * 3 - 0.000001);
-    const after = getCarouselState((index + 1) * 3);
+    const before = getCarouselState((index + 1) * 8 - 0.000001);
+    const after = getCarouselState((index + 1) * 8);
     assert.ok(Math.abs(before.slides[1].offsetX - after.slides[0].offsetX) < 0.001);
     assert.equal(before.slides[1].index, after.slides[0].index);
   }
@@ -99,7 +99,7 @@ test('each transition slides to the next product and the last slides back to the
 
 test('renderer paints only the visible product, or two products during a transition', () => {
   const input = snapshot();
-  for (const [seconds, expectedProducts] of [[1, [0]], [6, [2]], [14.9, [4, 0]]]) {
+  for (const [seconds, expectedProducts] of [[1, [0]], [16, [2]], [39.9, [4, 0]]]) {
     const context = mockContext();
     const state = drawIndoorFrame(context, input, seconds);
     assert.deepEqual(state, getCarouselState(seconds));
@@ -158,7 +158,7 @@ test('price is optional and no preview controls or timing labels are painted', (
 });
 
 test('stationary and sliding offers stay within the centered content viewport', () => {
-  for (const seconds of [0, 2.825, 5.825, 11.9, 14.9999]) {
+  for (const seconds of [0, 7.825, 5.825, 11.9, 14.9999]) {
     const context = mockContext();
     drawIndoorFrame(context, snapshot(), seconds);
     const clipIndex = context.calls.findIndex((call) => call.type === 'clipRect');
@@ -187,23 +187,23 @@ test('renderer requires two to five entries and does not mutate the snapshot', (
   assert.deepEqual(input, original);
 });
 
-test('TV distributes its 450 frames among every selected product and loops without an empty slide', () => {
+test('TV distributes its 240 frames per product among every selected product and loops without an empty slide', () => {
   for (const count of [2, 3, 4, 5]) {
     const input = snapshot();
     input.products = input.products.slice(0, count);
     const visits = Array(count).fill(0);
-    for (let frame = 0; frame < 450; frame++) {
+    for (let frame = 0; frame < count * 240; frame++) {
       const state = getCarouselState(frame / 30, count);
       visits[state.index]++;
       assert.ok(state.slides.every(slide => slide.index >= 0 && slide.index < count));
     }
-    assert.ok(visits.every(frames => Math.abs(frames - 450 / count) <= 1));
-    assert.deepEqual(getCarouselState(15, count), getCarouselState(0, count));
+    assert.ok(visits.every(frames => frames === 240));
+    assert.deepEqual(getCarouselState(count * 8, count), getCarouselState(0, count));
     for (let index = 0; index < count; index++) {
-      const state = drawIndoorFrame(mockContext(), input, index * 15 / count + .1);
+      const state = drawIndoorFrame(mockContext(), input, index * 8 + .1);
       assert.equal(state.index, index);
     }
-    const lastTransition = getCarouselState(14.9, count);
+    const lastTransition = getCarouselState(count * 8 - 0.1, count);
     assert.equal(lastTransition.slides.at(-1).index, 0);
   }
 });
@@ -241,7 +241,7 @@ test('progress uses the selected theme, fills each product segment and resets on
   };
   assert.equal(progress(0).length, 0);
   assert.equal(progress(1.5).length, 1);
-  assert.equal(progress(4.5).length, 2);
-  assert.equal(progress(14.9).length, 5);
-  assert.deepEqual(progress(15), progress(0));
+  assert.equal(progress(12).length, 2);
+  assert.equal(progress(39.9).length, 5);
+  assert.deepEqual(progress(40), progress(0));
 });

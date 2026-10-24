@@ -61,6 +61,7 @@ for (const orientation of ['vertical', 'horizontal']) {
 }
 
 const source = await readFile(new URL('../public/js/features/stories/editor.js', import.meta.url), 'utf8');
+const { offerQuantity, quantityImageBoxes } = await import('../public/js/features/stories/quantity-offer.js');
 test('only Encarte snapshots include item surfaces and freeze the shared animation geometry', () => {
   let rasterized = 0;
   const sandbox = vm.createContext({
@@ -72,7 +73,8 @@ test('only Encarte snapshots include item surfaces and freeze the shared animati
     getDetailsBox: () => ({ x: 80, y: 670, width: 260, height: 150 }),
     getFreeTextBox: () => null, hasPrice: () => true, getPriceForDetailsTarget: () => '99,90',
     getEncarteItemBounds, drawEncarteItemSurface,
-    drawProductImage() {}, drawDetailsCard() {}, drawImageCover() {},
+    offerQuantity, quantityImageBoxes,
+    drawProductImage() {}, drawProductCopies() {}, drawDetailsCard() {}, drawImageCover() {},
     createExportCanvas: () => ({ canvas: { id: ++rasterized }, context: {} }),
   });
   for (const name of ['getCompositionLayers', 'captureVideoSnapshot']) {

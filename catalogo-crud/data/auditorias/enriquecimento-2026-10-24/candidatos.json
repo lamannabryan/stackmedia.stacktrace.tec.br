@@ -1,0 +1,223 @@
+[
+  {
+    "id": 33726,
+    "nome": "Toalhinhas Umedecidas Multi Baby",
+    "subtitulo": null,
+    "ean": "7898970176053",
+    "imagem": null,
+    "fabricante_atual": "Não Classificado",
+    "conflitos": [],
+    "candidatos": [
+      "Multi"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 37892,
+    "nome": "Perfume Her Secret Kiss",
+    "subtitulo": "80ml",
+    "ean": "8411061029053",
+    "imagem": "imagens/8411061029053-3c55645e73a270cc.png",
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Secret"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 37897,
+    "nome": "Toalhinhas Umed Multi Baby",
+    "subtitulo": "100un",
+    "ean": "7897150502392",
+    "imagem": "imagens/7897150502392-dc235582aae841fd.png",
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Multi"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 38021,
+    "nome": "Perfume Tonito Lamborghini",
+    "subtitulo": "125ml",
+    "ean": "810876037006",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Lamborghini"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 38144,
+    "nome": "Hastes Flex Enlace",
+    "subtitulo": "75un",
+    "ean": "7896480608323",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "ENLACE"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 38279,
+    "nome": "Toalha Umed Turma Do Soninho",
+    "subtitulo": "100un",
+    "ean": "7898416442483",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Turma do Soninho"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 38575,
+    "nome": "Lenço Umedecido Turma Do Dudu",
+    "subtitulo": "50un",
+    "ean": "7898039565897",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Turma do Dudu"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 38782,
+    "nome": "Lady'S Secret",
+    "subtitulo": "Anti Aging - 50ml",
+    "ean": "716156489491",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Secret"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 38832,
+    "nome": "Perfume Animale For Men",
+    "subtitulo": "100ml",
+    "ean": "78945156165154",
+    "imagem": "imagens/78945156165154-9cb1dceded6378dc.png",
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Animale"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 38958,
+    "nome": "Marina de Bourbon",
+    "subtitulo": "Eau de Parfum",
+    "ean": "784984897987",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Marina De Bourbon"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 40129,
+    "nome": "Toalhinhas Umedecidas Multi Baby",
+    "subtitulo": null,
+    "ean": "7898970176060",
+    "imagem": "imagens/7898970176060-3bd074f5ab815bc4.png",
+    "fabricante_atual": "Não Classificado",
+    "conflitos": [],
+    "candidatos": [
+      "Multi"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 42201,
+    "nome": "OLEO THE DODGER P/BARBA",
+    "subtitulo": "30ML",
+    "ean": "7898965137175",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "The Dodger"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 42202,
+    "nome": "BALM PARA BARBA THE DODGER",
+    "subtitulo": "120ML",
+    "ean": "7898688011745",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "The Dodger"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 42203,
+    "nome": "LOCAO POS BARBA THE DODGER",
+    "subtitulo": "240ml",
+    "ean": "7898965137182",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "The Dodger"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 42204,
+    "nome": "SHAMPOO 4 EM 1 THE DODGER",
+    "subtitulo": "240ml",
+    "ean": "7898688011738",
+    "imagem": null,
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "The Dodger"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 44261,
+    "nome": "BEBIDA LACTA",
+    "subtitulo": null,
+    "ean": "7896862000196",
+    "imagem": "imagens/produto-ae84d0b3-d844-453e-879b-36e3d1a16054.webp",
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Lacta"
+    ],
+    "ean_fontes": []
+  },
+  {
+    "id": 44272,
+    "nome": "BEBIDA LACTA CAROLINA",
+    "subtitulo": null,
+    "ean": "7896691102849",
+    "imagem": "imagens/produto-96f7b58c-319f-459d-93f4-104f0a36c002.webp",
+    "fabricante_atual": null,
+    "conflitos": [],
+    "candidatos": [
+      "Lacta"
+    ],
+    "ean_fontes": []
+  }
+]

@@ -1,0 +1,363 @@
+{
+  "data": "2026-10-24T16:42:21.940Z",
+  "backup": "D:\\stacktrace.tec.br\\stackmedia.stacktrace.tec.br\\catalogo-crud\\data\\auditorias\\fabricantes-2026-10-24T16-42-21-322Z\\catalogo-antes.sqlite",
+  "total_produtos": 12639,
+  "alterados": 17,
+  "pendentes_com_imagem": 1338,
+  "excluidos": [
+    {
+      "id": 41796,
+      "motivo": "Nome generico Omega 3; subtitulo Vitagenix difere da referencia Maxinutri"
+    }
+  ],
+  "alteracoes": [
+    {
+      "id": 33770,
+      "nome": "Figatil",
+      "subtitulo": "Flaconete - 10ml",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Catarinense",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 39933,
+          "nome": "Figatil",
+          "subtitulo": "10ml",
+          "fabricante": "Catarinense"
+        },
+        {
+          "id": 40117,
+          "nome": "Figatil",
+          "subtitulo": "20 Drágeas",
+          "fabricante": "Catarinense"
+        },
+        {
+          "id": 41093,
+          "nome": "Figatil",
+          "subtitulo": "150ml",
+          "fabricante": "Catarinense"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 37905,
+      "nome": "Whey Protein Integralmedica",
+      "subtitulo": null,
+      "fabricante_anterior": null,
+      "fabricante_novo": "Integralmedica",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 40901,
+          "nome": "Whey Protein Integralmedica",
+          "subtitulo": null,
+          "fabricante": "Integralmedica"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 37993,
+      "nome": "Sonrisal",
+      "subtitulo": "10cp Efervescentes",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Haleon",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 41304,
+          "nome": "Sonrisal",
+          "subtitulo": "2Cp",
+          "fabricante": "Haleon"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 38141,
+      "nome": "Fralda Baby Bee Free Premium -",
+      "subtitulo": null,
+      "fabricante_anterior": null,
+      "fabricante_novo": "Upa Br",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 35216,
+          "nome": "Fralda Baby Bee Free Premium",
+          "subtitulo": null,
+          "fabricante": "Upa Br"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 38969,
+      "nome": "Toalha Umed Natural Baby Leve",
+      "subtitulo": null,
+      "fabricante_anterior": null,
+      "fabricante_novo": "Ever Green",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 37358,
+          "nome": "Toalha Umed Natural Baby Leve",
+          "subtitulo": null,
+          "fabricante": "Ever Green"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 39455,
+      "nome": "Lenços Kleenex",
+      "subtitulo": "50un",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Suzano",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 40935,
+          "nome": "Lenços Kleenex",
+          "subtitulo": "10 unid.",
+          "fabricante": "Suzano"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 39462,
+      "nome": "Creme Dent Sensodyne",
+      "subtitulo": "Original 90g",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Haleon",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 40943,
+          "nome": "Creme Dent Sensodyne",
+          "subtitulo": "50g",
+          "fabricante": "Haleon"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 39522,
+      "nome": "Protetor Sol Sunless",
+      "subtitulo": "Fps 30120g",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Farmax",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 41044,
+          "nome": "Protetor Sol Sunless",
+          "subtitulo": "Fps 40120g",
+          "fabricante": "Farmax"
+        },
+        {
+          "id": 41265,
+          "nome": "Protetor Sol Sunless",
+          "subtitulo": "Fps 30120g",
+          "fabricante": "Farmax"
+        },
+        {
+          "id": 41305,
+          "nome": "Protetor Sol Sunless",
+          "subtitulo": "Fps 30120g",
+          "fabricante": "Farmax"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 39631,
+      "nome": "Stomaliv",
+      "subtitulo": "Sabores - 5g",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Geolab",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 41251,
+          "nome": "Stomaliv",
+          "subtitulo": "Abacaxi 5g",
+          "fabricante": "Geolab"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 39644,
+      "nome": "Másc Hidr Haskel Cavalo Forte",
+      "subtitulo": "250g",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Haskell",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 41291,
+          "nome": "Másc Hidr Haskel Cavalo Forte",
+          "subtitulo": "500g",
+          "fabricante": "Haskell"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 39646,
+      "nome": "Toalha Umed Piquitucho",
+      "subtitulo": "120un",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Cremer",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 41299,
+          "nome": "Toalha Umed Piquitucho",
+          "subtitulo": "120 unid.",
+          "fabricante": "Cremer"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 41708,
+      "nome": "Engov",
+      "subtitulo": "6Cp",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Hypera",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 36473,
+          "nome": "Engov",
+          "subtitulo": "12 Compr.",
+          "fabricante": "Hypera"
+        },
+        {
+          "id": 40707,
+          "nome": "Engov",
+          "subtitulo": "24Cp",
+          "fabricante": "Hypera"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 41794,
+      "nome": "Desodorante Tabu",
+      "subtitulo": "Aerosol - 150ml",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Dana",
+      "updated_at_anterior": "2026-07-16 18:47:23",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 41169,
+          "nome": "Desodorante Tabu",
+          "subtitulo": "150ml / 90g",
+          "fabricante": "Dana"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 42980,
+      "nome": "Ap Barb Vida Men",
+      "subtitulo": "3 Lâminas L4/p3",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Vida",
+      "updated_at_anterior": "2026-07-21 15:59:00",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 42982,
+          "nome": "Ap Barb Vida Men",
+          "subtitulo": "3 lâminas c/2un",
+          "fabricante": "Vida"
+        },
+        {
+          "id": 43466,
+          "nome": "Ap Barb Vida Men",
+          "subtitulo": "3 Lâminas L4/P3",
+          "fabricante": "Vida"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 42981,
+      "nome": "Ap Barb Vida Men",
+      "subtitulo": "2 Lâminas C/2",
+      "fabricante_anterior": null,
+      "fabricante_novo": "Vida",
+      "updated_at_anterior": "2026-07-21 15:59:00",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 42982,
+          "nome": "Ap Barb Vida Men",
+          "subtitulo": "3 lâminas c/2un",
+          "fabricante": "Vida"
+        },
+        {
+          "id": 43466,
+          "nome": "Ap Barb Vida Men",
+          "subtitulo": "3 Lâminas L4/P3",
+          "fabricante": "Vida"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 43196,
+      "nome": "Creme Pentear Tresemme",
+      "subtitulo": "Diver. 200ml",
+      "fabricante_anterior": "",
+      "fabricante_novo": "Unilever",
+      "updated_at_anterior": "2026-08-03 17:29:21",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 43235,
+          "nome": "Creme Pentear Tresemme",
+          "subtitulo": "Diver. 200ml",
+          "fabricante": "Unilever"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    },
+    {
+      "id": 44472,
+      "nome": "REFRIGERANTE COCA-COLA 2LT",
+      "subtitulo": null,
+      "fabricante_anterior": null,
+      "fabricante_novo": "Coca-Cola",
+      "updated_at_anterior": "2026-10-22 18:54:51",
+      "updated_at_novo": "2026-10-24 16:42:21",
+      "fontes": [
+        {
+          "id": 44471,
+          "nome": "REFRIGERANTE COCA-COLA 2LT",
+          "subtitulo": null,
+          "fabricante": "Coca-Cola"
+        }
+      ],
+      "criterio": "Mesmo nome normalizado e fabricante unico nas referencias; revisao do subtitulo"
+    }
+  ]
+}

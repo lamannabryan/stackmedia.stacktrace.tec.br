@@ -21,6 +21,8 @@ export function createStoriesEditorState(maxProducts = 2) {
     productQuery: '',
     price: '',
     secondaryPrice: '',
+    offerQuantity: 1,
+    secondaryOfferQuantity: 1,
     freeText: '',
     backgroundRequest: null,
     productRequestId: 0,

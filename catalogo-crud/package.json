@@ -19,7 +19,7 @@
     "test:theme": "node --test scripts/theme.test.mjs",
     "test:partners": "node --test scripts/partners.test.mjs",
     "test:stories-layout": "node --test scripts/stories-auto-layout.test.mjs scripts/stories-format-conversion.test.mjs scripts/stories-composition.test.mjs",
-    "test:stories-prices": "node --test scripts/stories-price-input.test.mjs",
+    "test:stories-prices": "node --test scripts/stories-price-input.test.mjs scripts/stories-quantity-offer.test.mjs",
     "test:stories-video": "node --test scripts/stories-video-*.test.mjs",
     "test:stories-mobile": "node --test scripts/stories-mobile.test.mjs scripts/stories-gestures.test.mjs",
     "test:indoor": "node --test scripts/indoor-*.test.mjs",

@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
 import { COMPOSITION_COUNTS, compositionModes, compositionTargets } from '../public/js/features/stories/composition.js';
 import { createStoriesEditorState } from '../public/js/features/stories/state.js';
+import { offerQuantity } from '../public/js/features/stories/quantity-offer.js';
 import { createAutoLayout } from '../public/js/features/stories/auto-layout.js';
 import { getArtworkFormat } from '../public/js/features/stories/formats.js';
 import { getStoryVideoLayerState } from '../public/js/features/stories/video-animation.js';
@@ -13,7 +14,7 @@ import { loadSelectedProducts, selectedProductIds } from '../public/js/features/
 const source = await readFile(new URL('../public/js/features/stories/editor.js', import.meta.url), 'utf8');
 function selectionFixture(mode, formatName = 'stories') {
   const state = createStoriesEditorState(getArtworkFormat(formatName).maxProducts || 2); state.compositionMode = mode;
-  const sandbox = vm.createContext({ state, COMPOSITION_COUNTS, compositionTargets,
+  const sandbox = vm.createContext({ state, COMPOSITION_COUNTS, compositionTargets, offerQuantity,
     productSelectionRequest: null, loadSelectedProducts, selectedProductIds, compositionModes, formatName,
     format: getArtworkFormat(formatName), productPanel: {},
     addProductToResults(product) { state.productResults.push(product); },
@@ -136,6 +137,42 @@ for (const [mode, count] of Object.entries(COMPOSITION_COUNTS).filter(([, count]
   });
 }
 
+test('bundle quantities follow promoted products and reset when removed or changed to a combo', () => {
+  const f = selectionFixture('two-products');
+  f.selectProductForComposition({ id: 1, price: '1,00' });
+  f.selectProductForComposition({ id: 2, price: '2,00' });
+  f.state.offerQuantity = 2;
+  f.state.secondaryOfferQuantity = 3;
+  f.state.secondaryPrice = '5,00';
+  f.removeProductFromComposition('primary');
+  assert.equal(f.state.offerQuantity, 3);
+  assert.equal(f.state.price, '5,00');
+  assert.equal(f.state.secondaryOfferQuantity, 1);
+  f.setCompositionMode('combo');
+  assert.equal(f.state.offerQuantity, 1);
+  assert.equal(f.state.price, '');
+  f.setCompositionMode('single');
+  assert.equal(f.state.price, '2,00');
+  f.state.offerQuantity = 3;
+  f.removeProductFromComposition('all');
+  assert.equal(f.state.offerQuantity, 1);
+});
+
+test('choosing or replacing a product in a quantity offer never imports a unit price as its total', () => {
+  const f = selectionFixture('single');
+  f.state.offerQuantity = 2;
+  f.selectProductForComposition({ id: 1, price: '1,00' });
+  assert.equal(f.state.price, '');
+  f.state.price = '1,50';
+  f.selectProductForComposition({ id: 2, price: '2,00' });
+  assert.equal(f.state.price, '');
+  assert.equal(f.state.offerQuantity, 2);
+  f.setCompositionMode('two-products');
+  f.state.secondaryOfferQuantity = 3;
+  f.selectProductForComposition({ id: 3, price: '3,00' });
+  assert.equal(f.state.secondaryPrice, '');
+});
+
 test('reducing to one product clears the second product, its image, position and price', () => {
   const f = selectionFixture('two-products');
   f.selectProductForComposition({ id: 1, price: '1,00' });
@@ -194,7 +231,8 @@ test('Encarte offers all counts through five using the same editor controls as F
   const feed = await read('feed');
   const ids = source => [...source.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(new Set(ids(html)).size, ids(html).length, 'IDs must remain unique');
-  for (const id of ids(feed).filter(id => id !== 'story-composition-mode-combo')) assert.ok(ids(html).includes(id), 'missing shared control ' + id);
+  const feedOnly = new Set(['story-composition-mode-combo', 'story-offer-quantity', 'story-secondary-offer-quantity', 'story-quantity-hint']);
+  for (const id of ids(feed).filter(id => !feedOnly.has(id))) assert.ok(ids(html).includes(id), 'missing shared control ' + id);
   assert.deepEqual([...html.matchAll(/data-composition-mode="([^"]+)"/g)].map(match => match[1]), compositionModes('encarte'));
   const format = getArtworkFormat('encarte');
   assert.equal(format.width, 1080); assert.equal(format.height, 1440);

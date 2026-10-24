@@ -2,6 +2,7 @@ import { apiFetch } from './session.js';
 
 const form = document.querySelector('#import-form');
 const input = document.querySelector('#product-html');
+const manufacturer = document.querySelector('#batch-manufacturer');
 const button = document.querySelector('#import-submit');
 const errorBox = document.querySelector('#import-error');
 const progress = document.querySelector('#import-progress');
@@ -54,11 +55,12 @@ form.addEventListener('submit', async event => {
   event.preventDefault();
   if (running) return;
   running = true; button.disabled = true; input.readOnly = true;
+  manufacturer.readOnly = true;
   button.textContent = 'Importando…'; errorBox.hidden = true; report.hidden = true; progress.hidden = true;
   let items = [], results = [], completed = 0;
   try {
     if (new Blob([input.value]).size > 1024 * 1024) throw new Error('O HTML deve ter até 1 MB.');
-    const parsed = await post('parse', { html: input.value });
+    const parsed = await post('parse', { html: input.value, fabricante: manufacturer.value.trim() });
     items = parsed.items;
     progress.hidden = false; bar.max = items.length; bar.value = 0;
     title.textContent = 'Importando produtos'; count.textContent = `0 de ${items.length}`;
@@ -84,5 +86,6 @@ form.addEventListener('submit', async event => {
   } finally {
     if (results.length) showReport(results);
     running = false; button.disabled = false; input.readOnly = false; button.textContent = 'Importar produtos';
+    manufacturer.readOnly = false;
   }
 });

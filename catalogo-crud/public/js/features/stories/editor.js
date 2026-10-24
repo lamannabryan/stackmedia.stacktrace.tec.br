@@ -14,6 +14,7 @@ import { getStoriesEditorElements } from './dom.js';
 import { createStoriesEditorState } from './state.js';
 import { createAutoLayout } from './auto-layout.js';
 import { bindPriceInput, suggestedMagazinePrice } from './price-input.js';
+import { normalizeOfferQuantity, offerQuantity, quantityAspectRatio, quantityImageBoxes } from './quantity-offer.js';
 import { drawStoryVideoFrame } from './video-animation.js';
 import { resolveMagazineBackground } from '../magazines/background.js';
 import { selectedProductIds, loadSelectedProducts } from '../magazines/selection.js';
@@ -355,7 +356,7 @@ function setDefaultProductWidth(target, width) {
 function getProductAspectRatio(target = 'product') {
   const productImage = getProductImage(target);
   if (!productImage) return 1;
-  return productImage.naturalWidth / productImage.naturalHeight;
+  return quantityAspectRatio(productImage.naturalWidth / productImage.naturalHeight, offerQuantity(state, formatName, target));
 }
 
 function getProductWidthLimits(target = 'product') {
@@ -426,10 +427,12 @@ function getOfferTitle(target = 'details') {
 }
 
 function getOfferSupportingText(target = 'details') {
+  const quantity = offerQuantity(state, formatName, target);
   const productDescriptions = getDetailsProducts(target)
     .map((product) => product.subtitulo || product.fabricante)
     .filter(Boolean);
-  return productDescriptions.join(' + ') || 'Produto selecionado';
+  const description = productDescriptions.join(' + ') || 'Produto selecionado';
+  return quantity > 1 ? `${description} • ${quantity} unidades pelo preço anunciado` : description;
 }
 
 function getDetailsTextMetrics(
@@ -466,15 +469,17 @@ function getDetailsTextMetrics(
 }
 
 function getDetailsPriceMetrics(availableWidth, priceHeight, target = 'details') {
+  const quantity = offerQuantity(state, formatName, target);
+  const currencyLabel = quantity > 1 ? `${quantity} por R$` : 'R$';
   const displayedPrice = hasPrice(target) ? getPriceForDetailsTarget(target) : '—';
-  const currencyFontSize = priceHeight * 0.3;
+  const currencyFontSize = priceHeight * (quantity > 1 ? 0.22 : 0.3);
   let priceFontSize = priceHeight * 0.56;
   const horizontalPadding = priceHeight * 0.3;
   const contentGap = priceHeight * 0.12;
 
   const measureContext = getDetailsMeasureContext();
   measureContext.font = `800 ${currencyFontSize}px Arial, sans-serif`;
-  const currencyWidth = measureContext.measureText('R$').width;
+  const currencyWidth = measureContext.measureText(currencyLabel).width;
   measureContext.font = `900 ${priceFontSize}px Arial, sans-serif`;
   let priceWidth = measureContext.measureText(displayedPrice).width;
   const maxPriceWidth = Math.max(
@@ -490,6 +495,7 @@ function getDetailsPriceMetrics(availableWidth, priceHeight, target = 'details')
 
   return {
     displayedPrice,
+    currencyLabel,
     currencyFontSize,
     priceFontSize,
     horizontalPadding,
@@ -1269,7 +1275,7 @@ function drawDetailsCard(context, product, price, target = 'details') {
   if (!layout.includesPrice) return;
 
   const displayedPrice = price || '—';
-  const currencyFontSize = layout.priceHeight * 0.3;
+  const currencyFontSize = layout.currencyFontSize;
   let priceFontSize = layout.priceHeight * 0.56;
   const horizontalPadding = layout.priceHeight * 0.3;
   const contentGap = layout.priceHeight * 0.12;
@@ -1277,7 +1283,7 @@ function drawDetailsCard(context, product, price, target = 'details') {
 
   context.save();
   context.font = `800 ${currencyFontSize}px Arial, sans-serif`;
-  const currencyWidth = context.measureText('R$').width;
+  const currencyWidth = context.measureText(layout.currencyLabel).width;
   context.font = `900 ${priceFontSize}px Arial, sans-serif`;
   let priceWidth = context.measureText(displayedPrice).width;
   const maxPriceWidth = maxBadgeWidth - (horizontalPadding * 2) - currencyWidth - contentGap;
@@ -1304,7 +1310,7 @@ function drawDetailsCard(context, product, price, target = 'details') {
   const currencyX = layout.compact
     ? badgeX + (badgeWidth - currencyWidth - contentGap - priceWidth) / 2
     : badgeX + horizontalPadding;
-  context.fillText('R$', currencyX, layout.priceY + (layout.priceHeight / 2));
+  context.fillText(layout.currencyLabel, currencyX, layout.priceY + (layout.priceHeight / 2));
   context.font = `900 ${priceFontSize}px Arial, sans-serif`;
   context.fillText(
     displayedPrice,
@@ -1379,6 +1385,22 @@ function drawProductImage(context, image, bounds) {
   context.restore();
 }
 
+function drawProductCopies(context, image, bounds, quantity) {
+  if (quantity === 1) { drawProductImage(context, image, bounds); return; }
+  // Compose opaque foreground products before blending the complete group with
+  // the artwork, so overlapping packaging does not multiply and darken itself.
+  const padding = Math.ceil(Math.min(bounds.width, bounds.height) * 0.1);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.ceil(bounds.width) + padding * 2;
+  canvas.height = Math.ceil(bounds.height) + padding * 2;
+  const group = canvas.getContext('2d');
+  group.imageSmoothingEnabled = true;
+  group.imageSmoothingQuality = 'high';
+  quantityImageBoxes({ ...bounds, x: padding, y: padding }, quantity)
+    .forEach(copy => drawProductImage(group, image, copy));
+  context.drawImage(canvas, bounds.x - padding, bounds.y - padding);
+}
+
 function getCompositionLayers() {
   const layers = [];
   productTargets().forEach((target, index) => {
@@ -1387,7 +1409,7 @@ function getCompositionLayers() {
     if (!productImage || !bounds) return;
     layers.push({
       kind: 'product', index, bounds, compositeOperation: 'multiply',
-      draw: (context) => drawProductImage(context, productImage, bounds),
+      draw: (context) => drawProductCopies(context, productImage, bounds, offerQuantity(state, formatName, target)),
     });
   });
   const detailsTargets = detailTargets();
@@ -1594,16 +1616,49 @@ function syncPriceValidation() {
   }
 }
 
+function setOfferQuantity(value, target = 'product') {
+  if (!['feed', 'stories'].includes(formatName) || !['single', 'two-products'].includes(state.compositionMode)) return;
+  if (target === 'product-secondary' && !isTwoProductsMode()) return;
+  const quantity = normalizeOfferQuantity(value);
+  const key = target === 'product-secondary' ? 'secondaryOfferQuantity' : 'offerQuantity';
+  if (state[key] === quantity) { syncPriceInputs(); return; }
+  finishGesture();
+  state[key] = quantity;
+  // A unit price must never silently become the price of a bundle (or vice versa).
+  state[target === 'product-secondary' ? 'secondaryPrice' : 'price'] = '';
+  if (getProductImage(target)) {
+    resetProductTransform(target);
+    resetDetailsTransform(target === 'product-secondary' ? 'details-secondary' : 'details');
+    applyAutoLayout({ toggle: false, allowPartial: true });
+  }
+  syncProductEditor();
+  schedulePreview();
+  updateAvailability();
+  setStatus(quantity > 1 ? `Informe o preço total de ${quantity} unidades.` : 'Informe o preço de uma unidade.');
+}
+
 function syncPriceInputs() {
   const twoProducts = isTwoProductsMode();
-  elements.primaryPriceLabel.textContent = twoProducts ? 'Preço do produto 1' : 'Preço da oferta';
+  const quantity = offerQuantity(state, formatName);
+  const secondaryQuantity = offerQuantity(state, formatName, 'product-secondary');
+  elements.primaryPriceLabel.textContent = quantity > 1 ? `Preço total de ${quantity} unidades${twoProducts ? ' do produto 1' : ''}` : (twoProducts ? 'Preço do produto 1' : 'Preço da oferta');
   elements.secondaryPriceField.hidden = false;
   elements.secondaryPriceField.classList.toggle('is-disabled', !twoProducts);
   elements.secondaryPriceField.setAttribute('aria-disabled', String(!twoProducts));
   elements.price.required = true;
   elements.secondaryPrice.disabled = !twoProducts;
   elements.secondaryPrice.required = twoProducts;
-  elements.secondaryPriceLabel.textContent = 'Preço do produto 2';
+  elements.secondaryPriceLabel.textContent = secondaryQuantity > 1 ? `Preço total de ${secondaryQuantity} unidades do produto 2` : 'Preço do produto 2';
+  if (elements.offerQuantity) {
+    elements.offerQuantity.value = quantity;
+    elements.offerQuantity.disabled = state.compositionMode === 'combo';
+    elements.secondaryOfferQuantity.value = secondaryQuantity;
+    elements.secondaryOfferQuantity.disabled = !twoProducts;
+    elements.secondaryOfferQuantity.closest('label').hidden = !twoProducts;
+    elements.quantityHint.textContent = state.compositionMode === 'combo'
+      ? 'O combo reúne dois produtos diferentes em um preço único. Para anunciar unidades do mesmo produto, escolha 1 produto ou 2 produtos.'
+      : 'Use 1 para preço unitário, 2 para “2 por...” ou 3 para “3 por...”. Informe o preço total das unidades (de 1 a 99).';
+  }
 
   if (elements.price.value !== state.price) elements.price.value = state.price;
   if (elements.secondaryPrice.value !== state.secondaryPrice) {
@@ -2018,12 +2073,17 @@ function setCompositionMode(value) {
   productSelectionRequest = null;
   setProductRemovalStatus();
   state.compositionMode = nextMode;
+  if (nextMode === 'combo' || previousMode === 'combo') {
+    state.offerQuantity = 1;
+    state.secondaryOfferQuantity = 1;
+  }
   // A combo price describes the complete bundle, not either individual item.
   if (nextMode === 'combo') state.price = '';
   else if (previousMode === 'combo') state.price = suggestedMagazinePrice(state.selectedProduct);
   if (getCompositionProductLimit() === 1) {
     state.secondaryProduct = null;
     state.secondaryPrice = '';
+    state.secondaryOfferQuantity = 1;
   } else if (isTwoProductsMode() && ['single', 'combo'].includes(previousMode)) {
     state.secondaryPrice = suggestedMagazinePrice(state.secondaryProduct);
   }
@@ -2091,20 +2151,25 @@ function removeProductFromComposition(position) {
     state.secondaryProduct = null;
     state.price = '';
     state.secondaryPrice = '';
+    state.offerQuantity = 1;
+    state.secondaryOfferQuantity = 1;
     message = 'Todos os produtos foram removidos da arte.';
   } else if (position === 'primary') {
     const promoted = Boolean(state.secondaryProduct);
     state.selectedProduct = state.secondaryProduct;
     // A combo has one shared price; separate offers keep the remaining product's price.
     state.price = promoted ? (isTwoProductsMode() ? state.secondaryPrice : state.price) : '';
+    state.offerQuantity = promoted ? state.secondaryOfferQuantity : 1;
     state.secondaryProduct = null;
     state.secondaryPrice = '';
+    state.secondaryOfferQuantity = 1;
     message = promoted
       ? 'Produto 1 removido. O produto 2 agora ocupa a posição 1.'
       : 'Produto 1 removido da arte.';
   } else {
     state.secondaryProduct = null;
     state.secondaryPrice = '';
+    state.secondaryOfferQuantity = 1;
     message = 'Produto 2 removido da arte.';
   }
 
@@ -2139,13 +2204,13 @@ function selectProductForComposition(product) {
   setProductRemovalStatus();
   if (!state.selectedProduct) {
     state.selectedProduct = product;
-    state.price = state.compositionMode === 'combo' ? '' : suggestedMagazinePrice(product);
+    state.price = state.compositionMode === 'combo' || offerQuantity(state, formatName) > 1 ? '' : suggestedMagazinePrice(product);
   } else if (getCompositionProductLimit() === 1) {
     state.selectedProduct = product;
-    state.price = suggestedMagazinePrice(product);
+    state.price = offerQuantity(state, formatName) > 1 ? '' : suggestedMagazinePrice(product);
   } else {
     state.secondaryProduct = product;
-    state.secondaryPrice = isTwoProductsMode() ? suggestedMagazinePrice(product) : '';
+    state.secondaryPrice = isTwoProductsMode() && offerQuantity(state, formatName, 'product-secondary') === 1 ? suggestedMagazinePrice(product) : '';
   }
 
   refreshProductSelection({ collapseWhenComplete: true });
@@ -3208,6 +3273,8 @@ function syncExtraControls() {
 }
 
 function bindEvents() {
+  elements.offerQuantity?.addEventListener('change', event => setOfferQuantity(event.target.value));
+  elements.secondaryOfferQuantity?.addEventListener('change', event => setOfferQuantity(event.target.value, 'product-secondary'));
   ensureSecondaryDetailsControls();
   ensureExtraControls();
   const activeMode = elements.compositionModes.find((input) => input.checked);
